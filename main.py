@@ -21,12 +21,13 @@ init_db()
 # --- MODELOS PYDANTIC ---
 
 class RegisterRequest(BaseModel):
-    ra: str = Field(..., min_length=3, description="Registro Acadêmico UFABC")
+    email: str = Field(..., description="E-mail acadêmico da UFABC (@aluno.ufabc.edu.br)")
     name: str = Field(..., min_length=2, description="Nome completo")
     password: str = Field(..., min_length=4, description="Senha de acesso")
+    ra: Optional[str] = Field(default="", description="RA (Registro Acadêmico) opcional")
 
 class LoginRequest(BaseModel):
-    ra: str = Field(..., description="RA do estudante ou 'admin'")
+    email: str = Field(..., description="E-mail acadêmico da UFABC (ex: aluno@aluno.ufabc.edu.br)")
     password: str = Field(..., description="Senha do estudante")
 
 class SwipeRequest(BaseModel):
@@ -89,33 +90,70 @@ def get_current_user_id(request: Request) -> int:
     if cookie_val and cookie_val.isdigit():
         return int(cookie_val)
     # Se não tiver cookie nem header, levanta 401 para exigir login
-    raise HTTPException(status_code=401, detail="Você precisa estar autenticado com seu RA.")
+    raise HTTPException(status_code=401, detail="Você precisa estar autenticado com seu e-mail acadêmico.")
 
-# --- ROTAS DE AUTENTICAÇÃO (LOGIN & CADASTRO COM RA, NOME E SENHA) ---
+def sanitize_and_validate_ufabc_email(email_raw: str) -> str:
+    """
+    Sanitiza e valida e-mails acadêmicos da UFABC.
+    Aceita exclusivamente domínios @aluno.ufabc.edu.br ou @ufabc.edu.br.
+    Se o aluno digitar apenas seu login/nome de usuário (ex: 'mariana.silva'),
+    adiciona automaticamente o domínio @aluno.ufabc.edu.br.
+    """
+    email = email_raw.strip().lower()
+    if "@" not in email:
+        email = f"{email}@aluno.ufabc.edu.br"
+
+    valid_domains = ("@aluno.ufabc.edu.br", "@ufabc.edu.br")
+    if not any(email.endswith(domain) for domain in valid_domains):
+        raise HTTPException(
+            status_code=400,
+            detail="Apenas e-mails acadêmicos da UFABC (@aluno.ufabc.edu.br ou @ufabc.edu.br) são permitidos no cadastro."
+        )
+
+    username = email.split("@")[0].strip()
+    if len(username) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="Por favor, digite um e-mail acadêmico válido."
+        )
+
+    return email
+
+# --- ROTAS DE AUTENTICAÇÃO (LOGIN & CADASTRO COM E-MAIL ACADÊMICO E SENHA) ---
 
 @app.post("/api/auth/register")
 def register_user(data: RegisterRequest, response: Response):
     """
-    Cadastro simplificado de estudante com RA, Nome e Senha.
-    Cria a conta e já autentica via cookie pontinho_user_id.
+    Cadastro de estudante com E-mail Acadêmico UFABC, Nome e Senha.
+    Sanitiza e restringe para e-mails institucionais (@aluno.ufabc.edu.br).
     """
-    cleaned_ra = data.ra.strip()
+    sanitized_email = sanitize_and_validate_ufabc_email(data.email)
     cleaned_name = data.name.strip()
     cleaned_pw = data.password.strip()
+    cleaned_ra = (data.ra or "").strip()
 
-    if not cleaned_ra or not cleaned_name or not cleaned_pw:
-        raise HTTPException(status_code=400, detail="RA, Nome e Senha são obrigatórios.")
+    if not cleaned_name or not cleaned_pw:
+        raise HTTPException(status_code=400, detail="Nome e Senha são obrigatórios.")
 
     conn = get_db()
     cursor = conn.cursor()
 
-    # Verifica se já existe estudante com este RA
-    cursor.execute("SELECT id FROM users WHERE ra = ?", (cleaned_ra,))
+    # Verifica se já existe estudante com este e-mail
+    cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (sanitized_email,))
     if cursor.fetchone():
         conn.close()
-        raise HTTPException(status_code=400, detail="Este RA já está cadastrado no Pontinho UFABC.")
+        raise HTTPException(status_code=400, detail="Este e-mail acadêmico já está cadastrado no Pontinho UFABC.")
 
-    email = f"{cleaned_ra}@aluno.ufabc.edu.br"
+    # Se informou RA, verifica se não está duplicado
+    if cleaned_ra:
+        cursor.execute("SELECT id FROM users WHERE ra = ?", (cleaned_ra,))
+        if cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=400, detail="Este RA já está cadastrado no Pontinho UFABC.")
+    else:
+        # Se não informou RA, usa o prefixo do e-mail
+        cleaned_ra = sanitized_email.split("@")[0]
+
     pw_hash = hash_password(cleaned_pw)
 
     # Fotos padrão de avatar iniciais para satisfazer a regra de negócio de no mínimo 2 fotos
@@ -134,7 +172,7 @@ def register_user(data: RegisterRequest, response: Response):
                   'O melhor lugar para descansar na UFABC é...', 'Biblioteca',
                   'Minha opinião impopular sobre o RU...', 'Gosto da comida',
                   'No intervalo entre as aulas você me encontra...', 'Bloco A')
-    """, (cleaned_ra, pw_hash, email, cleaned_name, json.dumps(default_photos)))
+    """, (cleaned_ra, pw_hash, sanitized_email, cleaned_name, json.dumps(default_photos)))
 
     conn.commit()
     new_user_id = cursor.lastrowid
@@ -154,6 +192,7 @@ def register_user(data: RegisterRequest, response: Response):
         "success": True,
         "user_id": new_user_id,
         "name": cleaned_name,
+        "email": sanitized_email,
         "ra": cleaned_ra,
         "message": "Cadastro realizado com sucesso!"
     }
@@ -161,20 +200,26 @@ def register_user(data: RegisterRequest, response: Response):
 @app.post("/api/auth/login")
 def login_user(data: LoginRequest, response: Response):
     """
-    Login de estudante por RA e Senha.
+    Login de estudante por E-mail Acadêmico e Senha (ou RA).
     """
-    cleaned_ra = data.ra.strip()
+    login_input = data.email.strip().lower()
     cleaned_pw = data.password.strip()
 
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE ra = ? OR email = ?", (cleaned_ra, cleaned_ra))
+    # Aceita e-mail completo, RA ou prefixo sem @aluno.ufabc.edu.br
+    alt_email = f"{login_input}@aluno.ufabc.edu.br" if "@" not in login_input else login_input
+
+    cursor.execute("""
+        SELECT * FROM users
+        WHERE LOWER(email) = ? OR LOWER(email) = ? OR ra = ?
+    """, (login_input, alt_email, login_input))
     user = cursor.fetchone()
     conn.close()
 
     if not user:
-        raise HTTPException(status_code=401, detail="RA não encontrado no sistema.")
+        raise HTTPException(status_code=401, detail="E-mail acadêmico não encontrado no sistema.")
 
     stored_hash = user["password_hash"]
     # Se o usuário não tiver senha cadastrada ainda (ex: seeds antigos), permite senha padrão '123456'

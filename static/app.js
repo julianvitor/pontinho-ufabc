@@ -26,7 +26,7 @@ const Pontinho = {
 
     if (response.status === 401 && !window.location.pathname.includes('login.html')) {
       window.location.href = '/login.html';
-      throw new Error('Sessão expirada. Faça login com seu RA.');
+      throw new Error('Sessão expirada. Faça login com seu e-mail institucional.');
     }
 
     if (!response.ok) {

@@ -14,10 +14,11 @@
 
 ## 📋 Funcionalidades Implementadas
 
-### 1. Autenticação (Login & Cadastro por RA)
-- **Cadastro simplificado**: solicita apenas **RA (Registro Acadêmico)**, **Nome Completo** e **Senha**.
-- **Login por RA**: autenticação segura por hash com sessão persistida via cookie e localStorage.
-- **Página de Login (`/login.html`)**: interface elegante com abas para entrar ou se cadastrar, além de atalhos rápidos para contas demo de estudantes da UFABC.
+### 1. Autenticação (Login & Cadastro com E-mail Acadêmico UFABC)
+- **E-mail Institucional Obrigatório**: validação e sanitização estrita para que apenas e-mails acadêmicos da UFABC (`@aluno.ufabc.edu.br` ou `@ufabc.edu.br`) possam se cadastrar.
+- **Sanitização Inteligente**: converte para minúsculas, remove espaços e completa automaticamente com `@aluno.ufabc.edu.br` caso o estudante digite apenas o usuário.
+- **Login por E-mail e Senha**: autenticação segura por hash com sessão persistida via cookie e localStorage.
+- **Página de Login (`/login.html`)**: interface moderna e responsiva com abas para entrar ou se cadastrar, além de atalhos rápidos para contas de teste da UFABC.
 
 ### 2. Feed & Swipes
 - **Deck de Cards de Estudantes**: fotos em tela cheia com alternância rápida (toque no lado esquerdo ou direito), indicador de progresso no topo (estilo Stories/Tinder).

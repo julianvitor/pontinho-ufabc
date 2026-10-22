@@ -62,14 +62,15 @@
       <!-- ABA 1: FORMULÁRIO DE LOGIN -->
       <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">RA (Registro Acadêmico) *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail Acadêmico UFABC (ou RA) *</label>
           <input 
-            id="login-ra" 
+            id="login-email" 
             type="text" 
             required 
-            placeholder="Ex: 11202021001 ou admin" 
+            placeholder="Ex: seu.nome@aluno.ufabc.edu.br ou admin" 
             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
           >
+          <p class="text-[10px] text-slate-400 mt-1">Você também pode digitar seu login sem @aluno.ufabc.edu.br</p>
         </div>
 
         <div>
@@ -94,15 +95,17 @@
       <!-- ABA 2: FORMULÁRIO DE CADASTRO -->
       <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">RA (Registro Acadêmico) *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail Acadêmico UFABC *</label>
           <input 
-            id="reg-ra" 
-            type="text" 
+            id="reg-email" 
+            type="email" 
             required 
-            placeholder="Digite os dígitos do seu RA" 
+            placeholder="Ex: mariana.silva@aluno.ufabc.edu.br" 
             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
           >
-          <p class="text-[10px] text-slate-400 mt-1">Seu e-mail institucional será gerado como @aluno.ufabc.edu.br</p>
+          <p class="text-[10px] text-emerald-600 font-medium mt-1">
+            🔒 Exclusivo: apenas e-mails <b>@aluno.ufabc.edu.br</b> ou <b>@ufabc.edu.br</b>
+          </p>
         </div>
 
         <div>
@@ -144,28 +147,28 @@
         <div class="flex flex-wrap gap-1.5 justify-center">
           <button 
             type="button" 
-            onclick="fillDemo('11202021001', '123456')" 
+            onclick="fillDemo('mariana.silva@aluno.ufabc.edu.br', '123456')" 
             class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
           >
             Mariana (SA)
           </button>
           <button 
             type="button" 
-            onclick="fillDemo('11202021002', '123456')" 
+            onclick="fillDemo('lucas.mendes@aluno.ufabc.edu.br', '123456')" 
             class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
           >
             Lucas (SBC)
           </button>
           <button 
             type="button" 
-            onclick="fillDemo('11202021004', '123456')" 
+            onclick="fillDemo('gabriel.alves@aluno.ufabc.edu.br', '123456')" 
             class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
           >
             Gabriel (Bateria)
           </button>
           <button 
             type="button" 
-            onclick="fillDemo('admin', 'admin123')" 
+            onclick="fillDemo('admin@ufabc.edu.br', 'admin123')" 
             class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[11px] font-bold border border-amber-200/60 transition"
           >
             Admin
@@ -197,23 +200,23 @@
       }
     }
 
-    function fillDemo(ra, pw) {
+    function fillDemo(email, pw) {
       switchAuthTab('login');
-      document.getElementById('login-ra').value = ra;
+      document.getElementById('login-email').value = email;
       document.getElementById('login-password').value = pw;
-      Pontinho.showToast(`Dados preenchidos para ${ra}!`);
+      Pontinho.showToast(`E-mail e senha preenchidos para ${email}!`);
     }
 
     async function handleLogin(e) {
       e.preventDefault();
-      const ra = document.getElementById('login-ra').value.trim();
+      const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
 
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ra, password })
+          body: JSON.stringify({ email, password })
         });
 
         const data = await res.json();
@@ -235,15 +238,26 @@
 
     async function handleRegister(e) {
       e.preventDefault();
-      const ra = document.getElementById('reg-ra').value.trim();
+      const rawEmail = document.getElementById('reg-email').value.trim();
       const name = document.getElementById('reg-name').value.trim();
       const password = document.getElementById('reg-password').value;
+
+      // Sanitização no cliente
+      let email = rawEmail.toLowerCase();
+      if (!email.includes('@')) {
+        email += '@aluno.ufabc.edu.br';
+      }
+
+      if (!email.endsWith('@aluno.ufabc.edu.br') && !email.endsWith('@ufabc.edu.br')) {
+        Pontinho.showToast('Apenas e-mails acadêmicos da UFABC (@aluno.ufabc.edu.br ou @ufabc.edu.br) são permitidos.', 'error');
+        return;
+      }
 
       try {
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ra, name, password })
+          body: JSON.stringify({ email, name, password })
         });
 
         const data = await res.json();
