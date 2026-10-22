@@ -18,6 +18,7 @@ from pathlib import Path
 from collections import defaultdict
 from fastapi import APIRouter, UploadFile, File, HTTPException, Request
 from PIL import Image, ImageOps
+from backend.auth import get_current_user_id
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
 
@@ -53,11 +54,11 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
     """
     Recebe uma imagem, valida o cabeçalho real, sanitiza, redimensiona,
     remove metadados EXIF e comprime para WebP.
+    Exige que o usuário esteja autenticado.
     """
-    # Identificador para rate-limiting (ID do usuário no cabeçalho/cookie ou IP)
-    user_id = request.headers.get("X-User-Id")
+    user_id = get_current_user_id(request)
     client_ip = request.client.host if request.client else "unknown"
-    rate_limit_id = f"user_{user_id}" if user_id else f"ip_{client_ip}"
+    rate_limit_id = f"user_{user_id}"
     _check_rate_limit(rate_limit_id)
 
     if not file or not file.filename:

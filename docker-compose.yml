@@ -10,6 +10,8 @@ services:
     volumes:
       # Persistência do banco SQLite no host (dentro da pasta ./data)
       - ./data:/app/data
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
     environment:
       - DATABASE_PATH=/app/data/pontinho.db
       - PYTHONUNBUFFERED=1

@@ -50,7 +50,7 @@
         <a href="./profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
           <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
         </a>
-        <a href="./admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/60 text-amber-300 font-bold text-sm border border-amber-500/40 shadow-sm">
+        <a id="admin-nav-link" href="./admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/60 text-amber-300 font-bold text-sm border border-amber-500/40 shadow-sm">
           <span>⚙️</span> <span class="hidden sm:inline">Admin</span>
         </a>
       </nav>
@@ -70,8 +70,28 @@
     </div>
   </header>
 
+  <!-- TELA DE ACESSO NEGADO / RESTRITO (EXIBIDA QUANDO NÃO É ADMIN) -->
+  <div id="access-denied-container" class="hidden flex-1 max-w-lg w-full mx-auto p-6 flex flex-col items-center justify-center text-center my-auto">
+    <div class="bg-slate-900/95 backdrop-blur-xl border border-rose-500/30 p-8 rounded-3xl shadow-2xl space-y-5">
+      <div class="w-16 h-16 rounded-2xl bg-rose-950/70 border border-rose-500/40 text-rose-400 text-3xl flex items-center justify-center mx-auto shadow-inner">
+        🔒
+      </div>
+      <div>
+        <h1 class="text-2xl font-black text-white">Acesso Restrito</h1>
+        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+          Esta área é restrita exclusivamente a administradores do Pontinho UFABC. Seu usuário autenticado não possui privilégios de moderação.
+        </p>
+      </div>
+      <div class="pt-2">
+        <a href="./index.html" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-950/60 transition hover:scale-105 active:scale-95">
+          <span>🔥</span> Voltar para o Feed
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- CONTEÚDO DO PAINEL ADMIN (MOBILE-FIRST) -->
-  <main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 pb-24 md:pb-6 space-y-6">
+  <main id="admin-main" class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 pb-24 md:pb-6 space-y-6">
     
     <!-- RESUMO / STATS CARDS -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -319,10 +339,6 @@
       <span class="text-xl">👤</span>
       <span>Perfil</span>
     </a>
-    <a href="./admin.html" class="flex flex-col items-center gap-1 text-amber-400 font-bold text-[11px]">
-      <span class="text-xl">⚙️</span>
-      <span>Admin</span>
-    </a>
   </nav>
 
   <script src="./js/app.js"></script>
@@ -330,6 +346,18 @@
     document.addEventListener('DOMContentLoaded', async () => {
       const user = await Pontinho.requireAuth();
       if (!user) return;
+
+      // Se o usuário não for administrador, bloqueia a interface e não busca dados do painel
+      if (!user.is_admin) {
+        const main = document.getElementById('admin-main');
+        if (main) main.classList.add('hidden');
+        const denied = document.getElementById('access-denied-container');
+        if (denied) denied.classList.remove('hidden');
+        const adminNavLink = document.getElementById('admin-nav-link');
+        if (adminNavLink) adminNavLink.classList.add('hidden');
+        return;
+      }
+
       await Pontinho.initNavbarUserSwitcher();
       loadStats();
       loadUsersTable();

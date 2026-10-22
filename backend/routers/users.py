@@ -11,8 +11,9 @@ from backend.auth import get_current_user_id
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 @router.get("/list")
-def list_users_for_switch():
-    """Lista usuários para facilitar a troca no cabeçalho durante testes."""
+def list_users_for_switch(request: Request):
+    """Lista usuários para facilitar a troca no cabeçalho. Exige autenticação."""
+    get_current_user_id(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT id, ra, name, email, age, campus, course, specific_course, photos, is_admin FROM users ORDER BY id ASC")

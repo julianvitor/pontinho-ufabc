@@ -6,7 +6,7 @@ import sqlite3
 from fastapi import APIRouter, HTTPException, Request
 from backend.database import get_db
 from backend.models import CourseCreate, EntityCreate, PromptCreate, AdCreateOrUpdate
-from backend.auth import get_current_user_id
+from backend.auth import get_current_user_id, require_admin
 
 router = APIRouter(tags=["admin"])
 
@@ -39,10 +39,11 @@ def get_metadata():
         "looking_for_options": ["Algo sério", "Algo casual", "Amizade"]
     }
 
-# --- ROTAS DO PAINEL ADMIN ---
+# --- ROTAS DO PAINEL ADMIN (PROTEGIDAS - EXIGE IS_ADMIN) ---
 
 @router.get("/api/admin/overview")
-def get_admin_overview():
+def get_admin_overview(request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) AS count FROM users")
@@ -66,8 +67,9 @@ def get_admin_overview():
     }
 
 @router.get("/api/admin/users")
-def get_admin_users():
+def get_admin_users(request: Request):
     """Lista todos os usuários para o painel administrativo."""
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT id, ra, name, email, age, campus, course, specific_course, entity, photos, songs, is_admin, created_at FROM users ORDER BY id DESC")
@@ -82,8 +84,9 @@ def get_admin_users():
     return result
 
 @router.delete("/api/admin/users/{user_id}")
-def delete_user(user_id: int):
+def delete_user(user_id: int, request: Request):
     """Apaga um usuário do sistema (com exclusão em cascata de matches e mensagens)."""
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
@@ -92,7 +95,8 @@ def delete_user(user_id: int):
     return {"success": True, "message": f"Usuário {user_id} excluído com sucesso."}
 
 @router.get("/api/admin/courses")
-def get_admin_courses():
+def get_admin_courses(request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM courses ORDER BY category, name")
@@ -101,7 +105,8 @@ def get_admin_courses():
     return courses
 
 @router.post("/api/admin/courses")
-def add_admin_course(course: CourseCreate):
+def add_admin_course(course: CourseCreate, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("INSERT INTO courses (name, category) VALUES (?, ?)", (course.name.strip(), course.category.strip()))
@@ -111,7 +116,8 @@ def add_admin_course(course: CourseCreate):
     return {"success": True, "id": new_id, "name": course.name}
 
 @router.delete("/api/admin/courses/{course_id}")
-def delete_admin_course(course_id: int):
+def delete_admin_course(course_id: int, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM courses WHERE id = ?", (course_id,))
@@ -120,7 +126,8 @@ def delete_admin_course(course_id: int):
     return {"success": True}
 
 @router.get("/api/admin/entities")
-def get_admin_entities():
+def get_admin_entities(request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM entities ORDER BY name")
@@ -129,7 +136,8 @@ def get_admin_entities():
     return entities
 
 @router.post("/api/admin/entities")
-def add_admin_entity(entity: EntityCreate):
+def add_admin_entity(entity: EntityCreate, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     try:
@@ -143,7 +151,8 @@ def add_admin_entity(entity: EntityCreate):
         raise HTTPException(status_code=400, detail="Esta entidade já existe.")
 
 @router.delete("/api/admin/entities/{entity_id}")
-def delete_admin_entity(entity_id: int):
+def delete_admin_entity(entity_id: int, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM entities WHERE id = ?", (entity_id,))
@@ -152,7 +161,8 @@ def delete_admin_entity(entity_id: int):
     return {"success": True}
 
 @router.get("/api/admin/prompts")
-def get_admin_prompts():
+def get_admin_prompts(request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM prompts ORDER BY id ASC")
@@ -161,7 +171,8 @@ def get_admin_prompts():
     return prompts
 
 @router.post("/api/admin/prompts")
-def add_admin_prompt(prompt: PromptCreate):
+def add_admin_prompt(prompt: PromptCreate, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     try:
@@ -175,7 +186,8 @@ def add_admin_prompt(prompt: PromptCreate):
         raise HTTPException(status_code=400, detail="Esta pergunta já existe.")
 
 @router.delete("/api/admin/prompts/{prompt_id}")
-def delete_admin_prompt(prompt_id: int):
+def delete_admin_prompt(prompt_id: int, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM prompts WHERE id = ?", (prompt_id,))
@@ -184,7 +196,8 @@ def delete_admin_prompt(prompt_id: int):
     return {"success": True}
 
 @router.get("/api/admin/ads")
-def get_admin_ads():
+def get_admin_ads(request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ads ORDER BY id DESC")
@@ -193,7 +206,8 @@ def get_admin_ads():
     return ads
 
 @router.post("/api/admin/ads")
-def add_admin_ad(ad: AdCreateOrUpdate):
+def add_admin_ad(ad: AdCreateOrUpdate, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -206,7 +220,8 @@ def add_admin_ad(ad: AdCreateOrUpdate):
     return {"success": True, "id": new_id}
 
 @router.put("/api/admin/ads/{ad_id}")
-def update_admin_ad(ad_id: int, ad: AdCreateOrUpdate):
+def update_admin_ad(ad_id: int, ad: AdCreateOrUpdate, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -220,7 +235,8 @@ def update_admin_ad(ad_id: int, ad: AdCreateOrUpdate):
     return {"success": True}
 
 @router.delete("/api/admin/ads/{ad_id}")
-def delete_admin_ad(ad_id: int):
+def delete_admin_ad(ad_id: int, request: Request):
+    require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM ads WHERE id = ?", (ad_id,))
