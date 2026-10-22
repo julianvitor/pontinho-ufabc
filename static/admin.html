@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pontinho UFABC - Painel Administrativo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ufabc: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- CABEÇALHO / NAVBAR -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-2 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+          <span class="text-xl">⚙️</span>
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight text-slate-900">Admin</span>
+          <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full ml-1 border border-amber-200">Pontinho UFABC</span>
+        </div>
+      </a>
+
+      <!-- Navegação Principal -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
+        </a>
+        <a href="/matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>💬</span> <span class="hidden sm:inline">Conversas</span>
+        </a>
+        <a href="/profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
+        </a>
+        <a href="/admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 text-amber-900 font-semibold text-sm border border-amber-300 shadow-xs">
+          <span>⚙️</span> <span class="hidden sm:inline">Admin</span>
+        </a>
+      </nav>
+
+      <!-- Seletor Rápido de Usuário e Botão Sair -->
+      <div class="flex items-center gap-2">
+        <div class="hidden md:flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
+          <span class="text-slate-400 font-medium">RA:</span>
+          <select id="user-switcher-select" class="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer">
+            <option>Carregando...</option>
+          </select>
+        </div>
+        <button onclick="Pontinho.logout()" class="px-2.5 py-1 text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200/60 transition" title="Sair da conta">
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO DO PAINEL ADMIN -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    
+    <!-- RESUMO / STATS CARDS -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 text-2xl flex items-center justify-center font-bold">
+          👥
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Estudantes</span>
+          <span id="stat-users" class="text-2xl font-black text-slate-900">0</span>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 text-2xl flex items-center justify-center font-bold">
+          🎉
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Matches</span>
+          <span id="stat-matches" class="text-2xl font-black text-slate-900">0</span>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 text-2xl flex items-center justify-center font-bold">
+          💬
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Mensagens</span>
+          <span id="stat-messages" class="text-2xl font-black text-slate-900">0</span>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 text-2xl flex items-center justify-center font-bold">
+          📢
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Anúncios</span>
+          <span id="stat-ads" class="text-2xl font-black text-slate-900">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVEGAÇÃO DE ABAS DO ADMIN -->
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+      <button onclick="switchTab('users')" id="tab-btn-users" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-600 text-white shadow-sm transition">
+        👥 Usuários & Moderação
+      </button>
+      <button onclick="switchTab('ads')" id="tab-btn-ads" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200/60 transition">
+        📢 Publicidade & Anúncios
+      </button>
+      <button onclick="switchTab('courses')" id="tab-btn-courses" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200/60 transition">
+        🎓 Lista de Cursos
+      </button>
+      <button onclick="switchTab('entities')" id="tab-btn-entities" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200/60 transition">
+        🏛️ Entidades Estudantis
+      </button>
+      <button onclick="switchTab('prompts')" id="tab-btn-prompts" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200/60 transition">
+        ❓ Perguntinhas do Perfil
+      </button>
+    </div>
+
+    <!-- ABA 1: GERENCIAR USUÁRIOS (APAGAR USUÁRIOS) -->
+    <section id="tab-content-users" class="tab-content bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+        <div>
+          <h2 class="text-xl font-black text-slate-900">Gerenciamento de Usuários</h2>
+          <p class="text-xs text-slate-500">Visualize estudantes cadastrados e apague perfis inadequados ou para moderação.</p>
+        </div>
+        <button onclick="loadUsersTable()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+          🔄 Atualizar Lista
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-400 uppercase tracking-wider font-bold border-b border-slate-100">
+              <th class="py-3 px-3">Aluno</th>
+              <th class="py-3 px-3">E-mail</th>
+              <th class="py-3 px-3">Campus / Curso</th>
+              <th class="py-3 px-3">Entidade</th>
+              <th class="py-3 px-3">Fotos</th>
+              <th class="py-3 px-3 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="6" class="py-6 text-center text-slate-400">Carregando usuários...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ABA 2: GERENCIAR PUBLICIDADES (INSERIR PUBLICIDADE ENTRE OS CARDS) -->
+    <section id="tab-content-ads" class="tab-content hidden space-y-6">
+      
+      <!-- Formulário de Criação de Novo Anúncio -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-md p-6">
+        <h2 class="text-xl font-black text-slate-900 mb-1">Inserir Nova Publicidade nos Swipes</h2>
+        <p class="text-xs text-slate-500 mb-6">Estes cards patrocinados são exibidos automaticamente intercalados entre os perfis de alunos no feed.</p>
+
+        <form id="ad-form" onsubmit="createAd(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Título do Anúncio *</label>
+              <input id="ad-title" type="text" required placeholder="Ex: Choppada da Federal 2026" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">URL da Imagem de Fundo *</label>
+              <input id="ad-image" type="url" required placeholder="https://images.unsplash.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Descrição / Texto Promocional *</label>
+            <textarea id="ad-desc" rows="2" required placeholder="Explique a promoção, evento ou serviço para a comunidade universitária..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Texto do Botão</label>
+              <input id="ad-btn-text" type="text" placeholder="Ex: Conferir, Garantir Ingresso" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Link de Destino (URL) *</label>
+              <input id="ad-link" type="url" required placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Frequência (a cada quantos cards)</label>
+              <input id="ad-frequency" type="number" min="1" max="20" value="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md shadow-amber-500/30 transition">
+              + Inserir Publicidade
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de Anúncios Ativos -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-md p-6">
+        <h3 class="text-lg font-black text-slate-900 mb-4">Anúncios Cadastrados no Feed</h3>
+        <div id="ads-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Anúncios carregados dinamicamente -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ABA 3: GERENCIAR CURSOS -->
+    <section id="tab-content-courses" class="tab-content hidden bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-6">
+      <div>
+        <h2 class="text-xl font-black text-slate-900">Modificar Lista de Cursos</h2>
+        <p class="text-xs text-slate-500">Adicione novos cursos base ou específicos que aparecem nos cadastros dos alunos.</p>
+      </div>
+
+      <!-- Form adicionar curso -->
+      <form onsubmit="addCourse(event)" class="flex flex-col sm:flex-row gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+        <input id="new-course-name" type="text" required placeholder="Nome do curso (ex: Engenharia Aeroespacial)" class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+        
+        <select id="new-course-cat" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+          <option value="especifico">Curso Específico (Pós-BI)</option>
+          <option value="base">Curso Base (BI)</option>
+        </select>
+
+        <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition">
+          Adicionar Curso
+        </button>
+      </form>
+
+      <!-- Lista de Cursos -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="courses-list-container">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </section>
+
+    <!-- ABA 4: GERENCIAR ENTIDADES -->
+    <section id="tab-content-entities" class="tab-content hidden bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-6">
+      <div>
+        <h2 class="text-xl font-black text-slate-900">Modificar Lista de Entidades</h2>
+        <p class="text-xs text-slate-500">Gerencie as atléticas, coletivos, grupos de extensão e equipes acadêmicas da UFABC.</p>
+      </div>
+
+      <!-- Form adicionar entidade -->
+      <form onsubmit="addEntity(event)" class="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input id="new-entity-name" type="text" required placeholder="Nome da entidade (ex: Bateria UFABC)" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+          <input id="new-entity-desc" type="text" placeholder="Breve descrição" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition">
+            Adicionar Entidade
+          </button>
+        </div>
+      </form>
+
+      <!-- Lista de Entidades -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="entities-list-container">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </section>
+
+    <!-- ABA 5: GERENCIAR PERGUNTINHAS -->
+    <section id="tab-content-prompts" class="tab-content hidden bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-6">
+      <div>
+        <h2 class="text-xl font-black text-slate-900">Modificar as Perguntinhas de Perfil</h2>
+        <p class="text-xs text-slate-500">Frases e perguntas divertidas de quebra-gelo para os estudantes responderem.</p>
+      </div>
+
+      <!-- Form adicionar perguntinha -->
+      <form onsubmit="addPrompt(event)" class="flex flex-col sm:flex-row gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+        <input id="new-prompt-q" type="text" required placeholder="Texto da pergunta (ex: Minha opinião impopular sobre o RU...)" class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+        <button type="submit" class="px-5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition">
+          Adicionar Pergunta
+        </button>
+      </form>
+
+      <!-- Lista de Perguntinhas -->
+      <div class="space-y-2" id="prompts-list-container">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await Pontinho.requireAuth();
+      if (!user) return;
+      await Pontinho.initNavbarUserSwitcher();
+      loadStats();
+      loadUsersTable();
+      loadAds();
+      loadCourses();
+      loadEntities();
+      loadPrompts();
+    });
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-200/60 transition';
+      });
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      const activeContent = document.getElementById(`tab-content-${tab}`);
+
+      if (activeBtn) activeBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-600 text-white shadow-sm transition';
+      if (activeContent) activeContent.classList.remove('hidden');
+    }
+
+    async function loadStats() {
+      try {
+        const stats = await Pontinho.apiFetch('/api/admin/overview');
+        document.getElementById('stat-users').innerText = stats.total_users;
+        document.getElementById('stat-matches').innerText = stats.total_matches;
+        document.getElementById('stat-messages').innerText = stats.total_messages;
+        document.getElementById('stat-ads').innerText = stats.total_ads;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // --- USUÁRIOS ---
+    async function loadUsersTable() {
+      const tbody = document.getElementById('users-table-body');
+      try {
+        const users = await Pontinho.apiFetch('/api/admin/users');
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum usuário cadastrado.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = users.map(u => {
+          const photo = (u.photos && u.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+          return `
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-3 px-3 flex items-center gap-2.5">
+                <img src="${photo}" class="w-9 h-9 rounded-full object-cover border border-slate-200">
+                <div>
+                  <span class="font-bold text-slate-900 block">${u.name}</span>
+                  <span class="text-[10px] text-slate-400">${u.age} anos ${u.is_admin ? '• <strong class="text-amber-600">Admin</strong>' : ''}</span>
+                </div>
+              </td>
+              <td class="py-3 px-3 text-slate-600 font-mono text-[11px]">
+                <div>${u.email}</div>
+                <span class="inline-block mt-0.5 text-[10px] text-emerald-700 font-mono font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/50">RA: ${u.ra || 'N/A'}</span>
+              </td>
+              <td class="py-3 px-3">
+                <span class="font-medium text-slate-800">${u.campus}</span>
+                <span class="block text-[10px] text-slate-400">${u.specific_course || u.course}</span>
+              </td>
+              <td class="py-3 px-3 text-slate-600">${u.entity}</td>
+              <td class="py-3 px-3 font-semibold text-slate-700">${(u.photos || []).length} fotos</td>
+              <td class="py-3 px-3 text-right">
+                <button onclick="deleteUser(${u.id}, '${escapeQuote(u.name)}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-bold text-[11px] border border-rose-200 transition">
+                  Apagar
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-rose-500">${err.message}</td></tr>`;
+      }
+    }
+
+    async function deleteUser(id, name) {
+      if (!confirm(`Tem certeza que deseja apagar o estudante "${name}"? Todos os seus swipes, matches e mensagens serão excluídos permanentemente.`)) {
+        return;
+      }
+
+      try {
+        await Pontinho.apiFetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+        Pontinho.showToast(`Usuário "${name}" apagado com sucesso!`);
+        loadUsersTable();
+        loadStats();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    // --- PUBLICIDADE ---
+    async function loadAds() {
+      const container = document.getElementById('ads-list-container');
+      try {
+        const ads = await Pontinho.apiFetch('/api/admin/ads');
+        if (ads.length === 0) {
+          container.innerHTML = '<p class="text-xs text-slate-400 col-span-full">Nenhuma publicidade cadastrada.</p>';
+          return;
+        }
+
+        container.innerHTML = ads.map(a => `
+          <div class="border border-slate-200 rounded-2xl p-4 flex gap-4 bg-slate-50/50">
+            <img src="${a.image_url}" class="w-24 h-24 rounded-xl object-cover border border-slate-200">
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <h4 class="font-bold text-slate-900 text-sm">${a.title}</h4>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${a.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
+                    ${a.is_active ? 'Ativo' : 'Pausado'}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 line-clamp-2 mt-1">${a.description}</p>
+                <span class="text-[10px] text-amber-700 font-medium block mt-1">Frequência: a cada ${a.frequency || 4} cards</span>
+              </div>
+              <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/60">
+                <a href="${a.link_url}" target="_blank" class="text-xs text-blue-600 font-semibold hover:underline">
+                  ${a.button_text || 'Conferir'} ➔
+                </a>
+                <button onclick="deleteAd(${a.id})" class="text-rose-500 hover:text-rose-700 text-xs font-bold">
+                  Excluir Anúncio
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<p class="text-xs text-rose-500">${err.message}</p>`;
+      }
+    }
+
+    async function createAd(e) {
+      e.preventDefault();
+      const payload = {
+        title: document.getElementById('ad-title').value.trim(),
+        image_url: document.getElementById('ad-image').value.trim(),
+        description: document.getElementById('ad-desc').value.trim(),
+        button_text: document.getElementById('ad-btn-text').value.trim() || 'Conferir',
+        link_url: document.getElementById('ad-link').value.trim(),
+        frequency: parseInt(document.getElementById('ad-frequency').value, 10) || 4,
+        is_active: 1
+      };
+
+      try {
+        await Pontinho.apiFetch('/api/admin/ads', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        Pontinho.showToast('Publicidade inserida com sucesso no feed!');
+        document.getElementById('ad-form').reset();
+        loadAds();
+        loadStats();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteAd(id) {
+      if (!confirm('Deseja excluir este anúncio?')) return;
+      try {
+        await Pontinho.apiFetch(`/api/admin/ads/${id}`, { method: 'DELETE' });
+        Pontinho.showToast('Anúncio excluído!');
+        loadAds();
+        loadStats();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    // --- CURSOS ---
+    async function loadCourses() {
+      const container = document.getElementById('courses-list-container');
+      try {
+        const courses = await Pontinho.apiFetch('/api/admin/courses');
+        container.innerHTML = courses.map(c => `
+          <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs">
+            <div>
+              <span class="font-bold text-slate-800 block">${c.name}</span>
+              <span class="text-[10px] uppercase font-bold text-slate-400">${c.category === 'base' ? 'Curso Base (BI)' : 'Curso Específico'}</span>
+            </div>
+            <button onclick="deleteCourse(${c.id})" class="text-rose-500 hover:text-rose-700 font-bold ml-2">✕</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<p class="text-xs text-rose-500">${err.message}</p>`;
+      }
+    }
+
+    async function addCourse(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-course-name').value.trim();
+      const category = document.getElementById('new-course-cat').value;
+
+      try {
+        await Pontinho.apiFetch('/api/admin/courses', {
+          method: 'POST',
+          body: JSON.stringify({ name, category })
+        });
+        document.getElementById('new-course-name').value = '';
+        Pontinho.showToast('Curso adicionado!');
+        loadCourses();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteCourse(id) {
+      if (!confirm('Remover este curso da lista?')) return;
+      try {
+        await Pontinho.apiFetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+        loadCourses();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    // --- ENTIDADES ---
+    async function loadEntities() {
+      const container = document.getElementById('entities-list-container');
+      try {
+        const entities = await Pontinho.apiFetch('/api/admin/entities');
+        container.innerHTML = entities.map(e => `
+          <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs">
+            <div>
+              <span class="font-bold text-slate-800 block">${e.name}</span>
+              <span class="text-[10px] text-slate-400">${e.description || 'Entidade estudantil'}</span>
+            </div>
+            <button onclick="deleteEntity(${e.id})" class="text-rose-500 hover:text-rose-700 font-bold ml-2">✕</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<p class="text-xs text-rose-500">${err.message}</p>`;
+      }
+    }
+
+    async function addEntity(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-entity-name').value.trim();
+      const description = document.getElementById('new-entity-desc').value.trim();
+
+      try {
+        await Pontinho.apiFetch('/api/admin/entities', {
+          method: 'POST',
+          body: JSON.stringify({ name, description })
+        });
+        document.getElementById('new-entity-name').value = '';
+        document.getElementById('new-entity-desc').value = '';
+        Pontinho.showToast('Entidade adicionada!');
+        loadEntities();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteEntity(id) {
+      if (!confirm('Remover esta entidade?')) return;
+      try {
+        await Pontinho.apiFetch(`/api/admin/entities/${id}`, { method: 'DELETE' });
+        loadEntities();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    // --- PERGUNTINHAS ---
+    async function loadPrompts() {
+      const container = document.getElementById('prompts-list-container');
+      try {
+        const prompts = await Pontinho.apiFetch('/api/admin/prompts');
+        container.innerHTML = prompts.map(p => `
+          <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs">
+            <span class="font-medium text-slate-800">"${p.question}"</span>
+            <button onclick="deletePrompt(${p.id})" class="text-rose-500 hover:text-rose-700 font-bold ml-3">✕</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<p class="text-xs text-rose-500">${err.message}</p>`;
+      }
+    }
+
+    async function addPrompt(e) {
+      e.preventDefault();
+      const question = document.getElementById('new-prompt-q').value.trim();
+
+      try {
+        await Pontinho.apiFetch('/api/admin/prompts', {
+          method: 'POST',
+          body: JSON.stringify({ question })
+        });
+        document.getElementById('new-prompt-q').value = '';
+        Pontinho.showToast('Perguntinha adicionada!');
+        loadPrompts();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function deletePrompt(id) {
+      if (!confirm('Remover esta perguntinha?')) return;
+      try {
+        await Pontinho.apiFetch(`/api/admin/prompts/${id}`, { method: 'DELETE' });
+        loadPrompts();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function escapeQuote(str) {
+      return (str || '').replace(/'/g, "\\'");
+    }
+  </script>
+</body>
+</html>

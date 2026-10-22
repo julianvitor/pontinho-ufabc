@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pontinho UFABC - O Tinder da Federal do ABC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ufabc: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            flame: {
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- CABEÇALHO / NAVBAR -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <!-- Logo / Marca -->
+      <a href="/" class="flex items-center gap-2 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-rose-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+          <span class="text-xl">🔥</span>
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-700 to-teal-800 bg-clip-text text-transparent">Pontinho</span>
+          <span class="text-xs font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full ml-1 border border-rose-200">UFABC</span>
+        </div>
+      </a>
+
+      <!-- Navegação Principal -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-sm border border-emerald-200/60 shadow-xs">
+          <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
+        </a>
+        <a href="/matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>💬</span> <span class="hidden sm:inline">Conversas</span>
+        </a>
+        <a href="/profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
+        </a>
+        <a href="/admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium text-sm border border-amber-200/60 transition">
+          <span>⚙️</span> <span class="hidden sm:inline">Admin</span>
+        </a>
+      </nav>
+
+      <!-- Seletor Rápido de Usuário (Para Testes) e Botão Sair -->
+      <div class="flex items-center gap-2">
+        <div class="hidden md:flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
+          <span class="text-slate-400 font-medium">RA:</span>
+          <select id="user-switcher-select" class="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer">
+            <option>Carregando...</option>
+          </select>
+        </div>
+        <button onclick="Pontinho.logout()" class="px-2.5 py-1 text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200/60 transition" title="Sair da conta">
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL: ÁREA DE SWIPES -->
+  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 sm:py-6 flex flex-col items-center justify-center relative">
+    
+    <!-- BARRA DE AJUDA / DICAS UFABC -->
+    <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-3 px-1">
+      <div class="flex items-center gap-1">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="font-medium text-slate-700">Federal do ABC Online</span>
+      </div>
+      <button onclick="resetSwipes()" class="text-emerald-600 hover:text-emerald-700 font-medium hover:underline flex items-center gap-1">
+        <span>🔄</span> Resetar Swipes
+      </button>
+    </div>
+
+    <!-- CONTAINER DOS CARDS -->
+    <div id="deck-container" class="relative w-full aspect-[3/4.6] max-h-[640px] rounded-3xl shadow-2xl bg-white border border-slate-200/80 overflow-hidden flex items-center justify-center">
+      
+      <!-- ESTADO DE CARREGANDO -->
+      <div id="loading-spinner" class="flex flex-col items-center gap-3 text-slate-400">
+        <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm font-medium">Buscando estudantes no campus...</p>
+      </div>
+
+      <!-- ESTADO VAZIO (QUANDO ACABAREM OS CARDS) -->
+      <div id="empty-state" class="hidden flex flex-col items-center justify-center text-center p-6 space-y-4">
+        <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-3xl shadow-inner border border-emerald-100">
+          🎓
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-slate-800">Você zerou os perfis por aqui!</h3>
+          <p class="text-sm text-slate-500 mt-1 max-w-xs">Não há mais estudantes na sua fila de swipe no momento.</p>
+        </div>
+        <button onclick="resetSwipes()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 transition-all">
+          🔄 Rever Todos os Perfis
+        </button>
+      </div>
+
+      <!-- CARD ATIVO É RENDERIZADO VIA JAVASCRIPT AQUI DENTRO -->
+      <div id="card-wrapper" class="w-full h-full relative hidden"></div>
+
+    </div>
+
+    <!-- BOTÕES DE CONTROLE INFERIORES -->
+    <div id="action-controls" class="flex items-center justify-center gap-5 mt-5">
+      <!-- Botão Pass (X) -->
+      <button onclick="handleSwipe('pass')" class="w-14 h-14 rounded-full bg-white shadow-xl border border-slate-200 text-rose-500 text-2xl flex items-center justify-center hover:scale-110 active:scale-95 hover:bg-rose-50 hover:border-rose-300 transition-all focus:outline-none" title="Passar (Não curti)">
+        ✕
+      </button>
+
+      <!-- Botão Informações / Detalhes -->
+      <button onclick="openDetailsModal()" class="w-11 h-11 rounded-full bg-white shadow-lg border border-slate-200 text-blue-500 text-xl flex items-center justify-center hover:scale-110 active:scale-95 hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none" title="Ver perfil completo e perguntinhas">
+        ℹ️
+      </button>
+
+      <!-- Botão Like (Coração) -->
+      <button onclick="handleSwipe('like')" class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-xl shadow-emerald-500/30 text-white text-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all focus:outline-none" title="Curtir">
+        💚
+      </button>
+    </div>
+
+  </main>
+
+  <!-- MODAL DE DETALHES COMPLETOS DO PERFIL & PERGUNTINHAS -->
+  <div id="details-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+      <div class="sticky top-0 bg-white/90 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between z-10">
+        <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+          <span>Detalhes do Perfil</span>
+          <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full">UFABC</span>
+        </h3>
+        <button onclick="closeDetailsModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <div id="details-content" class="p-6 space-y-6">
+        <!-- Preenchido dinamicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CELEBRAÇÃO DE MATCH -->
+  <div id="match-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gradient-to-b from-slate-900 via-slate-800 to-emerald-950 w-full max-w-md rounded-3xl p-8 text-center text-white border border-emerald-500/30 shadow-2xl relative overflow-hidden animate-scale">
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
+
+      <span class="inline-block text-5xl mb-2 animate-bounce">🎉</span>
+      <h2 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-300 via-teal-200 to-rose-300 bg-clip-text text-transparent">
+        Deu Match no Pontinho!
+      </h2>
+      <p id="match-subtitle" class="text-slate-300 text-sm mt-1 mb-6">Vocês dois curtiram um ao outro.</p>
+
+      <!-- Fotos Lado a Lado -->
+      <div class="flex items-center justify-center gap-3 my-4">
+        <img id="match-my-photo" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-xl" src="" alt="Sua foto">
+        <div class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-lg shadow-lg">🔥</div>
+        <img id="match-partner-photo" class="w-24 h-24 rounded-full object-cover border-4 border-emerald-400 shadow-xl" src="" alt="Foto do Match">
+      </div>
+
+      <div class="space-y-3 mt-6">
+        <a id="match-chat-btn" href="/matches.html" class="block w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/40 transition">
+          Mandar Mensagem Agora 💬
+        </a>
+        <button onclick="closeMatchModal()" class="w-full py-2.5 text-slate-400 hover:text-white font-medium text-sm transition">
+          Continuar Swiping
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="/static/app.js"></script>
+  <script>
+    let currentCards = [];
+    let currentIndex = 0;
+    let currentPhotoIndex = 0;
+    let activeCardData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await Pontinho.requireAuth();
+      if (!user) return;
+      await Pontinho.initNavbarUserSwitcher();
+      loadFeed();
+    });
+
+    async function loadFeed() {
+      const spinner = document.getElementById('loading-spinner');
+      const emptyState = document.getElementById('empty-state');
+      const cardWrapper = document.getElementById('card-wrapper');
+
+      spinner.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      cardWrapper.classList.add('hidden');
+
+      try {
+        const data = await Pontinho.apiFetch('/api/feed');
+        currentCards = data.cards || [];
+        currentIndex = 0;
+
+        spinner.classList.add('hidden');
+
+        if (currentCards.length === 0) {
+          emptyState.classList.remove('hidden');
+        } else {
+          cardWrapper.classList.remove('hidden');
+          renderTopCard();
+        }
+      } catch (err) {
+        spinner.classList.add('hidden');
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function renderTopCard() {
+      const cardWrapper = document.getElementById('card-wrapper');
+      const emptyState = document.getElementById('empty-state');
+
+      if (currentIndex >= currentCards.length) {
+        cardWrapper.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        activeCardData = null;
+        return;
+      }
+
+      activeCardData = currentCards[currentIndex];
+      currentPhotoIndex = 0;
+
+      if (activeCardData.is_ad) {
+        renderAdCard(activeCardData);
+      } else {
+        renderProfileCard(activeCardData);
+      }
+    }
+
+    function renderProfileCard(user) {
+      const cardWrapper = document.getElementById('card-wrapper');
+      const photos = user.photos && user.photos.length ? user.photos : ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800'];
+      
+      // Indicadores de fotos no topo
+      let indicatorsHtml = '';
+      if (photos.length > 1) {
+        indicatorsHtml = `
+          <div class="absolute top-3 inset-x-3 z-20 flex gap-1.5">
+            ${photos.map((_, i) => `
+              <div class="flex-1 photo-indicator ${i === 0 ? 'active' : ''}" data-index="${i}"></div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      cardWrapper.innerHTML = `
+        <div id="active-card" class="tinder-card w-full h-full relative cursor-grab select-none">
+          <!-- Foto Principal -->
+          <img id="card-photo" src="${photos[0]}" alt="${user.name}" class="w-full h-full object-cover pointer-events-none">
+
+          <!-- Áreas clicáveis para trocar de foto (esquerda = anterior, direita = próxima) -->
+          <div class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer" onclick="prevPhoto(event)"></div>
+          <div class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer" onclick="nextPhoto(event)"></div>
+
+          ${indicatorsHtml}
+
+          <!-- Contador de Fotos -->
+          <div class="absolute top-6 right-3 z-20 bg-black/40 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <span id="photo-count-label">1/${photos.length} fotos</span>
+          </div>
+
+          <!-- Gradiente de sombra para leitura -->
+          <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none"></div>
+
+          <!-- Informações Principais do Estudante -->
+          <div class="absolute inset-x-0 bottom-0 p-5 z-20 text-white flex flex-col justify-end pointer-events-auto">
+            
+            <!-- Badges de Campus e Entidade -->
+            <div class="flex flex-wrap items-center gap-1.5 mb-2">
+              <span class="bg-emerald-600/90 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                📍 ${user.campus}
+              </span>
+              <span class="bg-rose-500/90 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                ${user.looking_for}
+              </span>
+              <span class="bg-amber-500/90 backdrop-blur-md text-slate-900 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+                🏛️ ${user.entity}
+              </span>
+            </div>
+
+            <!-- Nome e Idade -->
+            <div class="flex items-baseline gap-2">
+              <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">${user.name}</h2>
+              <span class="text-xl sm:text-2xl font-light text-slate-300">${user.age}</span>
+            </div>
+
+            <!-- Curso -->
+            <p class="text-xs sm:text-sm text-emerald-300 font-medium mt-0.5 line-clamp-1">
+              🎓 ${user.course} ➔ ${user.specific_course}
+            </p>
+
+            <!-- Bio resumida -->
+            ${user.bio ? `<p class="text-xs sm:text-sm text-slate-200 mt-2 line-clamp-2">${user.bio}</p>` : ''}
+
+            <!-- Botão de Ver Perguntinhas -->
+            <button onclick="openDetailsModal()" class="mt-3 w-full py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 border border-white/20">
+              <span>💬 Ver 3 perguntinhas & interesses</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdCard(ad) {
+      const cardWrapper = document.getElementById('card-wrapper');
+      cardWrapper.innerHTML = `
+        <div id="active-card" class="tinder-card w-full h-full relative select-none bg-slate-900">
+          <img src="${ad.image_url}" alt="${ad.title}" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+
+          <!-- Tag Patrocinado -->
+          <div class="absolute top-4 left-4 z-20">
+            <span class="bg-amber-400 text-slate-950 font-black text-xs px-3 py-1 rounded-full shadow-lg uppercase tracking-wider flex items-center gap-1">
+              ⭐ Publicidade UFABC
+            </span>
+          </div>
+
+          <!-- Conteúdo da Publicidade -->
+          <div class="absolute inset-x-0 bottom-0 p-6 z-20 text-white">
+            <h2 class="text-2xl font-extrabold text-amber-300 leading-tight">${ad.title}</h2>
+            <p class="text-sm text-slate-300 mt-2 leading-relaxed">${ad.description}</p>
+
+            <div class="mt-5 space-y-2">
+              <a href="${ad.link_url}" target="_blank" class="block w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold text-sm text-center rounded-xl shadow-lg transition">
+                ${ad.button_text || 'Conferir'} ➔
+              </a>
+              <button onclick="handleSwipe('pass')" class="w-full py-2 bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-medium rounded-xl transition">
+                Continuar swiping
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function prevPhoto(e) {
+      if (e) e.stopPropagation();
+      if (!activeCardData || activeCardData.is_ad) return;
+      const photos = activeCardData.photos || [];
+      if (photos.length <= 1) return;
+
+      currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+      updatePhotoView(photos);
+    }
+
+    function nextPhoto(e) {
+      if (e) e.stopPropagation();
+      if (!activeCardData || activeCardData.is_ad) return;
+      const photos = activeCardData.photos || [];
+      if (photos.length <= 1) return;
+
+      currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+      updatePhotoView(photos);
+    }
+
+    function updatePhotoView(photos) {
+      const img = document.getElementById('card-photo');
+      const countLabel = document.getElementById('photo-count-label');
+      if (img) img.src = photos[currentPhotoIndex];
+      if (countLabel) countLabel.innerText = `${currentPhotoIndex + 1}/${photos.length} fotos`;
+
+      document.querySelectorAll('.photo-indicator').forEach((ind, i) => {
+        if (i === currentPhotoIndex) {
+          ind.classList.add('active');
+        } else {
+          ind.classList.remove('active');
+        }
+      });
+    }
+
+    async function handleSwipe(action) {
+      if (!activeCardData) return;
+
+      const card = document.getElementById('active-card');
+      if (card) {
+        card.classList.add(action === 'like' ? 'swiping-right' : 'swiping-left');
+      }
+
+      // Se for anúncio, não faz post de swipe no banco, apenas avança
+      if (activeCardData.is_ad) {
+        setTimeout(() => {
+          currentIndex++;
+          renderTopCard();
+        }, 250);
+        return;
+      }
+
+      const targetUserId = activeCardData.id;
+
+      try {
+        const res = await Pontinho.apiFetch('/api/swipe', {
+          method: 'POST',
+          body: JSON.stringify({
+            target_user_id: targetUserId,
+            action: action
+          })
+        });
+
+        setTimeout(() => {
+          currentIndex++;
+          renderTopCard();
+
+          if (res.matched) {
+            triggerMatchCelebration(res.match_user);
+          }
+        }, 250);
+
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+        if (card) {
+          card.classList.remove('swiping-right', 'swiping-left');
+        }
+      }
+    }
+
+    async function triggerMatchCelebration(partner) {
+      try {
+        const me = await Pontinho.apiFetch('/api/users/me');
+        const myPhoto = me.photos && me.photos.length ? me.photos[0] : '';
+        const partnerPhoto = partner.photos && partner.photos.length ? partner.photos[0] : '';
+
+        document.getElementById('match-my-photo').src = myPhoto;
+        document.getElementById('match-partner-photo').src = partnerPhoto;
+        document.getElementById('match-subtitle').innerText = `Você e ${partner.name} combinaram!`;
+
+        const modal = document.getElementById('match-modal');
+        modal.classList.remove('hidden');
+      } catch (e) {
+        Pontinho.showToast(`Deu match com ${partner.name}! 🎉`, 'success');
+      }
+    }
+
+    function closeMatchModal() {
+      document.getElementById('match-modal').classList.add('hidden');
+    }
+
+    function openDetailsModal() {
+      if (!activeCardData || activeCardData.is_ad) return;
+
+      const u = activeCardData;
+      const content = document.getElementById('details-content');
+
+      const interestsList = (u.interests || []).map(item => `
+        <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded-full border border-slate-200">
+          #${item}
+        </span>
+      `).join('');
+
+      content.innerHTML = `
+        <!-- Galeria de Fotos -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Fotos do Perfil (${(u.photos || []).length})</h4>
+          <div class="grid grid-cols-2 gap-2">
+            ${(u.photos || []).map(p => `
+              <img src="${p}" class="w-full h-48 object-cover rounded-2xl shadow-sm">
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Dados Básicos -->
+        <div>
+          <div class="flex items-baseline gap-2">
+            <h3 class="text-2xl font-extrabold text-slate-900">${u.name}</h3>
+            <span class="text-lg text-slate-400 font-light">${u.age} anos</span>
+          </div>
+          <p class="text-sm text-emerald-700 font-medium mt-0.5">
+            🎓 ${u.course} ➔ ${u.specific_course}
+          </p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-emerald-200/50">
+              📍 Campus ${u.campus}
+            </span>
+            <span class="bg-rose-50 text-rose-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-rose-200/50">
+              ❤️ ${u.looking_for}
+            </span>
+            <span class="bg-amber-50 text-amber-900 text-xs font-semibold px-2.5 py-1 rounded-lg border border-amber-200/50">
+              🏛️ ${u.entity}
+            </span>
+          </div>
+        </div>
+
+        <!-- Biografia -->
+        ${u.bio ? `
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Sobre mim</h4>
+            <p class="text-sm text-slate-700 leading-relaxed">${u.bio}</p>
+          </div>
+        ` : ''}
+
+        <!-- Interesses -->
+        ${u.interests && u.interests.length ? `
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Interesses</h4>
+            <div class="flex flex-wrap gap-1.5">${interestsList}</div>
+          </div>
+        ` : ''}
+
+        <!-- 3 Perguntinhas com Respostas -->
+        <div class="space-y-3 pt-2 border-t border-slate-100">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-700">3 Perguntinhas UFABC</h4>
+          
+          ${u.prompt1_q && u.prompt1_a ? `
+            <div class="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100">
+              <span class="text-xs font-bold text-emerald-800 block">${u.prompt1_q}</span>
+              <p class="text-sm font-medium text-slate-800 mt-1 italic">"${u.prompt1_a}"</p>
+            </div>
+          ` : ''}
+
+          ${u.prompt2_q && u.prompt2_a ? `
+            <div class="p-4 bg-teal-50/60 rounded-2xl border border-teal-100">
+              <span class="text-xs font-bold text-teal-800 block">${u.prompt2_q}</span>
+              <p class="text-sm font-medium text-slate-800 mt-1 italic">"${u.prompt2_a}"</p>
+            </div>
+          ` : ''}
+
+          ${u.prompt3_q && u.prompt3_a ? `
+            <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-100">
+              <span class="text-xs font-bold text-amber-800 block">${u.prompt3_q}</span>
+              <p class="text-sm font-medium text-slate-800 mt-1 italic">"${u.prompt3_a}"</p>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      document.getElementById('details-modal').classList.remove('hidden');
+    }
+
+    function closeDetailsModal() {
+      document.getElementById('details-modal').classList.add('hidden');
+    }
+
+    async function resetSwipes() {
+      try {
+        await Pontinho.apiFetch('/api/admin/reset-swipes', { method: 'POST' });
+        Pontinho.showToast('Histórico de swipes resetado! Recarregando...');
+        loadFeed();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+services:
+  pontinho-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pontinho-ufabc
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistência do banco SQLite no host (dentro da pasta ./data)
+      - ./data:/app/data
+    environment:
+      - DATABASE_PATH=/app/data/pontinho.db
+      - PYTHONUNBUFFERED=1

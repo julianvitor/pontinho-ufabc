@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pontinho UFABC - Minhas Conversas e Matches</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ufabc: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- CABEÇALHO / NAVBAR -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-2 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+          <span class="text-xl">🔥</span>
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-700 to-teal-800 bg-clip-text text-transparent">Pontinho</span>
+          <span class="text-xs font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full ml-1 border border-rose-200">UFABC</span>
+        </div>
+      </a>
+
+      <!-- Navegação Principal -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
+        </a>
+        <a href="/matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-sm border border-emerald-200/60 shadow-xs">
+          <span>💬</span> <span class="hidden sm:inline">Conversas</span>
+        </a>
+        <a href="/profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
+        </a>
+        <a href="/admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium text-sm border border-amber-200/60 transition">
+          <span>⚙️</span> <span class="hidden sm:inline">Admin</span>
+        </a>
+      </nav>
+
+      <!-- Seletor Rápido de Usuário e Botão Sair -->
+      <div class="flex items-center gap-2">
+        <div class="hidden md:flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
+          <span class="text-slate-400 font-medium">RA:</span>
+          <select id="user-switcher-select" class="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer">
+            <option>Carregando...</option>
+          </select>
+        </div>
+        <button onclick="Pontinho.logout()" class="px-2.5 py-1 text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200/60 transition" title="Sair da conta">
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ÁREA DE CHAT & MATCHES -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col">
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden flex-1 flex flex-col md:flex-row min-h-[580px]">
+      
+      <!-- COLUNA DA ESQUERDA: LISTA DE MATCHES -->
+      <div id="matches-sidebar" class="w-full md:w-80 border-r border-slate-100 flex flex-col bg-slate-50/50">
+        
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h2 class="font-extrabold text-slate-900 text-lg">Seus Matches</h2>
+            <p class="text-xs text-slate-500">Estudantes que combinaram com você</p>
+          </div>
+          <span id="matches-count-badge" class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs">0</span>
+        </div>
+
+        <!-- Lista scrollável -->
+        <div id="matches-list-container" class="flex-1 overflow-y-auto divide-y divide-slate-100 p-2 space-y-1">
+          <div class="p-8 text-center text-slate-400 text-sm">Carregando matches...</div>
+        </div>
+      </div>
+
+      <!-- COLUNA DA DIREITA: JANELA DO CHAT -->
+      <div id="chat-window" class="flex-1 flex flex-col bg-white">
+        
+        <!-- ESTADO QUANDO NENHUM MATCH ESTÁ SELECIONADO -->
+        <div id="no-chat-selected" class="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
+          <div class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mb-3 shadow-inner">
+            💬
+          </div>
+          <h3 class="font-bold text-slate-700 text-lg">Nenhuma conversa selecionada</h3>
+          <p class="text-xs text-slate-400 max-w-xs mt-1">
+            Escolha um match à esquerda para começar a conversar por texto com outros alunos da UFABC.
+          </p>
+        </div>
+
+        <!-- ÁREA DO CHAT ATIVO -->
+        <div id="active-chat-container" class="hidden flex-1 flex flex-col h-full">
+          
+          <!-- Cabeçalho do Chat -->
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center gap-3">
+              <button onclick="backToMatchesList()" class="md:hidden text-slate-500 hover:text-slate-800 p-1 font-bold">
+                ←
+              </button>
+              <img id="chat-partner-avatar" src="" alt="Avatar" class="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 shadow-sm">
+              <div>
+                <h3 id="chat-partner-name" class="font-bold text-slate-900 text-sm leading-tight">Nome</h3>
+                <p id="chat-partner-sub" class="text-[11px] text-emerald-700 font-medium">Curso • Campus</p>
+              </div>
+            </div>
+            <a href="/" class="text-xs text-slate-500 hover:text-emerald-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">
+              🔥 Ver feed
+            </a>
+          </div>
+
+          <!-- Mensagens de Texto (Scroll) -->
+          <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-gradient-to-b from-white to-slate-50/50">
+            <!-- Mensagens são adicionadas aqui -->
+          </div>
+
+          <!-- Formulário de Envio (Texto Apenas) -->
+          <div class="p-3 sm:p-4 border-t border-slate-100 bg-white">
+            <form id="message-form" onsubmit="sendMessage(event)" class="flex items-center gap-2">
+              <input 
+                id="message-input" 
+                type="text" 
+                placeholder="Digite sua mensagem de texto para o match..." 
+                required 
+                maxlength="500" 
+                class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+              >
+              <button type="submit" class="px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-2xl shadow-md shadow-emerald-600/30 active:scale-95 transition flex items-center gap-1.5">
+                <span>Enviar</span>
+                <span>➤</span>
+              </button>
+            </form>
+            <p class="text-[10px] text-slate-400 mt-1.5 ml-2">Chat básico de texto apenas entre alunos da UFABC.</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/static/app.js"></script>
+  <script>
+    let matchesList = [];
+    let selectedMatchId = null;
+    let pollInterval = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await Pontinho.requireAuth();
+      if (!user) return;
+      await Pontinho.initNavbarUserSwitcher();
+      loadMatches();
+    });
+
+    async function loadMatches() {
+      const container = document.getElementById('matches-list-container');
+      const badge = document.getElementById('matches-count-badge');
+
+      try {
+        matchesList = await Pontinho.apiFetch('/api/matches');
+        badge.innerText = matchesList.length;
+
+        if (matchesList.length === 0) {
+          container.innerHTML = `
+            <div class="p-8 text-center text-slate-400 text-xs">
+              <span class="text-3xl block mb-2">💔</span>
+              Você ainda não tem nenhum match. Dê likes no feed de swipes para encontrar alguém!
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = matchesList.map(m => {
+          const partner = m.partner;
+          const photo = (partner.photos && partner.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+          const lastMsg = m.last_message ? m.last_message.text : 'Novo match! Diga um oi 👋';
+          const isSelected = m.match_id === selectedMatchId;
+
+          return `
+            <div 
+              onclick="selectMatch(${m.match_id})"
+              class="p-3 rounded-2xl cursor-pointer transition flex items-center gap-3 ${isSelected ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-100/80'}"
+            >
+              <img src="${photo}" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-xs">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-bold text-slate-900 text-sm truncate">${partner.name}</h4>
+                  <span class="text-[10px] text-slate-400">${partner.campus === 'Santo André' ? 'SA' : 'SBC'}</span>
+                </div>
+                <p class="text-xs text-slate-500 truncate mt-0.5">${lastMsg}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Se veio com id na URL ou primeiro da lista
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchParam = urlParams.get('match_id');
+        if (matchParam) {
+          selectMatch(parseInt(matchParam, 10));
+        } else if (!selectedMatchId && matchesList.length > 0 && window.innerWidth >= 768) {
+          selectMatch(matchesList[0].match_id);
+        }
+
+      } catch (err) {
+        container.innerHTML = `<div class="p-4 text-xs text-rose-500">${err.message}</div>`;
+      }
+    }
+
+    async function selectMatch(matchId) {
+      selectedMatchId = matchId;
+
+      // Em telas pequenas (mobile), esconde a lista de matches e foca o chat
+      if (window.innerWidth < 768) {
+        document.getElementById('matches-sidebar').classList.add('hidden');
+        document.getElementById('chat-window').classList.remove('hidden');
+      }
+
+      document.getElementById('no-chat-selected').classList.add('hidden');
+      document.getElementById('active-chat-container').classList.remove('hidden');
+
+      // Atualiza visual da lista
+      document.querySelectorAll('#matches-list-container > div').forEach(el => {
+        el.classList.remove('bg-emerald-50', 'border', 'border-emerald-200');
+      });
+
+      await fetchMessages(true);
+
+      // Inicia polling a cada 3 segundos
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(() => {
+        if (selectedMatchId) fetchMessages(false);
+      }, 3000);
+    }
+
+    function backToMatchesList() {
+      document.getElementById('matches-sidebar').classList.remove('hidden');
+      document.getElementById('chat-window').classList.add('hidden');
+    }
+
+    async function fetchMessages(shouldScroll = false) {
+      if (!selectedMatchId) return;
+
+      try {
+        const data = await Pontinho.apiFetch(`/api/matches/${selectedMatchId}/messages`);
+        
+        // Atualiza header
+        const partner = data.partner;
+        const photo = (partner.photos && partner.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+        document.getElementById('chat-partner-avatar').src = photo;
+        document.getElementById('chat-partner-name').innerText = partner.name || 'Estudante UFABC';
+        document.getElementById('chat-partner-sub').innerText = `${partner.course || 'UFABC'} • Campus ${partner.campus || 'SA'}`;
+
+        // Renderiza mensagens
+        const container = document.getElementById('messages-container');
+        const currentUserId = data.current_user_id;
+
+        if (data.messages.length === 0) {
+          container.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center text-slate-400 text-xs py-10">
+              <p>Vocês deram match! Mande a primeira mensagem de texto.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = data.messages.map(msg => {
+          const isMine = msg.sender_id === currentUserId;
+          const time = new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+          return `
+            <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'}">
+              <div class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-xs ${
+                isMine 
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-br-xs' 
+                  : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60'
+              }">
+                <p class="leading-relaxed break-words">${escapeHtml(msg.text)}</p>
+                <span class="text-[10px] block mt-1 opacity-70 text-right">${time}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (shouldScroll) {
+          container.scrollTop = container.scrollHeight;
+        }
+      } catch (err) {
+        console.error('Erro ao buscar mensagens:', err);
+      }
+    }
+
+    async function sendMessage(e) {
+      e.preventDefault();
+      if (!selectedMatchId) return;
+
+      const input = document.getElementById('message-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+
+      try {
+        await Pontinho.apiFetch(`/api/matches/${selectedMatchId}/messages`, {
+          method: 'POST',
+          body: JSON.stringify({ text })
+        });
+
+        await fetchMessages(true);
+        loadMatches(); // Atualiza preview na lista
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

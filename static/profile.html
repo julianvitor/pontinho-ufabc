@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pontinho UFABC - Editar Meu Perfil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ufabc: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- CABEÇALHO / NAVBAR -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-2 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+          <span class="text-xl">🔥</span>
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-700 to-teal-800 bg-clip-text text-transparent">Pontinho</span>
+          <span class="text-xs font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full ml-1 border border-rose-200">UFABC</span>
+        </div>
+      </a>
+
+      <!-- Navegação Principal -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
+        </a>
+        <a href="/matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+          <span>💬</span> <span class="hidden sm:inline">Conversas</span>
+        </a>
+        <a href="/profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-sm border border-emerald-200/60 shadow-xs">
+          <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
+        </a>
+        <a href="/admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium text-sm border border-amber-200/60 transition">
+          <span>⚙️</span> <span class="hidden sm:inline">Admin</span>
+        </a>
+      </nav>
+
+      <!-- Seletor Rápido de Usuário e Botão Sair -->
+      <div class="flex items-center gap-2">
+        <div class="hidden md:flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
+          <span class="text-slate-400 font-medium">RA:</span>
+          <select id="user-switcher-select" class="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer">
+            <option>Carregando...</option>
+          </select>
+        </div>
+        <button onclick="Pontinho.logout()" class="px-2.5 py-1 text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200/60 transition" title="Sair da conta">
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- FORMULÁRIO DE PERFIL -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6">
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 sm:p-8">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">Editar Perfil UFABC</h1>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Preencha seus dados para começar a receber likes no campus.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="showNewUserModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+            + Criar Novo Aluno
+          </button>
+          <button type="submit" form="profile-form" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm rounded-xl shadow-md shadow-emerald-600/30 hover:scale-105 active:scale-95 transition">
+            Salvar Perfil
+          </button>
+        </div>
+      </div>
+
+      <form id="profile-form" onsubmit="saveProfile(event)" class="mt-8 space-y-8">
+        
+        <!-- SEÇÃO 1: FOTOS OBRIGATÓRIAS (MÍNIMO 2 FOTOS) -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                <span>📸 Fotos do Perfil</span>
+                <span class="bg-rose-100 text-rose-700 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                  Obrigatório: ao menos 2 fotos
+                </span>
+              </h3>
+              <p class="text-xs text-slate-500">Adicione URLs de fotos suas (ex: links diretos do Unsplash, Imgur, redes).</p>
+            </div>
+            <span id="photos-count-indicator" class="text-xs font-bold text-slate-500">
+              0 de no mínimo 2 adicionadas
+            </span>
+          </div>
+
+          <!-- Grid de fotos cadastradas -->
+          <div id="photos-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <!-- Fotos inseridas dinamicamente -->
+          </div>
+
+          <!-- Input para adicionar nova foto -->
+          <div class="flex gap-2">
+            <input 
+              id="new-photo-input" 
+              type="url" 
+              placeholder="Cole a URL da foto (ex: https://images.unsplash.com/...)" 
+              class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            >
+            <button type="button" onclick="addPhotoUrl()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition">
+              Adicionar Foto
+            </button>
+          </div>
+        </div>
+
+        <!-- SEÇÃO 2: DADOS BÁSICOS & CAMPUS -->
+        <div class="space-y-4 pt-4 border-t border-slate-100">
+          <h3 class="font-extrabold text-slate-900 text-base">Identificação e Curso</h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nome Completo *</label>
+              <input id="form-name" type="text" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Idade *</label>
+              <input id="form-age" type="number" min="17" max="80" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">E-mail Institucional *</label>
+              <input id="form-email" type="email" required placeholder="@aluno.ufabc.edu.br" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Campus Principal *</label>
+              <select id="form-campus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                <option value="Santo André">Santo André</option>
+                <option value="São Bernardo do Campo">São Bernardo do Campo</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Curso Base (BI) *</label>
+              <select id="form-course" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                <!-- Populado dinamicamente -->
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Curso Específico (Pós-BI) *</label>
+              <select id="form-specific-course" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                <!-- Populado dinamicamente -->
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEÇÃO 3: ENTIDADE, O QUE PROCURA & BIO -->
+        <div class="space-y-4 pt-4 border-t border-slate-100">
+          <h3 class="font-extrabold text-slate-900 text-base">Vida Universitária & Intenções</h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Entidade que Participa *</label>
+              <select id="form-entity" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                <!-- Populado dinamicamente -->
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">O Que Procura? *</label>
+              <select id="form-looking-for" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                <option value="Algo sério">Algo sério ❤️</option>
+                <option value="Algo casual">Algo casual 🥂</option>
+                <option value="Amizade">Amizade 🤝</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Biografia (Bio)</label>
+            <textarea id="form-bio" rows="3" placeholder="Fale um pouco sobre sua rotina na federal, matérias favoritas, hobbies..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Interesses (separados por vírgula)</label>
+            <input id="form-interests" type="text" placeholder="Ex: Café, Vôlei, Taylor Swift, RPG, RU, Cervejada" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+          </div>
+        </div>
+
+        <!-- SEÇÃO 4: AS 3 PERGUNTINHAS UFABC -->
+        <div class="space-y-4 pt-4 border-t border-slate-100">
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-base">3 Perguntinhas com Respostas</h3>
+            <p class="text-xs text-slate-500">Escolha até 3 perguntas e responda com sinceridade ou bom humor.</p>
+          </div>
+
+          <!-- Pergunta 1 -->
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+            <label class="block text-xs font-bold text-slate-700">1ª Pergunta</label>
+            <select id="form-prompt1-q" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+              <!-- Perguntas dinâmicas -->
+            </select>
+            <input id="form-prompt1-a" type="text" placeholder="Sua resposta..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+          </div>
+
+          <!-- Pergunta 2 -->
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+            <label class="block text-xs font-bold text-slate-700">2ª Pergunta</label>
+            <select id="form-prompt2-q" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+              <!-- Perguntas dinâmicas -->
+            </select>
+            <input id="form-prompt2-a" type="text" placeholder="Sua resposta..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+          </div>
+
+          <!-- Pergunta 3 -->
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+            <label class="block text-xs font-bold text-slate-700">3ª Pergunta</label>
+            <select id="form-prompt3-q" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+              <!-- Perguntas dinâmicas -->
+            </select>
+            <input id="form-prompt3-a" type="text" placeholder="Sua resposta..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end">
+          <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 transition">
+            Salvar Alterações do Perfil
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+  <script src="/static/app.js"></script>
+  <script>
+    let currentPhotos = [];
+    let metadata = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await Pontinho.requireAuth();
+      if (!user) return;
+      await Pontinho.initNavbarUserSwitcher();
+      await loadMetadata();
+      await loadMyProfile();
+    });
+
+    async function loadMetadata() {
+      try {
+        metadata = await Pontinho.apiFetch('/api/metadata');
+
+        // Preenche Cursos Base
+        const courseSelect = document.getElementById('form-course');
+        courseSelect.innerHTML = metadata.base_courses.map(c => `
+          <option value="${c.name}">${c.name}</option>
+        `).join('');
+
+        // Preenche Cursos Específicos
+        const specificSelect = document.getElementById('form-specific-course');
+        specificSelect.innerHTML = metadata.specific_courses.map(sc => `
+          <option value="${sc.name}">${sc.name}</option>
+        `).join('');
+
+        // Preenche Entidades
+        const entitySelect = document.getElementById('form-entity');
+        entitySelect.innerHTML = metadata.entities.map(e => `
+          <option value="${e.name}">${e.name}</option>
+        `).join('');
+
+        // Preenche Prompts 1, 2 e 3
+        const promptOptions = metadata.prompts.map(p => `
+          <option value="${p.question}">${p.question}</option>
+        `).join('');
+
+        document.getElementById('form-prompt1-q').innerHTML = promptOptions;
+        document.getElementById('form-prompt2-q').innerHTML = promptOptions;
+        document.getElementById('form-prompt3-q').innerHTML = promptOptions;
+
+      } catch (err) {
+        Pontinho.showToast('Erro ao carregar opções: ' + err.message, 'error');
+      }
+    }
+
+    async function loadMyProfile() {
+      try {
+        const u = await Pontinho.apiFetch('/api/users/me');
+
+        document.getElementById('form-name').value = u.name || '';
+        document.getElementById('form-age').value = u.age || 20;
+        document.getElementById('form-email').value = u.email || '';
+        document.getElementById('form-campus').value = u.campus || 'Santo André';
+        
+        if (u.course) document.getElementById('form-course').value = u.course;
+        if (u.specific_course) document.getElementById('form-specific-course').value = u.specific_course;
+        if (u.entity) document.getElementById('form-entity').value = u.entity;
+        if (u.looking_for) document.getElementById('form-looking-for').value = u.looking_for;
+        
+        document.getElementById('form-bio').value = u.bio || '';
+        document.getElementById('form-interests').value = (u.interests || []).join(', ');
+
+        currentPhotos = u.photos || [];
+        renderPhotosGrid();
+
+        if (u.prompt1_q) document.getElementById('form-prompt1-q').value = u.prompt1_q;
+        document.getElementById('form-prompt1-a').value = u.prompt1_a || '';
+
+        if (u.prompt2_q) document.getElementById('form-prompt2-q').value = u.prompt2_q;
+        document.getElementById('form-prompt2-a').value = u.prompt2_a || '';
+
+        if (u.prompt3_q) document.getElementById('form-prompt3-q').value = u.prompt3_q;
+        document.getElementById('form-prompt3-a').value = u.prompt3_a || '';
+
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function renderPhotosGrid() {
+      const grid = document.getElementById('photos-grid');
+      const indicator = document.getElementById('photos-count-indicator');
+
+      indicator.innerText = `${currentPhotos.length} foto(s) cadastrada(s)`;
+      if (currentPhotos.length < 2) {
+        indicator.className = 'text-xs font-bold text-rose-500';
+      } else {
+        indicator.className = 'text-xs font-bold text-emerald-600';
+      }
+
+      if (currentPhotos.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full p-4 border border-dashed border-rose-300 bg-rose-50/50 rounded-2xl text-center text-xs text-rose-600">
+            Adicione pelo menos duas fotos ao seu perfil para salvar!
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = currentPhotos.map((url, i) => `
+        <div class="relative group rounded-2xl overflow-hidden aspect-square border border-slate-200 shadow-sm">
+          <img src="${url}" class="w-full h-full object-cover">
+          <button 
+            type="button" 
+            onclick="removePhoto(${i})" 
+            class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-rose-600 text-white flex items-center justify-center text-xs font-bold transition"
+            title="Remover foto"
+          >
+            ✕
+          </button>
+          <span class="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+            #${i + 1}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function addPhotoUrl() {
+      const input = document.getElementById('new-photo-input');
+      const url = input.value.trim();
+
+      if (!url) {
+        Pontinho.showToast('Digite uma URL válida para a foto.', 'error');
+        return;
+      }
+
+      currentPhotos.push(url);
+      input.value = '';
+      renderPhotosGrid();
+    }
+
+    function removePhoto(index) {
+      currentPhotos.splice(index, 1);
+      renderPhotosGrid();
+    }
+
+    async function saveProfile(e) {
+      e.preventDefault();
+
+      // Validação estrita de negócio: pelo menos duas fotos
+      if (currentPhotos.length < 2) {
+        Pontinho.showToast('O perfil deve ter obrigatoriamente ao menos duas fotos!', 'error');
+        return;
+      }
+
+      const interestsRaw = document.getElementById('form-interests').value;
+      const interestsArray = interestsRaw
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      const payload = {
+        name: document.getElementById('form-name').value.trim(),
+        age: parseInt(document.getElementById('form-age').value, 10),
+        email: document.getElementById('form-email').value.trim(),
+        campus: document.getElementById('form-campus').value,
+        course: document.getElementById('form-course').value,
+        specific_course: document.getElementById('form-specific-course').value,
+        entity: document.getElementById('form-entity').value,
+        looking_for: document.getElementById('form-looking-for').value,
+        bio: document.getElementById('form-bio').value.trim(),
+        interests: interestsArray,
+        photos: currentPhotos,
+        prompt1_q: document.getElementById('form-prompt1-q').value,
+        prompt1_a: document.getElementById('form-prompt1-a').value.trim(),
+        prompt2_q: document.getElementById('form-prompt2-q').value,
+        prompt2_a: document.getElementById('form-prompt2-a').value.trim(),
+        prompt3_q: document.getElementById('form-prompt3-q').value,
+        prompt3_a: document.getElementById('form-prompt3-a').value.trim(),
+      };
+
+      try {
+        await Pontinho.apiFetch('/api/users/me', {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        Pontinho.showToast('Perfil atualizado com sucesso! 🎉', 'success');
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function showNewUserModal() {
+      const email = prompt('Digite o e-mail do novo estudante (ex: novo.aluno@aluno.ufabc.edu.br):');
+      if (!email) return;
+
+      const name = prompt('Nome do novo estudante:');
+      if (!name) return;
+
+      const payload = {
+        name: name,
+        age: 20,
+        email: email,
+        campus: 'Santo André',
+        course: 'BC&T - Bacharelado em Ciência e Tecnologia',
+        specific_course: 'Ciência da Computação',
+        entity: 'Nenhuma / Foco no CR',
+        looking_for: 'Amizade',
+        bio: 'Novo estudante no Pontinho!',
+        interests: ['UFABC', 'Estudos'],
+        photos: [
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800',
+          'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800'
+        ],
+        prompt1_q: 'O melhor lugar para descansar na UFABC é...',
+        prompt1_a: 'Biblioteca',
+        prompt2_q: 'Minha opinião impopular sobre o RU...',
+        prompt2_a: 'Gosto do cardápio',
+        prompt3_q: 'No intervalo entre as aulas você me encontra...',
+        prompt3_a: 'No Bloco A'
+      };
+
+      Pontinho.apiFetch('/api/users', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }).then(res => {
+        Pontinho.showToast('Novo usuário criado com ID ' + res.user_id + '! Trocando para ele...', 'success');
+        Pontinho.setCurrentUserId(res.user_id);
+        setTimeout(() => window.location.reload(), 600);
+      }).catch(err => {
+        Pontinho.showToast(err.message, 'error');
+      });
+    }
+  </script>
+</body>
+</html>

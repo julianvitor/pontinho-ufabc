@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pontinho UFABC - Login e Cadastro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ufabc: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 min-h-screen flex flex-col justify-center items-center p-4 text-slate-100 font-sans antialiased">
+
+  <!-- CARD PRINCIPAL DE AUTENTICAÇÃO -->
+  <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 text-slate-800 transition-all">
+    
+    <!-- CABEÇALHO COM LOGO -->
+    <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 p-8 text-center text-white relative">
+      <div class="w-16 h-16 mx-auto rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner mb-3">
+        🔥
+      </div>
+      <h1 class="text-2xl font-black tracking-tight">Pontinho UFABC</h1>
+      <p class="text-xs text-emerald-100 mt-1 font-medium">O app de conexões exclusivo da Federal do ABC</p>
+    </div>
+
+    <!-- SELETOR DE ABAS: LOGIN OU CADASTRO -->
+    <div class="flex border-b border-slate-100 bg-slate-50">
+      <button 
+        id="tab-btn-login" 
+        onclick="switchAuthTab('login')" 
+        class="flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-700 border-b-2 border-emerald-600 bg-white transition"
+      >
+        Entrar
+      </button>
+      <button 
+        id="tab-btn-register" 
+        onclick="switchAuthTab('register')" 
+        class="flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition"
+      >
+        Cadastrar-se
+      </button>
+    </div>
+
+    <div class="p-6 sm:p-8">
+      
+      <!-- ABA 1: FORMULÁRIO DE LOGIN -->
+      <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">RA (Registro Acadêmico) *</label>
+          <input 
+            id="login-ra" 
+            type="text" 
+            required 
+            placeholder="Ex: 11202021001 ou admin" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Senha *</label>
+          <input 
+            id="login-password" 
+            type="password" 
+            required 
+            placeholder="Sua senha de acesso" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+          >
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition"
+        >
+          Entrar no Pontinho 🔥
+        </button>
+      </form>
+
+      <!-- ABA 2: FORMULÁRIO DE CADASTRO -->
+      <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">RA (Registro Acadêmico) *</label>
+          <input 
+            id="reg-ra" 
+            type="text" 
+            required 
+            placeholder="Digite os dígitos do seu RA" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+          >
+          <p class="text-[10px] text-slate-400 mt-1">Seu e-mail institucional será gerado como @aluno.ufabc.edu.br</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nome Completo *</label>
+          <input 
+            id="reg-name" 
+            type="text" 
+            required 
+            placeholder="Como quer ser chamado(a) no campus" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+          >
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Crie sua Senha *</label>
+          <input 
+            id="reg-password" 
+            type="password" 
+            required 
+            minlength="4" 
+            placeholder="Mínimo 4 caracteres" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+          >
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition"
+        >
+          Criar Minha Conta 🚀
+        </button>
+      </form>
+
+      <!-- ATALHOS RÁPIDOS PARA CONTAS DE TESTE -->
+      <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2.5">
+          Contas de Demonstração (Clique para testar):
+        </span>
+        <div class="flex flex-wrap gap-1.5 justify-center">
+          <button 
+            type="button" 
+            onclick="fillDemo('11202021001', '123456')" 
+            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
+          >
+            Mariana (SA)
+          </button>
+          <button 
+            type="button" 
+            onclick="fillDemo('11202021002', '123456')" 
+            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
+          >
+            Lucas (SBC)
+          </button>
+          <button 
+            type="button" 
+            onclick="fillDemo('11202021004', '123456')" 
+            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
+          >
+            Gabriel (Bateria)
+          </button>
+          <button 
+            type="button" 
+            onclick="fillDemo('admin', 'admin123')" 
+            class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[11px] font-bold border border-amber-200/60 transition"
+          >
+            Admin
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+  <script>
+    function switchAuthTab(tab) {
+      const loginBtn = document.getElementById('tab-btn-login');
+      const regBtn = document.getElementById('tab-btn-register');
+      const loginForm = document.getElementById('form-login');
+      const regForm = document.getElementById('form-register');
+
+      if (tab === 'login') {
+        loginBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-700 border-b-2 border-emerald-600 bg-white transition';
+        regBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition';
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+      } else {
+        regBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-700 border-b-2 border-emerald-600 bg-white transition';
+        loginBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition';
+        regForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+
+    function fillDemo(ra, pw) {
+      switchAuthTab('login');
+      document.getElementById('login-ra').value = ra;
+      document.getElementById('login-password').value = pw;
+      Pontinho.showToast(`Dados preenchidos para ${ra}!`);
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const ra = document.getElementById('login-ra').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ra, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || 'Falha no login');
+        }
+
+        Pontinho.setCurrentUserId(data.user.id);
+        Pontinho.showToast(`Bem-vindo(a) de volta, ${data.user.name}! 🔥`, 'success');
+        
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 600);
+
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const ra = document.getElementById('reg-ra').value.trim();
+      const name = document.getElementById('reg-name').value.trim();
+      const password = document.getElementById('reg-password').value;
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ra, name, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || 'Falha no cadastro');
+        }
+
+        Pontinho.setCurrentUserId(data.user_id);
+        Pontinho.showToast(`Cadastro realizado com sucesso! Bem-vindo(a), ${data.name}! 🎓`, 'success');
+
+        // Redireciona para completar o perfil (fotos e preferências)
+        setTimeout(() => {
+          window.location.href = '/profile.html';
+        }, 700);
+
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
