@@ -102,16 +102,10 @@
         <!-- Filtros Rápidos -->
         <div class="flex items-center gap-1.5 flex-wrap self-start sm:self-auto bg-slate-950/80 p-1 rounded-2xl border border-slate-800">
           <button onclick="setFilter('all')" id="filter-btn-all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 text-slate-950 transition shadow-sm">
-            Todas
+            Todas as Festas
           </button>
           <button onclick="setFilter('going')" id="filter-btn-going" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition">
             Vou Colar ✅
-          </button>
-          <button onclick="setFilter('sa')" id="filter-btn-sa" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition">
-            Santo André
-          </button>
-          <button onclick="setFilter('sbc')" id="filter-btn-sbc" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition">
-            São Bernardo
           </button>
         </div>
       </div>
@@ -263,10 +257,6 @@
       let filtered = allEvents;
       if (currentFilter === 'going') {
         filtered = allEvents.filter(e => e.is_attending);
-      } else if (currentFilter === 'sa') {
-        filtered = allEvents.filter(e => (e.location || '').toLowerCase().includes('santo andré') || (e.location || '').toLowerCase().includes('sa'));
-      } else if (currentFilter === 'sbc') {
-        filtered = allEvents.filter(e => (e.location || '').toLowerCase().includes('bernardo') || (e.location || '').toLowerCase().includes('sbc'));
       }
 
       if (!filtered.length) {
