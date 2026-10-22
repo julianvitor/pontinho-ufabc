@@ -2,12 +2,81 @@
 Rotas de Feed e Swipes do Pontinho UFABC
 """
 import json
+import re
+import urllib.request
+import urllib.parse
 from fastapi import APIRouter, HTTPException, Request
 from backend.database import get_db
 from backend.models import SwipeRequest
 from backend.auth import get_current_user_id
 
 router = APIRouter(prefix="/api", tags=["feed"])
+
+YOUTUBE_CACHE = {
+    "chico buarque - construção": "suia_i5dEZc",
+    "arctic monkeys - 505": "CKI8iQTgZKU",
+    "duda beat - bixinho": "gFUuxGOsMow",
+    "tim maia - não quero dinheiro": "FM2tZnIPZUk",
+    "tame impala - the less i know the better": "2SUwOgmvzK4",
+    "daft punk - harder better faster stronger": "gAjR4_CbPpQ",
+    "taylor swift - cruel summer": "ic8j13piAhQ",
+    "gilsons - várias queixas": "bBHPq3UQFsw",
+    "the strokes - someday": "knU9gRUWCno",
+    "daft punk - instant crush": "a5uQMwRMHcs",
+    "coldplay - yellow": "yKNxeF4KMsY",
+    "criolo - não existe amor em sp": "0PfevkndCPU",
+    "kendrick lamar - all the stars": "JQbjS0_ZfJ0",
+    "jorge ben jor - taj mahal": "rfrpOhC6858",
+    "liniker - baby 95": "9nbYJm9FYa0",
+    "silva - a cor é rosa": "KnJwCg-zh4w",
+    "caetano veloso - sozinho": "j9UbE1slI-Q",
+    "kraftwerk - the robots": "-wop47G2qeY",
+}
+
+@router.get("/youtube/search")
+def search_youtube(q: str):
+    """
+    Resolve uma busca de música para um ID de vídeo do YouTube sem depender de chaves de API.
+    Possui cache em memória para respostas instantâneas.
+    """
+    query = (q or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="Termo de busca vazio.")
+
+    # Se já for URL do YouTube ou ID direto de 11 caracteres
+    yt_match = re.search(r'(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})', query)
+    if yt_match:
+        return {"videoId": yt_match.group(1), "query": query}
+    if re.fullmatch(r'[a-zA-Z0-9_-]{11}', query):
+        return {"videoId": query, "query": query}
+
+    cache_key = query.lower()
+    if cache_key in YOUTUBE_CACHE:
+        return {"videoId": YOUTUBE_CACHE[cache_key], "query": query}
+
+    # Busca em tempo real no YouTube scraping
+    try:
+        url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(query)}"
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            html = resp.read().decode("utf-8", errors="ignore")
+        matches = re.findall(r'\"videoId\":\"([a-zA-Z0-9_-]{11})\"', html)
+        if matches:
+            vid = matches[0]
+            YOUTUBE_CACHE[cache_key] = vid
+            return {"videoId": vid, "query": query}
+    except Exception:
+        pass
+
+    # Fallback
+    return {"videoId": "suia_i5dEZc", "query": query, "fallback": True}
+
 
 @router.get("/feed")
 def get_feed(request: Request):

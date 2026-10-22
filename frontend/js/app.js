@@ -124,6 +124,71 @@ const Pontinho = {
     window.location.href = './index.html';
   },
 
+  // Utilitário para resolução de IDs do YouTube (usado offline ou como fallback)
+  resolveLocalYouTubeId(query) {
+    if (!query) return 'suia_i5dEZc';
+    const q = query.trim();
+
+    // Se já for link ou ID direto do YouTube
+    const ytMatch = q.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+    if (ytMatch && ytMatch[1]) return ytMatch[1];
+    if (/^[a-zA-Z0-9_-]{11}$/.test(q)) return q;
+
+    const lower = q.toLowerCase();
+    const dictionary = {
+      'chico buarque - construção': 'suia_i5dEZc',
+      'chico buarque': 'suia_i5dEZc',
+      'construção': 'suia_i5dEZc',
+      'arctic monkeys - 505': 'CKI8iQTgZKU',
+      'arctic monkeys': 'CKI8iQTgZKU',
+      '505': 'CKI8iQTgZKU',
+      'duda beat - bixinho': 'gFUuxGOsMow',
+      'duda beat': 'gFUuxGOsMow',
+      'bixinho': 'gFUuxGOsMow',
+      'tim maia - não quero dinheiro': 'FM2tZnIPZUk',
+      'tim maia': 'FM2tZnIPZUk',
+      'não quero dinheiro': 'FM2tZnIPZUk',
+      'tame impala - the less i know the better': '2SUwOgmvzK4',
+      'tame impala': '2SUwOgmvzK4',
+      'daft punk - harder better faster stronger': 'gAjR4_CbPpQ',
+      'daft punk - instant crush': 'a5uQMwRMHcs',
+      'daft punk': 'gAjR4_CbPpQ',
+      'taylor swift - cruel summer': 'ic8j13piAhQ',
+      'taylor swift': 'ic8j13piAhQ',
+      'gilsons - várias queixas': 'bBHPq3UQFsw',
+      'gilsons': 'bBHPq3UQFsw',
+      'várias queixas': 'bBHPq3UQFsw',
+      'the strokes - someday': 'knU9gRUWCno',
+      'the strokes': 'knU9gRUWCno',
+      'coldplay - yellow': 'yKNxeF4KMsY',
+      'coldplay': 'yKNxeF4KMsY',
+      'criolo - não existe amor em sp': '0PfevkndCPU',
+      'criolo': '0PfevkndCPU',
+      'kendrick lamar - all the stars': 'JQbjS0_ZfJ0',
+      'kendrick lamar': 'JQbjS0_ZfJ0',
+      'jorge ben jor - taj mahal': 'rfrpOhC6858',
+      'jorge ben jor': 'rfrpOhC6858',
+      'liniker - baby 95': '9nbYJm9FYa0',
+      'liniker': '9nbYJm9FYa0',
+      'silva - a cor é rosa': 'KnJwCg-zh4w',
+      'silva': 'KnJwCg-zh4w',
+      'caetano veloso - sozinho': 'j9UbE1slI-Q',
+      'caetano veloso': 'j9UbE1slI-Q',
+      'kraftwerk - the robots': '-wop47G2qeY',
+      'kraftwerk': '-wop47G2qeY',
+      'anitta - envolver': 'sa-42q_o5x8',
+      'legião urbana - tempo perdido': 'rQ6n_gO758I'
+    };
+
+    for (const [key, id] of Object.entries(dictionary)) {
+      if (lower.includes(key) || key.includes(lower)) {
+        return id;
+      }
+    }
+
+    return 'suia_i5dEZc';
+  },
+
   showToast(message, type = 'success') {
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -783,6 +848,14 @@ const PontinhoMock = {
       const swipes = this.getSwipes().filter(s => s.from_user_id !== currentUserId);
       this.saveSwipes(swipes);
       return { success: true, message: 'Histórico de swipes resetado!' };
+    }
+
+    // 14. YouTube Search Mock
+    if (url.includes('/api/youtube/search')) {
+      const qMatch = url.match(/[?&]q=([^&]+)/);
+      const query = qMatch ? decodeURIComponent(qMatch[1]) : '';
+      const videoId = Pontinho.resolveLocalYouTubeId(query);
+      return { videoId, query };
     }
 
     // Fallback genérico
