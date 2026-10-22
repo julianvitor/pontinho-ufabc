@@ -166,3 +166,26 @@ def get_auth_me(request: Request):
     d = dict(row)
     d["photos"] = json.loads(d["photos"]) if d["photos"] else []
     return {"authenticated": True, "user": d}
+
+@router.get("/demo-accounts")
+def get_demo_accounts():
+    """
+    Retorna as contas cadastradas no banco para geração dinâmica
+    dos botões de acesso demo na interface (sem nada hardcoded no frontend).
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, name, email, age, specific_course, course, campus, photos, is_admin
+        FROM users ORDER BY id ASC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    result = []
+    for r in rows:
+        d = dict(r)
+        d["photos"] = json.loads(d["photos"]) if d["photos"] else []
+        d["password"] = "admin123" if d["is_admin"] else "123456"
+        result.append(d)
+    return result
+

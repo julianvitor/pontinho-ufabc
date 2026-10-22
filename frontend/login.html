@@ -131,75 +131,13 @@
         </button>
       </form>
 
-      <!-- ATALHOS RÁPIDOS PARA CONTAS DE TESTE -->
-      <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+      <!-- ATALHOS RÁPIDOS PARA CONTAS DE TESTE (CARREGADOS DINAMICAMENTE DO BACKEND) -->
+      <div id="demo-section" class="mt-6 pt-5 border-t border-slate-100 text-center">
         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
           Contas Demo:
         </span>
-        <div class="flex flex-wrap gap-1.5 justify-center">
-          <button 
-            type="button" 
-            onclick="fillDemo('mariana.silva@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Mariana
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('lucas.mendes@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Lucas
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('beatriz.costa@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Bia
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('gabriel.santos@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Gabriel
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('camila.rocha@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Camila
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('rodrigo.alves@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Rodrigo
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('isabela.martins@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Isabela
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('felipe.ramos@pontinho.app', '123456')" 
-            class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition"
-          >
-            Felipe
-          </button>
-          <button 
-            type="button" 
-            onclick="fillDemo('admin@pontinho.app', 'admin123')" 
-            class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[11px] font-bold border border-amber-200/60 transition"
-          >
-            Admin
-          </button>
+        <div id="demo-buttons-container" class="flex flex-wrap gap-1.5 justify-center">
+          <span class="text-xs text-slate-400">Carregando contas...</span>
         </div>
       </div>
 
@@ -213,7 +151,39 @@
       if (urlParams.get('tab') === 'register') {
         switchAuthTab('register');
       }
+      loadDemoAccounts();
     });
+
+    async function loadDemoAccounts() {
+      const container = document.getElementById('demo-buttons-container');
+      const section = document.getElementById('demo-section');
+      if (!container) return;
+
+      try {
+        const accounts = await Pontinho.apiFetch('/api/auth/demo-accounts');
+        if (!accounts || accounts.length === 0) {
+          if (section) section.classList.add('hidden');
+          return;
+        }
+
+        container.innerHTML = accounts.map(acc => {
+          const isAdmin = acc.is_admin;
+          const btnClass = isAdmin 
+            ? "px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[11px] font-bold border border-amber-200/60 transition"
+            : "px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition";
+          
+          const shortName = (acc.name || 'Usuário').split(' ')[0];
+          const displayName = isAdmin ? `${shortName} (Admin)` : shortName;
+          const escapedEmail = (acc.email || '').replace(/'/g, "\\'");
+          const escapedPass = (acc.password || '123456').replace(/'/g, "\\'");
+          
+          return `<button type="button" onclick="fillDemo('${escapedEmail}', '${escapedPass}')" class="${btnClass}">${displayName}</button>`;
+        }).join('');
+      } catch (err) {
+        console.warn('Não foi possível carregar contas demo:', err);
+        if (section) section.classList.add('hidden');
+      }
+    }
 
     function switchAuthTab(tab) {
       const loginBtn = document.getElementById('tab-btn-login');

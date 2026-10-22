@@ -124,44 +124,14 @@
         </div>
       </div>
 
-      <!-- CONTAS DEMO -->
-      <div class="w-full bg-white rounded-3xl p-4 shadow-xl border border-slate-200/80 text-left">
+      <!-- CONTAS DEMO (CARREGADAS DINAMICAMENTE DO BACKEND) -->
+      <div id="landing-demo-section" class="w-full bg-white rounded-3xl p-4 shadow-xl border border-slate-200/80 text-left">
         <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2.5">
           Contas Demo
         </h3>
 
-        <div class="space-y-1.5">
-          <button type="button" onclick="loginAsDemo(2)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-2.5">
-              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800" class="w-8 h-8 rounded-full object-cover">
-              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Mariana, 21 • Neurociência</span>
-            </div>
-            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
-          </button>
-
-          <button type="button" onclick="loginAsDemo(3)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-2.5">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" class="w-8 h-8 rounded-full object-cover">
-              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Lucas, 22 • RI</span>
-            </div>
-            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
-          </button>
-
-          <button type="button" onclick="loginAsDemo(4)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-2.5">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800" class="w-8 h-8 rounded-full object-cover">
-              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Bia, 20 • Aeroespacial</span>
-            </div>
-            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
-          </button>
-
-          <button type="button" onclick="loginAsDemo(5)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-2.5">
-              <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800" class="w-8 h-8 rounded-full object-cover">
-              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Gabriel, 23 • Computação</span>
-            </div>
-            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
-          </button>
+        <div id="landing-demo-accounts" class="space-y-1.5">
+          <div class="p-3 text-center text-xs text-slate-400">Carregando contas...</div>
         </div>
       </div>
     </div>
@@ -322,6 +292,7 @@
         if (swipeSection) swipeSection.classList.add('hidden');
         if (navbarUserBox) navbarUserBox.classList.add('hidden');
         if (navbarAuthBtn) navbarAuthBtn.classList.remove('hidden');
+        loadLandingDemoAccounts();
         return;
       }
 
@@ -336,10 +307,46 @@
         if (swipeSection) swipeSection.classList.add('hidden');
         if (navbarUserBox) navbarUserBox.classList.add('hidden');
         if (navbarAuthBtn) navbarAuthBtn.classList.remove('hidden');
+        loadLandingDemoAccounts();
         return;
       }
       await Pontinho.initNavbarUserSwitcher();
       loadFeed();
+    }
+
+    async function loadLandingDemoAccounts() {
+      const container = document.getElementById('landing-demo-accounts');
+      const section = document.getElementById('landing-demo-section');
+      if (!container) return;
+
+      try {
+        const accounts = await Pontinho.apiFetch('/api/auth/demo-accounts');
+        if (!accounts || accounts.length === 0) {
+          if (section) section.classList.add('hidden');
+          return;
+        }
+
+        container.innerHTML = accounts.map(acc => {
+          const photo = (acc.photos && acc.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+          const courseText = acc.specific_course || acc.course || 'Estudante';
+          const ageText = acc.age ? `${acc.age} anos • ` : '';
+          const adminBadge = acc.is_admin ? '<span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded ml-1">Admin</span>' : '';
+          return `
+            <button type="button" onclick="loginAsDemo(${acc.id})" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group text-left">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img src="${photo}" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200">
+                <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700 truncate">
+                  ${acc.name}${adminBadge} <span class="font-normal text-slate-500">• ${ageText}${courseText}</span>
+                </span>
+              </div>
+              <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg shrink-0">Entrar</span>
+            </button>
+          `;
+        }).join('');
+      } catch (e) {
+        console.warn('Erro ao carregar contas demo da landing:', e);
+        if (section) section.classList.add('hidden');
+      }
     }
 
     function loginAsDemo(userId) {
@@ -940,17 +947,6 @@
         }
       });
 
-      // 1. Resolução SÍNCRONA do Video ID do YouTube
-      let videoId = 'suia_i5dEZc';
-      const ytMatch = songTitle.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
-      if (ytMatch && ytMatch[1]) {
-        videoId = ytMatch[1];
-      } else if (/^[a-zA-Z0-9_-]{11}$/.test(songTitle.trim())) {
-        videoId = songTitle.trim();
-      } else if (window.Pontinho && typeof Pontinho.resolveLocalYouTubeId === 'function') {
-        videoId = Pontinho.resolveLocalYouTubeId(songTitle);
-      }
-
       function injectPlayer(vid) {
         const originParam = window.location.origin && window.location.origin !== 'null' ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
         const embedUrl = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&controls=0&rel=0${originParam}`;
@@ -984,18 +980,22 @@
         }
       }
 
-      // Executa de forma síncrona durante o clique do usuário para garantir o autoplay
-      injectPlayer(videoId);
-
-      // Caso a música não esteja no dicionário, busca na API como fallback
-      if (videoId === 'suia_i5dEZc' && !songTitle.toLowerCase().includes('construção')) {
+      // Resolução do Video ID do YouTube via backend ou link direto
+      const ytMatch = songTitle.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+        injectPlayer(ytMatch[1]);
+      } else if (/^[a-zA-Z0-9_-]{11}$/.test(songTitle.trim())) {
+        injectPlayer(songTitle.trim());
+      } else {
         Pontinho.apiFetch('/api/youtube/search?q=' + encodeURIComponent(songTitle))
           .then(res => {
-            if (res && res.videoId && res.videoId !== videoId) {
+            if (res && res.videoId) {
               injectPlayer(res.videoId);
             }
           })
-          .catch(() => {});
+          .catch(err => {
+            console.warn('Erro ao resolver música no backend:', err);
+          });
       }
     }
 

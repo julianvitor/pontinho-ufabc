@@ -15,7 +15,7 @@ def list_users_for_switch():
     """Lista usuários para facilitar a troca no cabeçalho durante testes."""
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, ra, name, email, campus, course, photos, is_admin FROM users ORDER BY id ASC")
+    cursor.execute("SELECT id, ra, name, email, age, campus, course, specific_course, photos, is_admin FROM users ORDER BY id ASC")
     rows = cursor.fetchall()
     conn.close()
     users = []
