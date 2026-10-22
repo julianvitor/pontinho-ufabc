@@ -1,12 +1,10 @@
 """
-Pontinho - Ponto de Entrada Principal da Aplicação FastAPI
+Pontinho - Ponto de Entrada Principal da Aplicação FastAPI (API REST Pura)
 """
 import sys
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 
 # Configuração de paths
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -19,12 +17,12 @@ from backend.routers import auth_router, feed_router, matches_router, users_rout
 
 app = FastAPI(
     title="Pontinho API",
-    description="Backend modularizado do aplicativo de conexões Pontinho",
+    description="Backend modularizado e API REST pura do aplicativo Pontinho",
     version="2.0.0"
 )
 
-# Habilita CORS para permitir que o frontend seja servido separadamente
-# (ex: servidor com live refresh na porta 3000 ou 5500)
+# Habilita CORS para permitir que o frontend desacoplado acesse a API
+# (ex: servidor com live reload na porta 3000)
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
@@ -36,54 +34,23 @@ app.add_middleware(
 # Inicializa banco de dados SQLite e migrações automáticas
 init_db()
 
-# Diretório do Frontend
-FRONTEND_DIR = PROJECT_ROOT / "frontend"
-FRONTEND_DIR.mkdir(exist_ok=True)
-
-# Monta diretórios estáticos
-app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
-if (FRONTEND_DIR / "css").exists():
-    app.mount("/css", StaticFiles(directory=str(FRONTEND_DIR / "css")), name="css")
-if (FRONTEND_DIR / "js").exists():
-    app.mount("/js", StaticFiles(directory=str(FRONTEND_DIR / "js")), name="js")
-
-# Inclusão dos Roteadores Modulares
+# Inclusão dos Roteadores Modulares da API
 app.include_router(auth_router)
 app.include_router(feed_router)
 app.include_router(matches_router)
 app.include_router(users_router)
 app.include_router(admin_router)
 
-# Rotas de páginas HTML para navegação direta
-@app.get("/", response_class=FileResponse)
-def serve_home():
-    return FileResponse(FRONTEND_DIR / "index.html")
-
-@app.get("/index.html", response_class=FileResponse)
-def serve_index():
-    return FileResponse(FRONTEND_DIR / "index.html")
-
-@app.get("/login.html", response_class=FileResponse)
-def serve_login():
-    return FileResponse(FRONTEND_DIR / "login.html")
-
-@app.get("/profile.html", response_class=FileResponse)
-def serve_profile():
-    return FileResponse(FRONTEND_DIR / "profile.html")
-
-@app.get("/matches.html", response_class=FileResponse)
-def serve_matches():
-    return FileResponse(FRONTEND_DIR / "matches.html")
-
-@app.get("/admin.html", response_class=FileResponse)
-def serve_admin():
-    return FileResponse(FRONTEND_DIR / "admin.html")
-
-# Aliases de compatibilidade para arquivos estáticos
-@app.get("/static/style.css", response_class=FileResponse)
-def serve_css_alias():
-    return FileResponse(FRONTEND_DIR / "css" / "style.css")
-
-@app.get("/static/app.js", response_class=FileResponse)
-def serve_js_alias():
-    return FileResponse(FRONTEND_DIR / "js" / "app.js")
+@app.get("/")
+def api_root():
+    """
+    Endpoint raiz da API REST pura.
+    O frontend é servido de forma desacoplada na porta 3000 com Live Reload.
+    """
+    return {
+        "status": "online",
+        "app": "Pontinho API",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "frontend": "http://127.0.0.1:3000"
+    }
