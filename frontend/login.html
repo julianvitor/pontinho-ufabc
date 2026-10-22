@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pontinho UFABC - Login e Cadastro</title>
+  <title>Pontinho - Entrar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./css/style.css">
   <script>
@@ -30,13 +30,9 @@
   <!-- CARD PRINCIPAL DE AUTENTICAÇÃO -->
   <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 text-slate-800 transition-all">
     
-    <!-- CABEÇALHO COM LOGO -->
-    <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 p-8 text-center text-white relative">
-      <div class="w-16 h-16 mx-auto rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner mb-3">
-        🔥
-      </div>
-      <h1 class="text-2xl font-black tracking-tight">Pontinho UFABC</h1>
-      <p class="text-xs text-emerald-100 mt-1 font-medium">O app de conexões exclusivo da Federal do ABC</p>
+    <!-- CABEÇALHO -->
+    <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 py-6 px-8 text-center text-white relative">
+      <h1 class="text-3xl font-black tracking-tight">Pontinho</h1>
     </div>
 
     <!-- SELETOR DE ABAS: LOGIN OU CADASTRO -->
@@ -94,7 +90,7 @@
       <!-- ABA 2: FORMULÁRIO DE CADASTRO -->
       <form id="form-register" onsubmit="handleRegister(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail UFABC</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
           <input 
             id="reg-email" 
             type="email" 
@@ -246,7 +242,7 @@
       }
 
       if (!email.endsWith('@aluno.ufabc.edu.br') && !email.endsWith('@ufabc.edu.br')) {
-        Pontinho.showToast('Apenas e-mails acadêmicos da UFABC (@aluno.ufabc.edu.br ou @ufabc.edu.br) são permitidos.', 'error');
+        Pontinho.showToast('Insira um e-mail institucional válido.', 'error');
         return;
       }
 

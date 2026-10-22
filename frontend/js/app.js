@@ -1,4 +1,4 @@
-// Utilitários compartilhados e Engine de Demonstração Estática do Pontinho UFABC
+// Utilitários compartilhados e Engine de Demonstração Estática do Pontinho
 
 const Pontinho = {
   getCurrentUserId() {
@@ -48,7 +48,7 @@ const Pontinho = {
 
       // Se a rota deu 404 e é uma rota da API (/api/...), muito provavelmente o frontend está sendo hospedado estaticamente (ex: GitHub Pages)
       if (response.status === 404 && url.startsWith('/api/')) {
-        console.warn(`[Pontinho UFABC] Backend não encontrado em ${url}. Ativando modo de demonstração estática automática.`);
+        console.warn(`[Pontinho] Backend não encontrado em ${url}. Ativando modo de demonstração estática automática.`);
         window._PONTINHO_STATIC_MODE = true;
         return PontinhoMock.handle(url, options);
       }
@@ -66,7 +66,7 @@ const Pontinho = {
     } catch (err) {
       // Falha de rede (ex: servidor desligado ou site estático no GitHub Pages)
       if (url.startsWith('/api/')) {
-        console.warn(`[Pontinho UFABC] Falha de rede ao conectar à API (${err.message}). Chaveando para modo de demonstração estática.`);
+        console.warn(`[Pontinho] Falha de rede ao conectar à API (${err.message}). Chaveando para modo de demonstração estática.`);
         window._PONTINHO_STATIC_MODE = true;
         return PontinhoMock.handle(url, options);
       }
@@ -254,7 +254,7 @@ const PontinhoMock = {
           id: 1,
           ra: "admin",
           email: "admin@ufabc.edu.br",
-          name: "Administrador UFABC",
+          name: "Administrador",
           age: 28,
           campus: "Santo André",
           course: "BC&T - Bacharelado em Ciência e Tecnologia",
@@ -263,7 +263,7 @@ const PontinhoMock = {
           looking_for: "Amizade",
           gender: "Outro",
           target_gender: "Todos",
-          bio: "Conta de administração do Pontinho UFABC. Modero as entidades, cursos e publicidades.",
+          bio: "Conta de administração do Pontinho. Modero as entidades, cursos e publicidades.",
           interests: ["Tecnologia", "Gestão", "Café", "Open Source"],
           photos: [
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
@@ -597,12 +597,12 @@ const PontinhoMock = {
         email += '@aluno.ufabc.edu.br';
       }
       if (!email.endsWith('@aluno.ufabc.edu.br') && !email.endsWith('@ufabc.edu.br')) {
-        throw new Error('Apenas e-mails acadêmicos da UFABC são permitidos no cadastro.');
+        throw new Error('E-mail institucional necessário no cadastro.');
       }
 
       const users = this.getUsers();
       if (users.some(u => u.email.toLowerCase() === email)) {
-        throw new Error('Este e-mail já está cadastrado no Pontinho UFABC.');
+        throw new Error('Este e-mail já está cadastrado no Pontinho.');
       }
 
       const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
@@ -610,7 +610,7 @@ const PontinhoMock = {
         id: newId,
         ra: email.split('@')[0],
         email: email,
-        name: body.name || 'Estudante UFABC',
+        name: body.name || 'Estudante',
         age: 20,
         campus: 'Santo André',
         course: 'BC&T - Bacharelado em Ciência e Tecnologia',
@@ -619,7 +619,7 @@ const PontinhoMock = {
         looking_for: 'Amizade',
         gender: 'Não informado',
         target_gender: 'Todos',
-        bio: 'Estudante da UFABC!',
+        bio: 'Estudante no Pontinho!',
         interests: ['UFABC'],
         photos: [
           'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
@@ -930,7 +930,7 @@ const PontinhoMock = {
       const userMatches = matches.filter(m => m.user1_id === currentUserId || m.user2_id === currentUserId);
       return userMatches.map(m => {
         const partnerId = m.user1_id === currentUserId ? m.user2_id : m.user1_id;
-        const partner = users.find(u => u.id === partnerId) || { name: 'Estudante UFABC', photos: [] };
+        const partner = users.find(u => u.id === partnerId) || { name: 'Estudante', photos: [] };
         const matchMsgs = messages.filter(msg => msg.match_id === m.id);
         const lastMsg = matchMsgs[matchMsgs.length - 1] || null;
 

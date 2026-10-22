@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pontinho UFABC - Painel Administrativo</title>
+  <title>Pontinho - Painel Administrativo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./css/style.css">
   <script>
@@ -31,13 +31,8 @@
   <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
       <a href="./index.html" class="flex items-center gap-2 group">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
-          <span class="text-xl">⚙️</span>
-        </div>
-        <div>
-          <span class="font-extrabold text-xl tracking-tight text-slate-900">Admin</span>
-          <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full ml-1 border border-amber-200">Pontinho UFABC</span>
-        </div>
+        <span class="font-black text-2xl tracking-tight text-slate-900">Pontinho</span>
+        <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Admin</span>
       </a>
 
       <!-- Navegação Principal -->
@@ -261,13 +256,13 @@
     <section id="tab-content-entities" class="tab-content hidden bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-6">
       <div>
         <h2 class="text-xl font-black text-slate-900">Modificar Lista de Entidades</h2>
-        <p class="text-xs text-slate-500">Gerencie as atléticas, coletivos, grupos de extensão e equipes acadêmicas da UFABC.</p>
+        <p class="text-xs text-slate-500">Gerencie as atléticas, coletivos, grupos de extensão e equipes acadêmicas.</p>
       </div>
 
       <!-- Form adicionar entidade -->
       <form onsubmit="addEntity(event)" class="space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input id="new-entity-name" type="text" required placeholder="Nome da entidade (ex: Bateria UFABC)" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+          <input id="new-entity-name" type="text" required placeholder="Nome da entidade (ex: Bateria Universitária)" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
           <input id="new-entity-desc" type="text" placeholder="Breve descrição" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/40">
         </div>
         <div class="flex justify-end">

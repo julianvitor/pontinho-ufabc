@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pontinho UFABC - Minhas Conversas e Matches</title>
+  <title>Pontinho - Conversas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./css/style.css">
   <script>
@@ -30,14 +30,8 @@
   <!-- CABEÇALHO / NAVBAR -->
   <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-      <a href="./index.html" class="flex items-center gap-2 group">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-          <span class="text-xl">🔥</span>
-        </div>
-        <div>
-          <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-700 to-teal-800 bg-clip-text text-transparent">Pontinho</span>
-          <span class="text-xs font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full ml-1 border border-rose-200">UFABC</span>
-        </div>
+      <a href="./index.html" class="flex items-center group">
+        <span class="font-black text-2xl tracking-tight bg-gradient-to-r from-emerald-700 to-teal-800 bg-clip-text text-transparent">Pontinho</span>
       </a>
 
       <!-- Navegação Principal -->
@@ -467,8 +461,8 @@
         const partner = data.partner;
         const photo = (partner.photos && partner.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
         document.getElementById('chat-partner-avatar').src = photo;
-        document.getElementById('chat-partner-name').innerText = partner.name || 'Estudante UFABC';
-        document.getElementById('chat-partner-sub').innerText = `${partner.course || 'UFABC'} • Campus ${partner.campus || 'SA'}`;
+        document.getElementById('chat-partner-name').innerText = partner.name || 'Estudante';
+        document.getElementById('chat-partner-sub').innerText = `${partner.course || 'Curso'} • Campus ${partner.campus || 'SA'}`;
 
         // Renderiza mensagens
         const container = document.getElementById('messages-container');

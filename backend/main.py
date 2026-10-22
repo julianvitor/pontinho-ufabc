@@ -1,5 +1,5 @@
 """
-Pontinho UFABC - Ponto de Entrada Principal da Aplicação FastAPI
+Pontinho - Ponto de Entrada Principal da Aplicação FastAPI
 """
 import sys
 from pathlib import Path
@@ -17,8 +17,8 @@ from backend.database import init_db
 from backend.routers import auth_router, feed_router, matches_router, users_router, admin_router
 
 app = FastAPI(
-    title="Pontinho UFABC API",
-    description="Backend oficial modularizado do aplicativo de conexões da UFABC",
+    title="Pontinho API",
+    description="Backend modularizado do aplicativo de conexões Pontinho",
     version="2.0.0"
 )
 

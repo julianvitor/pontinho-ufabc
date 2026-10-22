@@ -30,14 +30,14 @@ def register_user(data: RegisterRequest, response: Response):
     cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (sanitized_email,))
     if cursor.fetchone():
         conn.close()
-        raise HTTPException(status_code=400, detail="Este e-mail acadêmico já está cadastrado no Pontinho UFABC.")
+        raise HTTPException(status_code=400, detail="Este e-mail acadêmico já está cadastrado no Pontinho.")
 
     # Se informou RA, verifica se não está duplicado
     if cleaned_ra:
         cursor.execute("SELECT id FROM users WHERE ra = ?", (cleaned_ra,))
         if cursor.fetchone():
             conn.close()
-            raise HTTPException(status_code=400, detail="Este RA já está cadastrado no Pontinho UFABC.")
+            raise HTTPException(status_code=400, detail="Este RA já está cadastrado no Pontinho.")
     else:
         # Se não informou RA, usa o prefixo do e-mail
         cleaned_ra = sanitized_email.split("@")[0]
