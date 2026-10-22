@@ -8,10 +8,18 @@ Utiliza:
    - PROIBIDO: Menores de idade (< 18 anos)
 """
 import os
-import cv2
-import numpy as np
 from pathlib import Path
 from typing import Dict, Any, List
+
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 MODELS_DIR = Path(__file__).resolve().parent / "models"
 GENDERAGE_MODEL_PATH = MODELS_DIR / "genderage.onnx"
@@ -92,7 +100,7 @@ class ImageContentModerator:
             if label in ("FACE_FEMALE", "FACE_MALE") and score >= 0.35:
                 face_boxes.append(det.get("box", []))
 
-        if age_session and face_boxes:
+        if age_session and face_boxes and cv2 is not None and np is not None:
             try:
                 img_cv = cv2.imread(str(path_obj))
                 if img_cv is None:
