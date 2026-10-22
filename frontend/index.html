@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pontinho UFABC - O Tinder da Federal do ABC</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="./css/style.css">
   <script>
     tailwind.config = {
       theme: {
@@ -37,7 +37,7 @@
   <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
     <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
       <!-- Logo / Marca -->
-      <a href="/" class="flex items-center gap-2 group">
+      <a href="./index.html" class="flex items-center gap-2 group">
         <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-rose-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
           <span class="text-xl">🔥</span>
         </div>
@@ -48,23 +48,23 @@
       </a>
 
       <!-- Navegação Principal -->
-      <nav class="flex items-center gap-1 sm:gap-2">
-        <a href="/" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-sm border border-emerald-200/60 shadow-xs">
+      <nav id="navbar-nav-links" class="flex items-center gap-1 sm:gap-2">
+        <a href="./index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-sm border border-emerald-200/60 shadow-xs">
           <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
         </a>
-        <a href="/matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+        <a href="./matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
           <span>💬</span> <span class="hidden sm:inline">Conversas</span>
         </a>
-        <a href="/profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
+        <a href="./profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-slate-50 font-medium text-sm transition">
           <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
         </a>
-        <a href="/admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium text-sm border border-amber-200/60 transition">
+        <a href="./admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium text-sm border border-amber-200/60 transition">
           <span>⚙️</span> <span class="hidden sm:inline">Admin</span>
         </a>
       </nav>
 
       <!-- Seletor Rápido de Usuário (Para Testes) e Botão Sair -->
-      <div class="flex items-center gap-2">
+      <div id="navbar-user-box" class="flex items-center gap-2">
         <div class="hidden md:flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
           <span class="text-slate-400 font-medium">RA:</span>
           <select id="user-switcher-select" class="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer">
@@ -75,86 +75,205 @@
           Sair
         </button>
       </div>
+
+      <!-- Botão de Entrar (Quando não logado) -->
+      <div id="navbar-auth-btn" class="hidden">
+        <a href="./login.html" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs rounded-xl shadow-md transition">
+          Entrar
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL: ÁREA DE SWIPES (MOBILE-FIRST) -->
-  <main class="flex-1 max-w-md w-full mx-auto px-3 sm:px-4 pt-3 pb-24 md:pb-6 flex flex-col items-center justify-center relative">
+  <!-- CONTEÚDO PRINCIPAL (MOBILE-FIRST) -->
+  <main class="flex-1 w-full max-w-4xl mx-auto px-3 sm:px-4 pt-3 pb-24 md:pb-6 flex flex-col items-center justify-center relative">
     
-    <!-- BARRA DE AJUDA / DICAS UFABC -->
-    <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-2.5 px-1">
-      <div class="flex items-center gap-1.5">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-        <span class="font-medium text-slate-700">Federal do ABC Online</span>
+    <!-- SEÇÃO DE LANDING / BOAS-VINDAS (QUANDO DESCONECTADO) -->
+    <div id="landing-section" class="w-full max-w-md mx-auto py-4 flex flex-col items-center text-center hidden space-y-6">
+      
+      <!-- Card Hero de Apresentação -->
+      <div class="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-700/60 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="w-16 h-16 mx-auto rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner mb-4 border border-white/20">
+          🔥
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+          Pontinho <span class="text-rose-400">UFABC</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-emerald-200 mt-2 font-medium max-w-sm mx-auto leading-relaxed">
+          O app de conexões e encontros exclusivo para estudantes da Federal do ABC.
+        </p>
+
+        <!-- Destaques -->
+        <div class="grid grid-cols-3 gap-2 my-6 text-left">
+          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xs">
+            <span class="text-lg block">🎓</span>
+            <span class="text-[11px] font-bold text-white block mt-1">100% UFABC</span>
+            <span class="text-[9px] text-slate-300">Autenticação acadêmica</span>
+          </div>
+          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xs">
+            <span class="text-lg block">🎵</span>
+            <span class="text-[11px] font-bold text-white block mt-1">Trilha Sonora</span>
+            <span class="text-[9px] text-slate-300">YouTube de fundo no perfil</span>
+          </div>
+          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xs">
+            <span class="text-lg block">📍</span>
+            <span class="text-[11px] font-bold text-white block mt-1">SA & SBC</span>
+            <span class="text-[9px] text-slate-300">Filtre por curso e campus</span>
+          </div>
+        </div>
+
+        <!-- Botões de Ação Principal -->
+        <div class="space-y-2.5">
+          <a href="./login.html?tab=register" class="block w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/30 transition transform active:scale-98">
+            Criar Conta com E-mail UFABC 🎓
+          </a>
+          <a href="./login.html?tab=login" class="block w-full py-3 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm rounded-xl border border-white/20 transition">
+            Já tenho conta • Fazer Login
+          </a>
+        </div>
       </div>
-      <button onclick="resetSwipes()" class="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline flex items-center gap-1">
-        <span>🔄</span> Resetar Swipes
-      </button>
+
+      <!-- SEÇÃO DE CONTAS DEMONSTRAÇÃO (1 CLIQUE PARA TESTAR) -->
+      <div class="w-full bg-white rounded-3xl p-5 shadow-xl border border-slate-200/80 text-left">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <h2 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Acesso Imediato para Demonstração</h2>
+            <h3 class="text-sm font-extrabold text-slate-900">Entrar como Perfil Demo (1 Clique)</h3>
+          </div>
+          <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Pronto</span>
+        </div>
+        <p class="text-xs text-slate-500 mb-3.5">
+          Permite testar os swipes, chat e músicas de perfil sem precisar digitar credenciais:
+        </p>
+
+        <div class="space-y-2">
+          <button type="button" onclick="loginAsDemo(2)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
+            <div class="flex items-center gap-3">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800" class="w-9 h-9 rounded-full object-cover">
+              <div>
+                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Mariana Silva, 21</p>
+                <p class="text-[10px] text-slate-500">BC&T • Neurociência • SA 🎵 Arctic Monkeys</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+          </button>
+
+          <button type="button" onclick="loginAsDemo(3)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
+            <div class="flex items-center gap-3">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" class="w-9 h-9 rounded-full object-cover">
+              <div>
+                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Lucas Mendes, 22</p>
+                <p class="text-[10px] text-slate-500">BC&H • RI • SBC 🎵 Tame Impala</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+          </button>
+
+          <button type="button" onclick="loginAsDemo(4)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
+            <div class="flex items-center gap-3">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800" class="w-9 h-9 rounded-full object-cover">
+              <div>
+                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Bia Costa, 20</p>
+                <p class="text-[10px] text-slate-500">BC&T • Aeroespacial • Foguetes 🎵 Taylor Swift</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+          </button>
+
+          <button type="button" onclick="loginAsDemo(5)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
+            <div class="flex items-center gap-3">
+              <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800" class="w-9 h-9 rounded-full object-cover">
+              <div>
+                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Gabriel Santos, 23</p>
+                <p class="text-[10px] text-slate-500">Ciência da Computação • Bateria 🎵 Criolo</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- CONTAINER DOS CARDS COM ALTURA OTIMIZADA PARA MOBILE (DVH) -->
-    <div id="deck-container" class="relative w-full h-[64dvh] sm:h-[580px] max-h-[620px] rounded-3xl shadow-2xl bg-white border border-slate-200/80 overflow-hidden flex items-center justify-center">
-      
-      <!-- ESTADO DE CARREGANDO -->
-      <div id="loading-spinner" class="flex flex-col items-center gap-3 text-slate-400">
-        <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm font-medium">Buscando estudantes no campus...</p>
-      </div>
-
-      <!-- ESTADO VAZIO (QUANDO ACABAREM OS CARDS) -->
-      <div id="empty-state" class="hidden flex flex-col items-center justify-center text-center p-6 space-y-4">
-        <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-3xl shadow-inner border border-emerald-100">
-          🎓
+    <!-- SEÇÃO DE SWIPES (QUANDO AUTENTICADO) -->
+    <div id="swipe-section" class="w-full max-w-md mx-auto flex flex-col items-center">
+      <!-- BARRA DE AJUDA / DICAS UFABC -->
+      <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-2.5 px-1">
+        <div class="flex items-center gap-1.5">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span class="font-medium text-slate-700">Federal do ABC Online</span>
         </div>
-        <div>
-          <h3 class="text-xl font-bold text-slate-800">Você zerou os perfis por aqui!</h3>
-          <p class="text-sm text-slate-500 mt-1 max-w-xs">Não há mais estudantes na sua fila de swipe no momento.</p>
-        </div>
-        <button onclick="resetSwipes()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 transition-all">
-          🔄 Rever Todos os Perfis
+        <button onclick="resetSwipes()" class="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline flex items-center gap-1">
+          <span>🔄</span> Resetar Swipes
         </button>
       </div>
 
-      <!-- CARD ATIVO É RENDERIZADO VIA JAVASCRIPT AQUI DENTRO -->
-      <div id="card-wrapper" class="w-full h-full relative hidden"></div>
+      <!-- CONTAINER DOS CARDS COM ALTURA OTIMIZADA PARA MOBILE (DVH) -->
+      <div id="deck-container" class="relative w-full h-[64dvh] sm:h-[580px] max-h-[620px] rounded-3xl shadow-2xl bg-white border border-slate-200/80 overflow-hidden flex items-center justify-center">
+        
+        <!-- ESTADO DE CARREGANDO -->
+        <div id="loading-spinner" class="flex flex-col items-center gap-3 text-slate-400">
+          <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-sm font-medium">Buscando estudantes no campus...</p>
+        </div>
 
-    </div>
+        <!-- ESTADO VAZIO (QUANDO ACABAREM OS CARDS) -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center text-center p-6 space-y-4">
+          <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-3xl shadow-inner border border-emerald-100">
+            🎓
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-800">Você zerou os perfis por aqui!</h3>
+            <p class="text-sm text-slate-500 mt-1 max-w-xs">Não há mais estudantes na sua fila de swipe no momento.</p>
+          </div>
+          <button onclick="resetSwipes()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 transition-all">
+            🔄 Rever Todos os Perfis
+          </button>
+        </div>
 
-    <!-- BOTÕES DE CONTROLE INFERIORES -->
-    <div id="action-controls" class="flex items-center justify-center gap-6 mt-4 sm:mt-5">
-      <!-- Botão Pass (X) -->
-      <button onclick="handleSwipe('pass')" class="w-14 h-14 rounded-full bg-white shadow-xl border border-slate-200 text-rose-500 text-2xl flex items-center justify-center hover:scale-110 active:scale-95 hover:bg-rose-50 hover:border-rose-300 transition-all focus:outline-none" title="Passar (Não curti)">
-        ✕
-      </button>
+        <!-- CARD ATIVO É RENDERIZADO VIA JAVASCRIPT AQUI DENTRO -->
+        <div id="card-wrapper" class="w-full h-full relative hidden"></div>
 
-      <!-- Botão Informações / Detalhes -->
-      <button onclick="openDetailsModal()" class="w-11 h-11 rounded-full bg-white shadow-lg border border-slate-200 text-blue-500 text-xl flex items-center justify-center hover:scale-110 active:scale-95 hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none" title="Ver perfil completo e perguntinhas">
-        ℹ️
-      </button>
+      </div>
 
-      <!-- Botão Like (Coração) -->
-      <button onclick="handleSwipe('like')" class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-xl shadow-emerald-500/30 text-white text-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all focus:outline-none" title="Curtir">
-        💚
-      </button>
+      <!-- BOTÕES DE CONTROLE INFERIORES -->
+      <div id="action-controls" class="flex items-center justify-center gap-6 mt-4 sm:mt-5">
+        <!-- Botão Pass (X) -->
+        <button onclick="handleSwipe('pass')" class="w-14 h-14 rounded-full bg-white shadow-xl border border-slate-200 text-rose-500 text-2xl flex items-center justify-center hover:scale-110 active:scale-95 hover:bg-rose-50 hover:border-rose-300 transition-all focus:outline-none" title="Passar (Não curti)">
+          ✕
+        </button>
+
+        <!-- Botão Informações / Detalhes -->
+        <button onclick="openDetailsModal()" class="w-11 h-11 rounded-full bg-white shadow-lg border border-slate-200 text-blue-500 text-xl flex items-center justify-center hover:scale-110 active:scale-95 hover:bg-blue-50 hover:border-blue-300 transition-all focus:outline-none" title="Ver perfil completo e músicas">
+          ℹ️
+        </button>
+
+        <!-- Botão Like (Coração) -->
+        <button onclick="handleSwipe('like')" class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-xl shadow-emerald-500/30 text-white text-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all focus:outline-none" title="Curtir">
+          💚
+        </button>
+      </div>
     </div>
 
   </main>
 
   <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE (NATIVE BOTTOM BAR) -->
   <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 mobile-bottom-nav flex items-center justify-around py-2.5 shadow-lg">
-    <a href="/" class="flex flex-col items-center gap-1 text-emerald-700 font-bold text-[11px]">
+    <a href="./index.html" class="flex flex-col items-center gap-1 text-emerald-700 font-bold text-[11px]">
       <span class="text-xl">🔥</span>
       <span>Swipes</span>
     </a>
-    <a href="/matches.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
+    <a href="./matches.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
       <span class="text-xl">💬</span>
       <span>Conversas</span>
     </a>
-    <a href="/profile.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
+    <a href="./profile.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
       <span class="text-xl">👤</span>
       <span>Perfil</span>
     </a>
-    <a href="/admin.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-600 font-semibold text-[11px] transition">
+    <a href="./admin.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-600 font-semibold text-[11px] transition">
       <span class="text-xl">⚙️</span>
       <span>Admin</span>
     </a>
@@ -197,7 +316,7 @@
       </div>
 
       <div class="space-y-3 mt-6">
-        <a id="match-chat-btn" href="/matches.html" class="block w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/40 transition">
+        <a id="match-chat-btn" href="./matches.html" class="block w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/40 transition">
           Mandar Mensagem Agora 💬
         </a>
         <button onclick="closeMatchModal()" class="w-full py-2.5 text-slate-400 hover:text-white font-medium text-sm transition">
@@ -207,20 +326,63 @@
     </div>
   </div>
 
+  <!-- CONTAINER DO PLAYER DE MÚSICA DO YOUTUBE (OCULTO EM SEGUNDO PLANO) -->
+  <div id="youtube-player-host" style="display:none;"></div>
+
   <!-- SCRIPTS -->
-  <script src="/static/js/app.js"></script>
+  <script src="./js/app.js"></script>
   <script>
     let currentCards = [];
     let currentIndex = 0;
     let currentPhotoIndex = 0;
     let activeCardData = null;
 
+    // Estado da Trilha Sonora do Perfil (YouTube)
+    let currentProfileSongs = [];
+    let currentPlayingSongIndex = 0;
+    let isProfileAudioPlaying = false;
+
     document.addEventListener('DOMContentLoaded', async () => {
+      checkAuthStateAndLoad();
+    });
+
+    async function checkAuthStateAndLoad() {
+      const userId = Pontinho.getCurrentUserId();
+      const landingSection = document.getElementById('landing-section');
+      const swipeSection = document.getElementById('swipe-section');
+      const navbarUserBox = document.getElementById('navbar-user-box');
+      const navbarAuthBtn = document.getElementById('navbar-auth-btn');
+
+      if (!userId) {
+        if (landingSection) landingSection.classList.remove('hidden');
+        if (swipeSection) swipeSection.classList.add('hidden');
+        if (navbarUserBox) navbarUserBox.classList.add('hidden');
+        if (navbarAuthBtn) navbarAuthBtn.classList.remove('hidden');
+        return;
+      }
+
+      if (landingSection) landingSection.classList.add('hidden');
+      if (swipeSection) swipeSection.classList.remove('hidden');
+      if (navbarUserBox) navbarUserBox.classList.remove('hidden');
+      if (navbarAuthBtn) navbarAuthBtn.classList.add('hidden');
+
       const user = await Pontinho.requireAuth();
-      if (!user) return;
+      if (!user) {
+        if (landingSection) landingSection.classList.remove('hidden');
+        if (swipeSection) swipeSection.classList.add('hidden');
+        if (navbarUserBox) navbarUserBox.classList.add('hidden');
+        if (navbarAuthBtn) navbarAuthBtn.classList.remove('hidden');
+        return;
+      }
       await Pontinho.initNavbarUserSwitcher();
       loadFeed();
-    });
+    }
+
+    function loginAsDemo(userId) {
+      Pontinho.setCurrentUserId(userId);
+      Pontinho.showToast('Conectado à conta de demonstração! Carregando...', 'success');
+      checkAuthStateAndLoad();
+    }
 
     async function loadFeed() {
       const spinner = document.getElementById('loading-spinner');
@@ -345,9 +507,17 @@
             <!-- Bio resumida -->
             ${user.bio ? `<p class="text-xs sm:text-sm text-slate-200 mt-1.5 line-clamp-2">${user.bio}</p>` : ''}
 
-            <!-- Botão de Ver Perguntinhas -->
+            <!-- Indicador de Trilha Sonora -->
+            ${(user.songs && user.songs.length) ? `
+              <div class="mt-2 flex items-center gap-1.5 text-[11px] text-purple-200 bg-purple-950/70 backdrop-blur-md px-2.5 py-1 rounded-xl border border-purple-400/30 truncate">
+                <span>🎵</span>
+                <span class="truncate">Trilha: <strong>${user.songs[0]}</strong></span>
+              </div>
+            ` : ''}
+
+            <!-- Botão de Ver Detalhes, Músicas e Perguntas -->
             <button onclick="openDetailsModal()" class="mt-2.5 w-full py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 border border-white/20 active:scale-98">
-              <span>💬 Ver 3 perguntinhas & interesses</span>
+              <span>💬 Ver perfil completo, músicas & perguntas</span>
             </button>
           </div>
         </div>
@@ -578,11 +748,67 @@
       const u = activeCardData;
       const content = document.getElementById('details-content');
 
+      // Processa lista de músicas
+      currentProfileSongs = Array.isArray(u.songs) ? u.songs.filter(s => s && s.trim()) : [];
+      currentPlayingSongIndex = 0;
+      isProfileAudioPlaying = false;
+
       const interestsList = (u.interests || []).map(item => `
         <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-3 py-1 rounded-full border border-slate-200">
           #${item}
         </span>
       `).join('');
+
+      const songsSectionHtml = currentProfileSongs.length > 0 ? `
+        <!-- TRILHA SONORA DO PERFIL (YOUTUBE) -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
+              <span>🎵</span> Trilha Sonora do Perfil
+            </h4>
+            <span class="text-[10px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full">YouTube Player</span>
+          </div>
+
+          <div class="p-3.5 bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white rounded-2xl border border-purple-500/30 shadow-lg">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="relative w-10 h-10 rounded-full bg-purple-900/60 flex items-center justify-center shrink-0 border border-purple-400/40 shadow-inner">
+                  <span id="player-vinyl-icon" class="text-lg inline-block animate-spin" style="animation-duration: 3s;">💿</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="bg-rose-600 text-white font-extrabold text-[9px] uppercase px-1.5 py-0.5 rounded tracking-wider">YouTube</span>
+                    <span id="player-status-badge" class="text-[10px] text-purple-200">Tocando em segundo plano</span>
+                  </div>
+                  <p id="player-current-song-title" class="text-xs font-bold text-white truncate mt-0.5">
+                    ${currentProfileSongs[0]}
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button id="player-toggle-btn" type="button" onclick="toggleProfileAudio()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center transition active:scale-95" title="Pausar / Tocar">
+                  ⏸️
+                </button>
+              </div>
+            </div>
+
+            <!-- Chips com todas as músicas cadastradas pela pessoa -->
+            <div class="flex flex-wrap gap-1.5 pt-2.5 mt-2.5 border-t border-white/10">
+              ${currentProfileSongs.map((s, idx) => `
+                <button 
+                  id="song-chip-${idx}" 
+                  type="button"
+                  onclick="selectProfileSong(${idx})" 
+                  class="song-chip text-[11px] font-semibold px-2.5 py-1 rounded-xl transition flex items-center gap-1.5 ${idx === 0 ? 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-300' : 'bg-white/10 text-purple-200 hover:bg-white/20'}"
+                >
+                  <span>🎧</span> <span class="truncate max-w-[130px]">${s}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      ` : '';
 
       content.innerHTML = `
         <!-- Galeria de Fotos -->
@@ -594,6 +820,9 @@
             `).join('')}
           </div>
         </div>
+
+        <!-- Trilha Sonora do Perfil (YouTube) -->
+        ${songsSectionHtml}
 
         <!-- Dados Básicos -->
         <div>
@@ -666,10 +895,103 @@
       `;
 
       document.getElementById('details-modal').classList.remove('hidden');
+
+      // Toca em segundo plano com YouTube caso o perfil possua músicas
+      if (currentProfileSongs.length > 0) {
+        startProfileAudio(0);
+      }
     }
 
     function closeDetailsModal() {
+      // Para a música imediatamente ao fechar os detalhes
+      stopProfileAudio();
       document.getElementById('details-modal').classList.add('hidden');
+    }
+
+    function selectProfileSong(index) {
+      if (index < 0 || index >= currentProfileSongs.length) return;
+      startProfileAudio(index);
+    }
+
+    function startProfileAudio(index) {
+      const songTitle = currentProfileSongs[index];
+      if (!songTitle) return;
+
+      currentPlayingSongIndex = index;
+      isProfileAudioPlaying = true;
+
+      const titleElem = document.getElementById('player-current-song-title');
+      if (titleElem) titleElem.innerText = songTitle;
+
+      const toggleBtn = document.getElementById('player-toggle-btn');
+      if (toggleBtn) toggleBtn.innerText = '⏸️';
+
+      const vinylIcon = document.getElementById('player-vinyl-icon');
+      if (vinylIcon) vinylIcon.classList.add('animate-spin');
+
+      const statusBadge = document.getElementById('player-status-badge');
+      if (statusBadge) statusBadge.innerText = 'Tocando em segundo plano';
+
+      document.querySelectorAll('.song-chip').forEach((chip, i) => {
+        if (i === index) {
+          chip.className = 'song-chip text-[11px] font-semibold px-2.5 py-1 rounded-xl transition flex items-center gap-1.5 bg-purple-600 text-white shadow-sm ring-1 ring-purple-300';
+        } else {
+          chip.className = 'song-chip text-[11px] font-semibold px-2.5 py-1 rounded-xl transition flex items-center gap-1.5 bg-white/10 text-purple-200 hover:bg-white/20';
+        }
+      });
+
+      // Cria URL do YouTube com autoplay
+      let embedUrl = '';
+      const ytMatch = songTitle.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+      if (ytMatch && ytMatch[1]) {
+        embedUrl = `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&playsinline=1&enablejsapi=1`;
+      } else {
+        embedUrl = `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(songTitle)}&autoplay=1&playsinline=1&enablejsapi=1`;
+      }
+
+      let host = document.getElementById('youtube-player-host');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'youtube-player-host';
+        host.style.display = 'none';
+        document.body.appendChild(host);
+      }
+
+      host.innerHTML = `
+        <iframe 
+          id="yt-bg-player" 
+          src="${embedUrl}" 
+          width="1" height="1" 
+          allow="autoplay; encrypted-media" 
+          frameborder="0"
+          style="position:fixed; bottom:0; left:0; width:1px; height:1px; opacity:0.01; pointer-events:none;">
+        </iframe>
+      `;
+    }
+
+    function toggleProfileAudio() {
+      const host = document.getElementById('youtube-player-host');
+      const toggleBtn = document.getElementById('player-toggle-btn');
+      const vinylIcon = document.getElementById('player-vinyl-icon');
+      const statusBadge = document.getElementById('player-status-badge');
+
+      if (isProfileAudioPlaying) {
+        if (host) host.innerHTML = '';
+        isProfileAudioPlaying = false;
+        if (toggleBtn) toggleBtn.innerText = '▶️';
+        if (vinylIcon) vinylIcon.classList.remove('animate-spin');
+        if (statusBadge) statusBadge.innerText = 'Pausado';
+      } else {
+        startProfileAudio(currentPlayingSongIndex);
+      }
+    }
+
+    function stopProfileAudio() {
+      const host = document.getElementById('youtube-player-host');
+      if (host) {
+        host.innerHTML = '';
+      }
+      isProfileAudioPlaying = false;
     }
 
     async function resetSwipes() {

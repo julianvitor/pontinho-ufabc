@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pontinho UFABC - Login e Cadastro</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="./css/style.css">
   <script>
     tailwind.config = {
       theme: {
@@ -179,8 +179,15 @@
     </div>
   </div>
 
-  <script src="/static/js/app.js"></script>
+  <script src="./js/app.js"></script>
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('tab') === 'register') {
+        switchAuthTab('register');
+      }
+    });
+
     function switchAuthTab(tab) {
       const loginBtn = document.getElementById('tab-btn-login');
       const regBtn = document.getElementById('tab-btn-register');
@@ -213,22 +220,16 @@
       const password = document.getElementById('login-password').value;
 
       try {
-        const res = await fetch('/api/auth/login', {
+        const data = await Pontinho.apiFetch('/api/auth/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.detail || 'Falha no login');
-        }
 
         Pontinho.setCurrentUserId(data.user.id);
         Pontinho.showToast(`Bem-vindo(a) de volta, ${data.user.name}! 🔥`, 'success');
         
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.href = './index.html';
         }, 600);
 
       } catch (err) {
@@ -254,23 +255,17 @@
       }
 
       try {
-        const res = await fetch('/api/auth/register', {
+        const data = await Pontinho.apiFetch('/api/auth/register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, name, password })
         });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.detail || 'Falha no cadastro');
-        }
 
         Pontinho.setCurrentUserId(data.user_id);
         Pontinho.showToast(`Cadastro realizado com sucesso! Bem-vindo(a), ${data.name}! 🎓`, 'success');
 
         // Redireciona para completar o perfil (fotos e preferências)
         setTimeout(() => {
-          window.location.href = '/profile.html';
+          window.location.href = './profile.html';
         }, 700);
 
       } catch (err) {

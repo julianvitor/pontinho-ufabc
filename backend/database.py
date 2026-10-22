@@ -61,12 +61,13 @@ def init_db():
         prompt3_a TEXT,
         gender TEXT NOT NULL DEFAULT 'Não informado', -- 'Mulher', 'Homem', 'Não-binário', 'Outro'
         target_gender TEXT NOT NULL DEFAULT 'Todos', -- 'Mulheres', 'Homens', 'Não-binário', 'Todos'
+        songs TEXT NOT NULL DEFAULT '[]', -- Músicas favoritas / trilha do perfil
         is_admin INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
 
-    # Migração automática caso o banco já existisse sem ra, password_hash, gender ou target_gender
+    # Migração automática caso o banco já existisse sem ra, password_hash, gender, target_gender ou songs
     cursor.execute("PRAGMA table_info(users)")
     existing_cols = [row["name"] for row in cursor.fetchall()]
     if "ra" not in existing_cols:
@@ -78,6 +79,8 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN gender TEXT DEFAULT 'Não informado'")
     if "target_gender" not in existing_cols:
         cursor.execute("ALTER TABLE users ADD COLUMN target_gender TEXT DEFAULT 'Todos'")
+    if "songs" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN songs TEXT DEFAULT '[]'")
 
     # Tabela de Cursos (Base e Específico) gerenciáveis pelo admin
     cursor.execute("""

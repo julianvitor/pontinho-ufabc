@@ -142,6 +142,7 @@ def seed_database():
             "prompt3_a": "Programando no laboratório ou caçando tomada no mezanino.",
             "gender": "Outro",
             "target_gender": "Todos",
+            "songs": json.dumps(["Daft Punk - Harder Better Faster Stronger", "Kraftwerk - The Robots"]),
             "is_admin": 1
         },
         {
@@ -170,6 +171,7 @@ def seed_database():
             "prompt3_a": "Pastel na feira de Santo André e depois um café pra papear sem pressa.",
             "gender": "Mulher",
             "target_gender": "Todos",
+            "songs": json.dumps(["Chico Buarque - Construção", "Arctic Monkeys - 505", "Duda Beat - Bixinho"]),
             "is_admin": 0
         },
         {
@@ -197,6 +199,7 @@ def seed_database():
             "prompt3_a": "Na banquinha discutindo o último filme da A24.",
             "gender": "Homem",
             "target_gender": "Mulheres",
+            "songs": json.dumps(["Tame Impala - The Less I Know The Better", "Tim Maia - Não Quero Dinheiro", "The Strokes - Someday"]),
             "is_admin": 0
         },
         {
@@ -224,6 +227,7 @@ def seed_database():
             "prompt3_a": "Fazer amizade com os veteranos pra saber quais professores não reprovam 80%.",
             "gender": "Mulher",
             "target_gender": "Todos",
+            "songs": json.dumps(["Taylor Swift - Cruel Summer", "Daft Punk - Instant Crush", "Coldplay - Yellow"]),
             "is_admin": 0
         },
         {
@@ -251,6 +255,7 @@ def seed_database():
             "prompt3_a": "Hambúrguer artesanal no Bairro Jardim e muitas risadas.",
             "gender": "Homem",
             "target_gender": "Mulheres",
+            "songs": json.dumps(["Criolo - Não Existe Amor em SP", "Kendrick Lamar - All The Stars", "Jorge Ben Jor - Taj Mahal"]),
             "is_admin": 0
         },
         {
@@ -278,6 +283,7 @@ def seed_database():
             "prompt3_a": "Eu te passo os melhores resumos de Economia Política.",
             "gender": "Mulher",
             "target_gender": "Todos",
+            "songs": json.dumps(["Liniker - Baby 95", "Silva - A Cor É Rosa", "Caetano Veloso - Sozinho"]),
             "is_admin": 0
         }
     ]
@@ -289,18 +295,19 @@ def seed_database():
                 ra, password_hash, email, name, age, campus, course, specific_course, entity,
                 looking_for, bio, interests, photos,
                 prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
-                gender, target_gender, is_admin
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                gender, target_gender, songs, is_admin
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(email) DO UPDATE SET
                 ra = excluded.ra,
                 password_hash = excluded.password_hash,
                 gender = excluded.gender,
-                target_gender = excluded.target_gender
+                target_gender = excluded.target_gender,
+                songs = excluded.songs
         """, (
             u["ra"], u["password_hash"], u["email"], u["name"], u["age"], u["campus"], u["course"], u["specific_course"], u["entity"],
             u["looking_for"], u["bio"], u["interests"], u["photos"],
             u["prompt1_q"], u["prompt1_a"], u["prompt2_q"], u["prompt2_a"], u["prompt3_q"], u["prompt3_a"],
-            u["gender"], u["target_gender"], u["is_admin"]
+            u["gender"], u["target_gender"], u["songs"], u["is_admin"]
         ))
 
     # Criar um match inicial de exemplo entre Mariana (id=2) e Gabriel (id=5) para podermos testar o chat imediatamente
