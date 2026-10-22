@@ -795,13 +795,22 @@
               </div>
             </div>
 
-            <!-- Player de Vídeo e Áudio Oficial do YouTube no Card -->
-            <div id="modal-youtube-container" class="relative w-full aspect-video rounded-xl overflow-hidden bg-black/90 border border-purple-500/30 shadow-inner mt-3">
-              <div class="absolute inset-0 flex flex-col items-center justify-center text-purple-200 text-xs gap-2">
-                <span class="animate-spin text-xl">💿</span>
-                <span class="font-medium text-[11px]">Iniciando player do YouTube...</span>
+            <!-- Visualizador de Áudio de Fundo (Equalizer) -->
+            <div id="player-visualizer-bar" class="flex items-center justify-between px-3 py-2 bg-black/40 rounded-xl border border-white/5 mt-2.5">
+              <span class="text-[11px] text-purple-200 font-medium flex items-center gap-1.5">
+                <span>🔊</span> Áudio de Fundo
+              </span>
+              <div id="player-equalizer-waves" class="flex items-end gap-1 h-3.5">
+                <span class="w-1 bg-purple-400 rounded-full animate-pulse" style="height: 60%; animation-duration: 0.8s;"></span>
+                <span class="w-1 bg-rose-400 rounded-full animate-pulse" style="height: 100%; animation-duration: 0.5s;"></span>
+                <span class="w-1 bg-purple-300 rounded-full animate-pulse" style="height: 40%; animation-duration: 0.9s;"></span>
+                <span class="w-1 bg-teal-400 rounded-full animate-pulse" style="height: 80%; animation-duration: 0.6s;"></span>
+                <span class="w-1 bg-purple-400 rounded-full animate-pulse" style="height: 50%; animation-duration: 0.7s;"></span>
               </div>
             </div>
+
+            <!-- Host Oculto do Iframe do YouTube (Fora da tela para tocar somente áudio sem mostrar vídeo) -->
+            <div id="modal-youtube-container" style="position:fixed; top:-9999px; left:-9999px; width:300px; height:300px; opacity:0.001; pointer-events:none; overflow:hidden;"></div>
 
             <!-- Chips com todas as músicas cadastradas pela pessoa -->
             <div class="flex flex-wrap gap-1.5 pt-2.5 mt-2.5 border-t border-white/10">
@@ -975,14 +984,18 @@
       // 2. URL oficial de Embed do YouTube com suporte a Autoplay
       const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&enablejsapi=1&playsinline=1&rel=0`;
 
-      // 3. Injeta o player dentro do container visível no card do modal
+      const equalizer = document.getElementById('player-equalizer-waves');
+      if (equalizer) equalizer.style.opacity = '1';
+
+      // 3. Injeta o player dentro do host oculto fora da tela
       const container = document.getElementById('modal-youtube-container');
       if (container) {
         container.innerHTML = `
           <iframe 
             id="yt-bg-player" 
             src="${embedUrl}" 
-            class="w-full h-full border-0" 
+            width="300" height="300"
+            style="border:0; width:300px; height:300px;" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
             allowfullscreen>
           </iframe>
@@ -995,20 +1008,17 @@
       const toggleBtn = document.getElementById('player-toggle-btn');
       const vinylIcon = document.getElementById('player-vinyl-icon');
       const statusBadge = document.getElementById('player-status-badge');
+      const equalizer = document.getElementById('player-equalizer-waves');
 
       if (isProfileAudioPlaying) {
         if (container) {
-          container.innerHTML = `
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-purple-300 text-xs gap-1.5 bg-black/85">
-              <span>⏸️</span>
-              <span class="font-semibold text-[11px]">Áudio Pausado</span>
-            </div>
-          `;
+          container.innerHTML = '';
         }
         isProfileAudioPlaying = false;
         if (toggleBtn) toggleBtn.innerText = '▶️';
         if (vinylIcon) vinylIcon.classList.remove('animate-spin');
         if (statusBadge) statusBadge.innerText = 'Pausado';
+        if (equalizer) equalizer.style.opacity = '0.25';
       } else {
         startProfileAudio(currentPlayingSongIndex);
       }
