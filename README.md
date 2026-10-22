@@ -57,6 +57,37 @@
 
 ---
 
+## 📁 Estrutura de Pastas do Projeto
+
+O projeto é organizado com separação clara de responsabilidades entre backend, frontend estático e persistência de dados:
+
+```text
+pontinho-ufabc/
+├── backend/                  # Aplicação Python / FastAPI
+│   ├── __init__.py
+│   ├── database.py           # Conexão SQLite3, migrações automáticas e helpers
+│   ├── main.py               # Rotas da API REST, autenticação, feed e swipes
+│   └── seed.py               # Mocks da UFABC (cursos, entidades, perguntas, perfis)
+├── frontend/                 # Interface estática mobile-first com Tailwind CSS
+│   ├── css/
+│   │   └── style.css         # Estilos personalizados e animações de swipe
+│   ├── js/
+│   │   └── app.js            # Utilitários compartilhados, autenticação e toast
+│   ├── index.html            # Feed de swipes com física de toque e cards
+│   ├── login.html            # Tela de login e cadastro com e-mail @ufabc.edu.br
+│   ├── profile.html          # Edição de perfil, gênero de interesse e fotos
+│   ├── matches.html          # Lista de combinações e chat de texto
+│   └── admin.html            # Painel de moderação e gerenciamento de publicidades
+├── data/                     # Volume persistente para o banco SQLite (pontinho.db)
+├── docker-compose.yml        # Orquestração do container Docker com montagem de volume
+├── Dockerfile                # Imagem de produção baseada em Python slim
+├── entrypoint.sh             # Script de inicialização (migração + servidor Uvicorn)
+├── requirements.txt          # Dependências Python (FastAPI, Uvicorn, etc.)
+└── README.md                 # Documentação do projeto
+```
+
+---
+
 ## 💻 Como Rodar o Projeto
 
 ### Opção 1: Via Docker & Docker Compose (Recomendado para Deploy)
@@ -88,18 +119,19 @@
 
 2. **Popular o banco com dados de teste da UFABC**:
    ```bash
-   python seed.py
+   python -m backend.seed
    ```
 
 3. **Iniciar o servidor**:
    ```bash
-   uvicorn main:app --reload --port 8000
+   uvicorn backend.main:app --reload --port 8000
    ```
 
 ---
 
 ### 🌐 Acessar no Navegador
 - Swipes (Feed Principal): [http://localhost:8000](http://localhost:8000)
+- Login / Cadastro: [http://localhost:8000/login.html](http://localhost:8000/login.html)
 - Chat & Matches: [http://localhost:8000/matches.html](http://localhost:8000/matches.html)
 - Meu Perfil: [http://localhost:8000/profile.html](http://localhost:8000/profile.html)
 - Painel Admin: [http://localhost:8000/admin.html](http://localhost:8000/admin.html)

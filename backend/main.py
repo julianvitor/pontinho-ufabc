@@ -7,13 +7,23 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from database import get_db, init_db, hash_password, verify_password
+import sys
+from pathlib import Path
+
+BACKEND_DIR = Path(__file__).resolve().parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
+try:
+    from database import get_db, init_db, hash_password, verify_password
+except ImportError:
+    from backend.database import get_db, init_db, hash_password, verify_password
 
 app = FastAPI(title="Pontinho UFABC API", version="1.0.0")
 
-STATIC_DIR = Path(__file__).parent / "static"
-STATIC_DIR.mkdir(exist_ok=True)
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+FRONTEND_DIR.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 # Inicializa o banco de dados caso não exista
 init_db()
@@ -286,23 +296,32 @@ def get_auth_me(request: Request):
 
 @app.get("/", response_class=FileResponse)
 def get_home_page():
-    return FileResponse(STATIC_DIR / "index.html")
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 @app.get("/login.html", response_class=FileResponse)
 def get_login_page():
-    return FileResponse(STATIC_DIR / "login.html")
+    return FileResponse(FRONTEND_DIR / "login.html")
 
 @app.get("/profile.html", response_class=FileResponse)
 def get_profile_page():
-    return FileResponse(STATIC_DIR / "profile.html")
+    return FileResponse(FRONTEND_DIR / "profile.html")
 
 @app.get("/matches.html", response_class=FileResponse)
 def get_matches_page():
-    return FileResponse(STATIC_DIR / "matches.html")
+    return FileResponse(FRONTEND_DIR / "matches.html")
 
 @app.get("/admin.html", response_class=FileResponse)
 def get_admin_page():
-    return FileResponse(STATIC_DIR / "admin.html")
+    return FileResponse(FRONTEND_DIR / "admin.html")
+
+# Compatibilidade retroativa para rotas legadas de CSS e JS
+@app.get("/static/style.css", response_class=FileResponse)
+def get_legacy_style():
+    return FileResponse(FRONTEND_DIR / "css" / "style.css")
+
+@app.get("/static/app.js", response_class=FileResponse)
+def get_legacy_script():
+    return FileResponse(FRONTEND_DIR / "js" / "app.js")
 
 # --- ROTAS DE METADADOS (Cursos, Entidades, Perguntas) ---
 

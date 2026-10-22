@@ -9,7 +9,9 @@ if DB_PATH_ENV:
     DB_FILE = Path(DB_PATH_ENV)
     DB_FILE.parent.mkdir(parents=True, exist_ok=True)
 else:
-    DB_FILE = Path(__file__).parent / "pontinho.db"
+    # Salva na pasta data/ na raiz do projeto
+    DB_FILE = Path(__file__).resolve().parent.parent / "data" / "pontinho.db"
+    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 def get_db():
     """Retorna uma conexão com o banco SQLite com suporte a dicionários."""

@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # Evita arquivos .pyc e garante logs em tempo real
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
     DATABASE_PATH=/app/data/pontinho.db
 
 # Diretório de trabalho dentro do container
@@ -13,9 +14,10 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia o código da aplicação e arquivos estáticos
-COPY database.py main.py seed.py entrypoint.sh ./
-COPY static/ ./static/
+# Copia pastas do backend, frontend e script de inicialização
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
+COPY entrypoint.sh .
 
 # Cria o diretório para persistência do SQLite via volume
 RUN mkdir -p /app/data && chmod +x /app/entrypoint.sh

@@ -1,5 +1,16 @@
 import json
-from database import get_db, init_db, hash_password
+import sys
+from pathlib import Path
+
+# Garante resolução de imports dentro do backend
+BACKEND_DIR = Path(__file__).resolve().parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
+try:
+    from database import get_db, init_db, hash_password
+except ImportError:
+    from backend.database import get_db, init_db, hash_password
 
 def seed_database():
     init_db()
