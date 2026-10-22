@@ -143,6 +143,8 @@ def seed_database():
             "gender": "Outro",
             "target_gender": "Todos",
             "songs": json.dumps(["Daft Punk - Harder Better Faster Stronger", "Kraftwerk - The Robots"]),
+            "private_photos": json.dumps([]),
+            "private_bio": "",
             "is_admin": 1
         },
         {
@@ -172,6 +174,11 @@ def seed_database():
             "gender": "Mulher",
             "target_gender": "Todos",
             "songs": json.dumps(["Chico Buarque - Construção", "Arctic Monkeys - 505", "Duda Beat - Bixinho"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Na facul pareço tímida, mas adoro uma festa até o amanhecer e um date com vinho e conversa sem tabu. Quer descobrir mais? 🔥",
             "is_admin": 0
         },
         {
@@ -200,6 +207,11 @@ def seed_database():
             "gender": "Homem",
             "target_gender": "Mulheres",
             "songs": json.dumps(["Tame Impala - The Less I Know The Better", "Tim Maia - Não Quero Dinheiro", "The Strokes - Someday"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Gosto de olhares provocantes, carona noturna ouvindo indie e química que dispense apresentações formais. 😉",
             "is_admin": 0
         },
         {
@@ -228,6 +240,11 @@ def seed_database():
             "gender": "Mulher",
             "target_gender": "Todos",
             "songs": json.dumps(["Taylor Swift - Cruel Summer", "Daft Punk - Instant Crush", "Coldplay - Yellow"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Engenheira com lado secreto: fã de noites quentes, beijo roubado e dates despretensiosos que não têm hora pra acabar. 🚀✨",
             "is_admin": 0
         },
         {
@@ -256,6 +273,11 @@ def seed_database():
             "gender": "Homem",
             "target_gender": "Mulheres",
             "songs": json.dumps(["Criolo - Não Existe Amor em SP", "Kendrick Lamar - All The Stars", "Jorge Ben Jor - Taj Mahal"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Pegada firme e ritmo dentro e fora dos palcos. Me conquista com atitude e bom humor. Se pedir com carinho, eu libero o álbum secreto. 🔥",
             "is_admin": 0
         },
         {
@@ -284,6 +306,10 @@ def seed_database():
             "gender": "Mulher",
             "target_gender": "Todos",
             "songs": json.dumps(["Liniker - Baby 95", "Silva - A Cor É Rosa", "Caetano Veloso - Sozinho"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Equilíbrio entre calmaria de dia e intensidade à noite. Se você for direto ao ponto, ganha pontos comigo. 💋",
             "is_admin": 0
         }
     ]
@@ -295,19 +321,21 @@ def seed_database():
                 ra, password_hash, email, name, age, campus, course, specific_course, entity,
                 looking_for, bio, interests, photos,
                 prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
-                gender, target_gender, songs, is_admin
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                gender, target_gender, songs, private_photos, private_bio, is_admin
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(email) DO UPDATE SET
                 ra = excluded.ra,
                 password_hash = excluded.password_hash,
                 gender = excluded.gender,
                 target_gender = excluded.target_gender,
-                songs = excluded.songs
+                songs = excluded.songs,
+                private_photos = excluded.private_photos,
+                private_bio = excluded.private_bio
         """, (
             u["ra"], u["password_hash"], u["email"], u["name"], u["age"], u["campus"], u["course"], u["specific_course"], u["entity"],
             u["looking_for"], u["bio"], u["interests"], u["photos"],
             u["prompt1_q"], u["prompt1_a"], u["prompt2_q"], u["prompt2_a"], u["prompt3_q"], u["prompt3_a"],
-            u["gender"], u["target_gender"], u["songs"], u["is_admin"]
+            u["gender"], u["target_gender"], u["songs"], u.get("private_photos", "[]"), u.get("private_bio", ""), u["is_admin"]
         ))
 
     # Criar um match inicial de exemplo entre Mariana (id=2) e Gabriel (id=5) para podermos testar o chat imediatamente

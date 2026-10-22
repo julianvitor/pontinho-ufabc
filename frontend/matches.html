@@ -120,6 +120,11 @@
             </a>
           </div>
 
+          <!-- BANNER DE CONTEÚDO PRIVADO & PICANTE -->
+          <div id="private-access-banner" class="hidden px-4 py-2.5 bg-gradient-to-r from-rose-950 via-slate-900 to-rose-950 text-white border-b border-rose-500/20 text-xs flex flex-wrap items-center justify-between gap-2 shadow-inner">
+            <!-- Conteúdo dinâmico do banner -->
+          </div>
+
           <!-- Mensagens de Texto (Scroll) -->
           <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-2.5 bg-gradient-to-b from-white to-slate-50/50">
             <!-- Mensagens são adicionadas aqui -->
@@ -169,11 +174,48 @@
     </a>
   </nav>
 
+  <!-- MODAL: ÁLBUM & BIO SECRETA DESBLOQUEADOS -->
+  <div id="unlocked-private-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white w-full max-w-lg rounded-3xl border border-rose-500/30 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Header do Modal -->
+      <div class="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🔥</span>
+          <div>
+            <h3 id="unlocked-modal-title" class="font-black text-sm sm:text-base text-rose-300">Conteúdo Secreto</h3>
+            <p class="text-[11px] text-slate-400">Liberado exclusivamente após match e autorização</p>
+          </div>
+        </div>
+        <button onclick="closeUnlockedModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Conteúdo do Modal (Scroll) -->
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-4">
+        <!-- Bio Secreta -->
+        <div id="unlocked-bio-card" class="hidden p-4 rounded-2xl bg-rose-950/40 border border-rose-500/30 text-rose-100">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 block mb-1">💋 Bio Privada</span>
+          <p id="unlocked-bio-text" class="text-xs sm:text-sm leading-relaxed font-medium italic"></p>
+        </div>
+
+        <!-- Galeria de Fotos Privadas -->
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 block mb-2">📸 Fotos Secretas</span>
+          <div id="unlocked-photos-grid" class="grid grid-cols-2 gap-2.5">
+            <!-- Fotos inseridas dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="./js/app.js"></script>
   <script>
     let matchesList = [];
     let selectedMatchId = null;
     let pollInterval = null;
+    let currentPrivateStatus = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       const user = await Pontinho.requireAuth();
@@ -255,17 +297,164 @@
       });
 
       await fetchMessages(true);
+      await loadPrivateStatus(matchId);
 
       // Inicia polling a cada 3 segundos
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(() => {
-        if (selectedMatchId) fetchMessages(false);
+        if (selectedMatchId) {
+          fetchMessages(false);
+          loadPrivateStatus(selectedMatchId);
+        }
       }, 3000);
     }
 
     function backToMatchesList() {
       document.getElementById('matches-sidebar').classList.remove('hidden');
       document.getElementById('chat-window').classList.add('hidden');
+    }
+
+    async function loadPrivateStatus(matchId) {
+      const banner = document.getElementById('private-access-banner');
+      if (!banner) return;
+
+      try {
+        const data = await Pontinho.apiFetch(`/api/matches/${matchId}/private-status`);
+        currentPrivateStatus = data;
+
+        // Caso 1: O parceiro pediu acesso aos meus conteúdos privados
+        if (data.their_request_status === 'pending') {
+          banner.classList.remove('hidden');
+          banner.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="text-base">🔥</span>
+              <span><strong>${data.partner_name}</strong> pediu acesso às suas fotos e bio secretas!</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="respondPrivateAccess('approve')" class="px-3 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg text-white font-bold text-xs shadow-sm">
+                Liberar 🔓
+              </button>
+              <button onclick="respondPrivateAccess('reject')" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-slate-300 font-semibold text-xs">
+                Recusar
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        // Caso 2: O parceiro possui conteúdo privado cadastrado
+        if (data.partner_has_private) {
+          banner.classList.remove('hidden');
+
+          if (data.my_request_status === 'none') {
+            banner.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="text-base">🔥</span>
+                <span>${data.partner_name} possui <strong>${data.partner_private_count} foto(s) e bio secreta</strong>.</span>
+              </div>
+              <button onclick="requestPrivateAccess()" class="px-3 py-1 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs rounded-lg shadow-sm">
+                Solicitar Acesso 🔒
+              </button>
+            `;
+          } else if (data.my_request_status === 'pending') {
+            banner.innerHTML = `
+              <div class="flex items-center gap-2 text-rose-200">
+                <span class="text-base">⏳</span>
+                <span>Pedido enviado... Aguardando autorização de ${data.partner_name}.</span>
+              </div>
+            `;
+          } else if (data.my_request_status === 'rejected') {
+            banner.innerHTML = `
+              <div class="flex items-center gap-2 text-slate-300">
+                <span class="text-base">🔒</span>
+                <span>${data.partner_name} preferiu manter o conteúdo privado.</span>
+              </div>
+              <button onclick="requestPrivateAccess()" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-slate-200 text-xs rounded-lg font-semibold">
+                Pedir de novo
+              </button>
+            `;
+          } else if (data.my_request_status === 'approved') {
+            banner.innerHTML = `
+              <div class="flex items-center gap-2 text-rose-300">
+                <span class="text-base">🔥</span>
+                <span>Álbum Secreto & Bio Privada liberados por <strong>${data.partner_name}</strong>!</span>
+              </div>
+              <button onclick="openUnlockedModal()" class="px-3 py-1 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs rounded-lg shadow-md flex items-center gap-1">
+                <span>🔥</span> Ver Fotos & Bio
+              </button>
+            `;
+          }
+        } else {
+          banner.classList.add('hidden');
+        }
+
+      } catch (err) {
+        console.error('Erro ao verificar status privado:', err);
+        banner.classList.add('hidden');
+      }
+    }
+
+    async function requestPrivateAccess() {
+      if (!selectedMatchId) return;
+      try {
+        await Pontinho.apiFetch(`/api/matches/${selectedMatchId}/request-private`, { method: 'POST' });
+        Pontinho.showToast('Solicitação de fotos privadas enviada! 🔥', 'success');
+        await loadPrivateStatus(selectedMatchId);
+        await fetchMessages(true);
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function respondPrivateAccess(action) {
+      if (!selectedMatchId) return;
+      try {
+        await Pontinho.apiFetch(`/api/matches/${selectedMatchId}/respond-private`, {
+          method: 'POST',
+          body: JSON.stringify({ action })
+        });
+        Pontinho.showToast(action === 'approve' ? 'Álbum privado liberado! 🔓' : 'Solicitação recusada.', 'success');
+        await loadPrivateStatus(selectedMatchId);
+        await fetchMessages(true);
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function openUnlockedModal() {
+      if (!currentPrivateStatus || !currentPrivateStatus.unlocked_content) return;
+      const content = currentPrivateStatus.unlocked_content;
+      document.getElementById('unlocked-modal-title').innerText = `Álbum Secreto • ${currentPrivateStatus.partner_name}`;
+
+      const bioCard = document.getElementById('unlocked-bio-card');
+      const bioText = document.getElementById('unlocked-bio-text');
+      if (content.private_bio && content.private_bio.trim()) {
+        bioText.innerText = content.private_bio;
+        bioCard.classList.remove('hidden');
+      } else {
+        bioCard.classList.add('hidden');
+      }
+
+      const grid = document.getElementById('unlocked-photos-grid');
+      const photos = content.private_photos || [];
+      if (photos.length > 0) {
+        grid.innerHTML = photos.map((p, idx) => `
+          <div class="relative rounded-2xl overflow-hidden aspect-square border border-rose-500/40 shadow-lg group">
+            <img src="${p}" class="w-full h-full object-cover">
+            <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-bold">
+              #${idx + 1}
+            </span>
+          </div>
+        `).join('');
+      } else {
+        grid.innerHTML = `<p class="col-span-2 text-xs text-slate-400">Nenhuma foto adicionada.</p>`;
+      }
+
+      document.getElementById('unlocked-private-modal').classList.remove('hidden');
+    }
+
+    function closeUnlockedModal() {
+      document.getElementById('unlocked-private-modal').classList.add('hidden');
     }
 
     async function fetchMessages(shouldScroll = false) {

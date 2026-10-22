@@ -248,7 +248,7 @@ const Pontinho = {
 
 const PontinhoMock = {
   initStorage() {
-    if (!localStorage.getItem('pontinho_mock_initialized_v2')) {
+    if (!localStorage.getItem('pontinho_mock_initialized_v3')) {
       const defaultUsers = [
         {
           id: 1,
@@ -276,6 +276,8 @@ const PontinhoMock = {
           prompt3_q: "No intervalo entre as aulas você me encontra...",
           prompt3_a: "Programando no laboratório ou caçando tomada no mezanino.",
           songs: ["Daft Punk - Harder Better Faster Stronger", "Kraftwerk - The Robots"],
+          private_photos: [],
+          private_bio: "",
           is_admin: 1
         },
         {
@@ -305,6 +307,11 @@ const PontinhoMock = {
           prompt3_q: "Um date ideal pelo ABC ou Santo André tem...",
           prompt3_a: "Pastel na feira de Santo André e depois um café pra papear sem pressa.",
           songs: ["Chico Buarque - Construção", "Arctic Monkeys - 505", "Duda Beat - Bixinho"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Na facul pareço tímida, mas adoro uma festa até o amanhecer e um date com vinho e conversa sem tabu. Quer descobrir mais? 🔥",
           is_admin: 0
         },
         {
@@ -333,6 +340,11 @@ const PontinhoMock = {
           prompt3_q: "No intervalo entre as aulas você me encontra...",
           prompt3_a: "Na banquinha discutindo o último filme da A24.",
           songs: ["Tame Impala - The Less I Know The Better", "Tim Maia - Não Quero Dinheiro", "The Strokes - Someday"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Gosto de olhares provocantes, carona noturna ouvindo indie e química que dispense apresentações formais. 😉",
           is_admin: 0
         },
         {
@@ -361,6 +373,11 @@ const PontinhoMock = {
           prompt3_q: "Minha técnica infalível pra conseguir vaga no SIGAA...",
           prompt3_a: "Fazer amizade com os veteranos pra saber quais professores não reprovam 80%.",
           songs: ["Taylor Swift - Cruel Summer", "Daft Punk - Instant Crush", "Coldplay - Yellow"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Engenheira com lado secreto: fã de noites quentes, beijo roubado e dates despretensiosos que não têm hora pra acabar. 🚀✨",
           is_admin: 0
         },
         {
@@ -389,6 +406,11 @@ const PontinhoMock = {
           prompt3_q: "Um date ideal pelo ABC ou Santo André tem...",
           prompt3_a: "Hambúrguer artesanal no Bairro Jardim e muitas risadas.",
           songs: ["Criolo - Não Existe Amor em SP", "Kendrick Lamar - All The Stars", "Jorge Ben Jor - Taj Mahal"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Pegada firme e ritmo dentro e fora dos palcos. Me conquista com atitude e bom humor. Se pedir com carinho, eu libero o álbum secreto. 🔥",
           is_admin: 0
         },
         {
@@ -417,6 +439,10 @@ const PontinhoMock = {
           prompt3_q: "Se você me pagar um salgado na lanchonete do Bloco A...",
           prompt3_a: "Eu te passo os melhores resumos de Economia Política.",
           songs: ["Liniker - Baby 95", "Silva - A Cor É Rosa", "Caetano Veloso - Sozinho"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Equilíbrio entre calmaria de dia e intensidade à noite. Se você for direto ao ponto, ganha pontos comigo. 💋",
           is_admin: 0
         }
       ];
@@ -459,12 +485,15 @@ const PontinhoMock = {
         { from_user_id: 5, to_user_id: 2, action: "like" }
       ];
 
+      const defaultPrivateRequests = [];
+
       localStorage.setItem('pontinho_mock_users', JSON.stringify(defaultUsers));
       localStorage.setItem('pontinho_mock_ads', JSON.stringify(defaultAds));
       localStorage.setItem('pontinho_mock_matches', JSON.stringify(defaultMatches));
       localStorage.setItem('pontinho_mock_messages', JSON.stringify(defaultMessages));
       localStorage.setItem('pontinho_mock_swipes', JSON.stringify(defaultSwipes));
-      localStorage.setItem('pontinho_mock_initialized_v2', 'true');
+      localStorage.setItem('pontinho_mock_private_requests', JSON.stringify(defaultPrivateRequests));
+      localStorage.setItem('pontinho_mock_initialized_v3', 'true');
     }
   },
 
@@ -511,6 +540,15 @@ const PontinhoMock = {
 
   saveAds(ads) {
     localStorage.setItem('pontinho_mock_ads', JSON.stringify(ads));
+  },
+
+  getPrivateRequests() {
+    this.initStorage();
+    return JSON.parse(localStorage.getItem('pontinho_mock_private_requests') || '[]');
+  },
+
+  savePrivateRequests(reqs) {
+    localStorage.setItem('pontinho_mock_private_requests', JSON.stringify(reqs));
   },
 
   // Roteador de endpoints estáticos
@@ -685,7 +723,19 @@ const PontinhoMock = {
       const freq = (ads[0] && ads[0].frequency) || 3;
 
       for (const p of availableProfiles) {
-        feedCards.push({ ...p, is_ad: false });
+        const privPhotos = p.private_photos || [];
+        const privBio = p.private_bio || '';
+        const hasPrivate = Boolean(privPhotos.length || (privBio && privBio.trim()));
+        const countPrivate = privPhotos.length;
+        const sanitized = { 
+          ...p, 
+          has_private_content: hasPrivate, 
+          private_photos_count: countPrivate, 
+          is_ad: false 
+        };
+        delete sanitized.private_photos;
+        delete sanitized.private_bio;
+        feedCards.push(sanitized);
         cardCount++;
         if (ads.length > 0 && cardCount % freq === 0) {
           feedCards.push({ ...ads[adIdx % ads.length], is_ad: true });
@@ -761,6 +811,114 @@ const PontinhoMock = {
     // 9. Users List
     if (url.includes('/api/users/list')) {
       return this.getUsers().map(u => ({ id: u.id, name: u.name, ra: u.ra, email: u.email }));
+    }
+
+    // 9.1 Private Access Status
+    if (url.includes('/private-status')) {
+      const matchId = parseInt(url.split('/api/matches/')[1].split('/private-status')[0], 10);
+      const matches = this.getMatches();
+      const match = matches.find(m => m.id === matchId && (m.user1_id === currentUserId || m.user2_id === currentUserId));
+      if (!match) throw new Error('Match não encontrado ou acesso não autorizado.');
+      const partnerId = match.user1_id === currentUserId ? match.user2_id : match.user1_id;
+      const users = this.getUsers();
+      const partner = users.find(u => u.id === partnerId);
+      const partnerPrivPhotos = (partner && partner.private_photos) || [];
+      const partnerPrivBio = (partner && partner.private_bio) || '';
+      const partnerHasPrivate = Boolean(partnerPrivPhotos.length || (partnerPrivBio && partnerPrivBio.trim()));
+
+      const reqs = this.getPrivateRequests();
+      const reqByMe = reqs.find(r => r.match_id === matchId && r.requester_id === currentUserId && r.target_id === partnerId);
+      const reqByThem = reqs.find(r => r.match_id === matchId && r.requester_id === partnerId && r.target_id === currentUserId);
+
+      const myStatus = reqByMe ? reqByMe.status : 'none';
+      const theirStatus = reqByThem ? reqByThem.status : 'none';
+
+      let unlockedContent = null;
+      if (myStatus === 'approved' && partnerHasPrivate) {
+        unlockedContent = {
+          private_photos: partnerPrivPhotos,
+          private_bio: partnerPrivBio
+        };
+      }
+
+      return {
+        partner_id: partnerId,
+        partner_name: partner ? partner.name : '',
+        partner_has_private: partnerHasPrivate,
+        partner_private_count: partnerPrivPhotos.length,
+        my_request_status: myStatus,
+        their_request_status: theirStatus,
+        unlocked_content: unlockedContent
+      };
+    }
+
+    // 9.2 Request Private Access
+    if (url.includes('/request-private') && method === 'POST') {
+      const matchId = parseInt(url.split('/api/matches/')[1].split('/request-private')[0], 10);
+      const matches = this.getMatches();
+      const match = matches.find(m => m.id === matchId && (m.user1_id === currentUserId || m.user2_id === currentUserId));
+      if (!match) throw new Error('Match não encontrado ou acesso não autorizado.');
+      const partnerId = match.user1_id === currentUserId ? match.user2_id : match.user1_id;
+
+      const reqs = this.getPrivateRequests();
+      const existingIdx = reqs.findIndex(r => r.requester_id === currentUserId && r.target_id === partnerId);
+      if (existingIdx >= 0) {
+        reqs[existingIdx].status = 'pending';
+        reqs[existingIdx].match_id = matchId;
+      } else {
+        reqs.push({ match_id: matchId, requester_id: currentUserId, target_id: partnerId, status: 'pending' });
+      }
+      this.savePrivateRequests(reqs);
+
+      // Injeta mensagem no chat
+      const messages = this.getMessages();
+      const newMsgId = messages.length > 0 ? Math.max(...messages.map(m => m.id)) + 1 : 1;
+      messages.push({
+        id: newMsgId,
+        match_id: matchId,
+        sender_id: currentUserId,
+        text: '🔒 Pediu acesso às suas fotos e bio privadas.',
+        created_at: new Date().toISOString()
+      });
+      this.saveMessages(messages);
+
+      return { success: true, status: 'pending', message: 'Solicitação enviada!' };
+    }
+
+    // 9.3 Respond Private Access
+    if (url.includes('/respond-private') && method === 'POST') {
+      const matchId = parseInt(url.split('/api/matches/')[1].split('/respond-private')[0], 10);
+      const matches = this.getMatches();
+      const match = matches.find(m => m.id === matchId && (m.user1_id === currentUserId || m.user2_id === currentUserId));
+      if (!match) throw new Error('Match não encontrado ou acesso não autorizado.');
+      const partnerId = match.user1_id === currentUserId ? match.user2_id : match.user1_id;
+
+      const action = body.action;
+      const newStatus = action === 'approve' ? 'approved' : 'rejected';
+
+      const reqs = this.getPrivateRequests();
+      const existingIdx = reqs.findIndex(r => r.requester_id === partnerId && r.target_id === currentUserId);
+      if (existingIdx >= 0) {
+        reqs[existingIdx].status = newStatus;
+      } else {
+        reqs.push({ match_id: matchId, requester_id: partnerId, target_id: currentUserId, status: newStatus });
+      }
+      this.savePrivateRequests(reqs);
+
+      // Injeta mensagem no chat
+      const messages = this.getMessages();
+      const newMsgId = messages.length > 0 ? Math.max(...messages.map(m => m.id)) + 1 : 1;
+      const notice = newStatus === 'approved' ? '🔓 Liberou o acesso às fotos e bio privadas!' : '🚫 Recusou o pedido de acesso privado.';
+      messages.push({
+        id: newMsgId,
+        match_id: matchId,
+        sender_id: currentUserId,
+        text: notice,
+        created_at: new Date().toISOString()
+      });
+      this.saveMessages(messages);
+
+      return { success: true, status: newStatus };
     }
 
     // 10. Matches

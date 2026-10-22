@@ -40,14 +40,16 @@ def get_my_profile(request: Request):
     d["interests"] = json.loads(d["interests"]) if d.get("interests") else []
     d["photos"] = json.loads(d["photos"]) if d.get("photos") else []
     d["songs"] = json.loads(d["songs"]) if d.get("songs") else []
+    d["private_photos"] = json.loads(d["private_photos"]) if d.get("private_photos") else []
+    d["private_bio"] = d.get("private_bio") or ""
     return d
 
 @router.put("/me")
 def update_my_profile(data: UserCreateOrUpdate, request: Request):
-    """Atualiza o perfil próprio. Valida obrigatoriedade de ao menos 2 fotos."""
+    """Atualiza o perfil próprio. Valida obrigatoriedade de ao menos 2 fotos públicas."""
     current_id = get_current_user_id(request)
     if len(data.photos) < 2:
-        raise HTTPException(status_code=400, detail="O perfil deve ter obrigatoriamente ao menos duas fotos.")
+        raise HTTPException(status_code=400, detail="O perfil deve ter obrigatoriamente ao menos duas fotos públicas.")
 
     conn = get_db()
     cursor = conn.cursor()
@@ -58,7 +60,8 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
             entity = ?, looking_for = ?, bio = ?, interests = ?, photos = ?,
             prompt1_q = ?, prompt1_a = ?, prompt2_q = ?, prompt2_a = ?,
             prompt3_q = ?, prompt3_a = ?,
-            gender = ?, target_gender = ?, songs = ?
+            gender = ?, target_gender = ?, songs = ?,
+            private_photos = ?, private_bio = ?
         WHERE id = ?
     """, (
         data.email, data.name, data.age, data.campus, data.course, data.specific_course,
@@ -67,6 +70,8 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
         data.prompt3_q, data.prompt3_a,
         data.gender or "Não informado", data.target_gender or "Todos",
         json.dumps(data.songs or []),
+        json.dumps(data.private_photos or []),
+        data.private_bio or "",
         current_id
     ))
 
@@ -89,14 +94,16 @@ def create_new_user(data: UserCreateOrUpdate):
                 email, name, age, campus, course, specific_course,
                 entity, looking_for, bio, interests, photos,
                 prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
-                gender, target_gender, songs
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                gender, target_gender, songs, private_photos, private_bio
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data.email, data.name, data.age, data.campus, data.course, data.specific_course,
             data.entity, data.looking_for, data.bio, json.dumps(data.interests), json.dumps(data.photos),
             data.prompt1_q, data.prompt1_a, data.prompt2_q, data.prompt2_a, data.prompt3_q, data.prompt3_a,
             data.gender or "Não informado", data.target_gender or "Todos",
-            json.dumps(data.songs or [])
+            json.dumps(data.songs or []),
+            json.dumps(data.private_photos or []),
+            data.private_bio or ""
         ))
         conn.commit()
         new_id = cursor.lastrowid

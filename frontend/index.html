@@ -469,6 +469,11 @@
               <span class="bg-amber-500/90 backdrop-blur-md text-slate-900 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
                 🏛️ ${user.entity}
               </span>
+              ${user.has_private_content ? `
+                <span class="bg-gradient-to-r from-rose-600 to-red-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 border border-rose-400/40">
+                  🔒 Álbum Secreto 🔥
+                </span>
+              ` : ''}
             </div>
 
             <!-- Nome e Idade -->
@@ -843,6 +848,28 @@
           <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Bio</h4>
             <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${u.bio}</p>
+          </div>
+        ` : ''}
+
+        <!-- Teaser Bloqueado de Conteúdo Secreto / Picante -->
+        ${u.has_private_content ? `
+          <div class="p-4 rounded-2xl bg-gradient-to-r from-rose-950 via-slate-900 to-black border border-rose-500/30 text-white shadow-lg flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-300 flex items-center justify-center text-xl shrink-0 border border-rose-500/30">
+                🔒
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-rose-200 flex items-center gap-1.5">
+                  <span>🔥</span> Álbum & Bio Secreta (${u.private_photos_count || 0} fotos)
+                </h4>
+                <p class="text-[11px] text-rose-300/70 mt-0.5">
+                  Conteúdo exclusivo disponível após match e autorização no chat.
+                </p>
+              </div>
+            </div>
+            <span class="text-[11px] font-bold text-rose-300 bg-rose-500/20 px-2.5 py-1 rounded-full border border-rose-500/30 shrink-0">
+              Bloqueado
+            </span>
           </div>
         ` : ''}
 

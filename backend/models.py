@@ -42,6 +42,11 @@ class UserCreateOrUpdate(BaseModel):
     gender: Optional[str] = "Não informado"  # 'Mulher', 'Homem', 'Não-binário', 'Outro'
     target_gender: Optional[str] = "Todos"   # 'Mulheres', 'Homens', 'Não-binário', 'Todos'
     songs: List[str] = Field(default_factory=list, description="Lista de músicas / trilha sonora do perfil")
+    private_photos: List[str] = Field(default_factory=list, description="Fotos privadas (visíveis após match + autorização)")
+    private_bio: Optional[str] = Field(default="", description="Bio secreta/picante para matches autorizados")
+
+class PrivateAccessAction(BaseModel):
+    action: str  # 'approve' ou 'reject'
 
 class CourseCreate(BaseModel):
     name: str

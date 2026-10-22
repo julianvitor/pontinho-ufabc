@@ -81,6 +81,27 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN target_gender TEXT DEFAULT 'Todos'")
     if "songs" not in existing_cols:
         cursor.execute("ALTER TABLE users ADD COLUMN songs TEXT DEFAULT '[]'")
+    if "private_photos" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN private_photos TEXT DEFAULT '[]'")
+    if "private_bio" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN private_bio TEXT DEFAULT ''")
+
+    # Tabela de Solicitações de Acesso a Conteúdo Privado (Fotos & Bio Secreta)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS private_access_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        match_id INTEGER NOT NULL,
+        requester_id INTEGER NOT NULL,
+        target_id INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(requester_id, target_id),
+        FOREIGN KEY(match_id) REFERENCES matches(id) ON DELETE CASCADE,
+        FOREIGN KEY(requester_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY(target_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    """)
 
     # Tabela de Cursos (Base e Específico) gerenciáveis pelo admin
     cursor.execute("""

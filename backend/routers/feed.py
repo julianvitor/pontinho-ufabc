@@ -125,6 +125,15 @@ def get_feed(request: Request):
         d["interests"] = json.loads(d["interests"]) if d["interests"] else []
         d["photos"] = json.loads(d["photos"]) if d["photos"] else []
         d["songs"] = json.loads(d["songs"]) if d.get("songs") else []
+        
+        # Conteúdo Privado: não expõe dados no feed aberto, apenas indicações
+        private_photos = json.loads(d["private_photos"]) if d.get("private_photos") else []
+        d["has_private_content"] = bool(private_photos or d.get("private_bio"))
+        d["private_photos_count"] = len(private_photos)
+        d.pop("private_photos", None)
+        d.pop("private_bio", None)
+        d.pop("password_hash", None)
+        
         d["is_ad"] = False
         profiles.append(d)
 

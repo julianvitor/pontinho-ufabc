@@ -223,6 +223,64 @@
           </div>
         </div>
 
+        <!-- SEÇÃO: CONTEÚDO PRIVADO & PICANTE (APÓS MATCH E AUTORIZAÇÃO) -->
+        <div class="space-y-4 pt-4 border-t border-slate-100 bg-gradient-to-br from-rose-950 via-slate-900 to-black text-white p-5 rounded-3xl shadow-lg border border-rose-500/20">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-extrabold text-sm sm:text-base flex items-center gap-2 text-rose-300">
+                <span>🔥</span> Área Secreta & Picante
+              </h3>
+              <p class="text-[11px] sm:text-xs text-rose-200/70 mt-0.5">
+                Fotos e bio exclusivas. Apenas quem der match e você autorizar poderá ver.
+              </p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1">
+              <span>🔒</span> Privado
+            </span>
+          </div>
+
+          <!-- Fotos Privadas -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-rose-200 flex items-center gap-1.5">
+                <span>📸</span> Fotos Ocultas
+              </label>
+              <span id="private-photos-count-indicator" class="text-[11px] font-semibold text-rose-300/80">
+                0 fotos
+              </span>
+            </div>
+
+            <div id="private-photos-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <!-- Fotos privadas renderizadas dinamicamente -->
+            </div>
+
+            <div class="flex gap-2">
+              <input 
+                id="new-private-photo-input" 
+                type="url" 
+                placeholder="Cole a URL da foto privada..." 
+                class="flex-1 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-rose-200/40 focus:outline-none focus:ring-2 focus:ring-rose-500/60"
+              >
+              <button type="button" onclick="addPrivatePhotoUrl()" class="px-4 py-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                Adicionar
+              </button>
+            </div>
+          </div>
+
+          <!-- Bio Privada / Picante -->
+          <div class="pt-2 border-t border-white/10">
+            <label class="block text-xs font-bold text-rose-200 mb-1 flex items-center gap-1">
+              <span>💋</span> Bio Privada (Seu lado picante ou sem filtros)
+            </label>
+            <textarea 
+              id="form-private-bio" 
+              rows="2" 
+              placeholder="O que só seus matches autorizados devem saber sobre você... 🔥" 
+              class="w-full bg-white/10 border border-white/15 rounded-xl p-3 text-xs text-white placeholder-rose-200/40 focus:outline-none focus:ring-2 focus:ring-rose-500/60"
+            ></textarea>
+          </div>
+        </div>
+
         <!-- SEÇÃO: MÚSICAS DO PERFIL (YOUTUBE) -->
         <div class="space-y-3 pt-4 border-t border-slate-100">
           <div>
@@ -316,6 +374,7 @@
   <script src="./js/app.js"></script>
   <script>
     let currentPhotos = [];
+    let currentPrivatePhotos = [];
     let metadata = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -383,6 +442,10 @@
 
         currentPhotos = u.photos || [];
         renderPhotosGrid();
+
+        currentPrivatePhotos = u.private_photos || [];
+        renderPrivatePhotosGrid();
+        document.getElementById('form-private-bio').value = u.private_bio || '';
 
         if (u.prompt1_q) document.getElementById('form-prompt1-q').value = u.prompt1_q;
         document.getElementById('form-prompt1-a').value = u.prompt1_a || '';
@@ -460,12 +523,65 @@
       renderPhotosGrid();
     }
 
+    function renderPrivatePhotosGrid() {
+      const grid = document.getElementById('private-photos-grid');
+      const indicator = document.getElementById('private-photos-count-indicator');
+
+      indicator.innerText = `${currentPrivatePhotos.length} foto(s) secreta(s)`;
+
+      if (currentPrivatePhotos.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full p-3.5 border border-dashed border-rose-500/40 bg-white/5 rounded-2xl text-center text-[11px] text-rose-300">
+            Nenhuma foto privada. Adicione fotos exclusivas para seus matches autorizados! 🔥
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = currentPrivatePhotos.map((url, i) => `
+        <div class="relative group rounded-2xl overflow-hidden aspect-square border border-rose-500/40 shadow-sm">
+          <img src="${url}" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <button 
+            type="button" 
+            onclick="removePrivatePhoto(${i})" 
+            class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-rose-600 text-white flex items-center justify-center text-xs font-bold transition"
+            title="Remover foto privada"
+          >
+            ✕
+          </button>
+          <span class="absolute bottom-2 left-2 bg-rose-900/80 text-rose-200 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+            <span>🔒</span> #${i + 1}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function addPrivatePhotoUrl() {
+      const input = document.getElementById('new-private-photo-input');
+      const url = input.value.trim();
+
+      if (!url) {
+        Pontinho.showToast('Digite uma URL válida para a foto privada.', 'error');
+        return;
+      }
+
+      currentPrivatePhotos.push(url);
+      input.value = '';
+      renderPrivatePhotosGrid();
+    }
+
+    function removePrivatePhoto(index) {
+      currentPrivatePhotos.splice(index, 1);
+      renderPrivatePhotosGrid();
+    }
+
     async function saveProfile(e) {
       e.preventDefault();
 
       // Validação estrita de negócio: pelo menos duas fotos
       if (currentPhotos.length < 2) {
-        Pontinho.showToast('O perfil deve ter obrigatoriamente ao menos duas fotos!', 'error');
+        Pontinho.showToast('O perfil deve ter obrigatoriamente ao menos duas fotos públicas!', 'error');
         return;
       }
 
@@ -494,6 +610,8 @@
         bio: document.getElementById('form-bio').value.trim(),
         interests: interestsArray,
         photos: currentPhotos,
+        private_photos: currentPrivatePhotos,
+        private_bio: document.getElementById('form-private-bio').value.trim(),
         prompt1_q: document.getElementById('form-prompt1-q').value,
         prompt1_a: document.getElementById('form-prompt1-a').value.trim(),
         prompt2_q: document.getElementById('form-prompt2-q').value,
