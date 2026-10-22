@@ -418,6 +418,336 @@ def seed_database():
             ]),
             "private_bio": "Voz firme, beijo com pegada e zero limites pra quem desperta meu lado mais quente. Vem conferir. 🔥",
             "is_admin": 0
+        },
+        # Perfil 9: Larissa Prado
+        {
+            "ra": "11202021009",
+            "password_hash": hash_password("123456"),
+            "email": "larissa.prado@pontinho.app",
+            "name": "Larissa Prado",
+            "age": 21,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Engenharia Biomédica",
+            "entity": "GPDA",
+            "looking_for": "Algo sério",
+            "bio": "Pesquisadora de biomateriais e próteses. Viciada em corrida de rua, café gelado e dias ensolarados no campus. Adoro rir de coisas bobas e conversar sobre o futuro.",
+            "interests": json.dumps(["Engenharia", "Corrida", "Café Gelado", "Séries", "Biomateriais"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt1_a": "Correndo na pista do campus no fim de tarde ouvindo música pop animada.",
+            "prompt2_q": "Se você me chamar pra sair agora...",
+            "prompt2_a": "Topo na hora se for pra comer uma sobremesa boa ou tomar um açaí caprichado.",
+            "prompt3_q": "Minha técnica infalível pra quebrar o gelo...",
+            "prompt3_a": "Elogiar o tênis ou perguntar qual matéria tá tirando seu sono essa semana.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
+            "songs": json.dumps(["Dua Lipa - Dance The Night", "Marina Sena - Dano Sarrada", "Harry Styles - As It Was"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Tenho jeito de certinha na sala de aula, mas quem me conhece de verdade sabe que tenho um lado provocante e cheio de atitude. Me manda pedido! 😉",
+            "is_admin": 0
+        },
+        # Perfil 10: Thiago Oliveira
+        {
+            "ra": "11202021010",
+            "password_hash": hash_password("123456"),
+            "email": "thiago.oliveira@pontinho.app",
+            "name": "Thiago Oliveira",
+            "age": 24,
+            "campus": "São Bernardo do Campo",
+            "course": "BC&H - Bacharelado em Ciências e Humanidades",
+            "specific_course": "Filosofia",
+            "entity": "Nenhuma / Foco nos Estudos",
+            "looking_for": "Algo sério",
+            "bio": "Filosofia e literatura. Apaixonado por vinis antigos, cafés especiais filtrados e papos que duram até o amanhecer. Busco conexões que façam o coração bater no ritmo certo.",
+            "interests": json.dumps(["Filosofia", "Café Especial", "Vinis", "Jazz", "Literatura"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt1_a": "Livraria charmosa com cafeteria no fundo dá de dez a zero em qualquer balada barulhenta.",
+            "prompt2_q": "Um date ideal no fim de noite tem...",
+            "prompt2_a": "Caminhada calma com céu estrelado, jaqueta emprestada e silêncios confortáveis.",
+            "prompt3_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt3_a": "No cantinho da biblioteca lendo Sartre ou trocando ideia no banco de madeira.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
+            "songs": json.dumps(["Miles Davis - So What", "Belchior - Apenas um Rapaz Latino-Americano", "Chet Baker - I Fall In Love Too Easily"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Por trás da calma e dos livros, gosto de intensidade, beijo que não pede licença e olhares que desarmam. Quer conferir? 🔥",
+            "is_admin": 0
+        },
+        # Perfil 11: Juliana Freitas
+        {
+            "ra": "11202021011",
+            "password_hash": hash_password("123456"),
+            "email": "juliana.freitas@pontinho.app",
+            "name": "Juliana Freitas",
+            "age": 22,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Engenharia Ambiental e Urbana",
+            "entity": "Enactus",
+            "looking_for": "Amizade",
+            "bio": "Futura engenheira ambiental. Ciclista nas horas vagas, apaixonada por botânica e cerveja artesanal. Vamos pedalar até a Represa Billings ou tomar uma IPA gelada?",
+            "interests": json.dumps(["Bicicleta", "Sustentabilidade", "Cerveja Artesanal", "Plantas", "MPB"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt1_a": "Parque Celso Daniel em um sábado ensolarado com canga na grama e amigos.",
+            "prompt2_q": "Se você me chamar pra sair agora...",
+            "prompt2_a": "Se tiver petisco vegetariano e bebida refrescante, já tô calçando o tênis.",
+            "prompt3_q": "Minha técnica infalível pra quebrar o gelo...",
+            "prompt3_a": "Perguntar quantas plantas você já conseguiu manter vivas por mais de um ano.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
+            "songs": json.dumps(["Gilsons - Várias Queixas", "Luedji Luna - Banho de Folhas", "Alceu Valença - Anunciação"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Espírito livre, sorriso fácil e carinho que arrepia. Deixo minhas fotos secretas pra quem demonstrar interesse de verdade. ✨",
+            "is_admin": 0
+        },
+        # Perfil 12: Mateus Chen
+        {
+            "ra": "11202021012",
+            "password_hash": hash_password("123456"),
+            "email": "mateus.chen@pontinho.app",
+            "name": "Mateus Chen",
+            "age": 20,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Ciência da Computação",
+            "entity": "IEEE Student Branch",
+            "looking_for": "Algo casual",
+            "bio": "Programo em Rust e TypeScript, viciado em hackathons e jogos de ritmo. Amo comida asiática, teclados mecânicos e descobrir novos lugares no ABC.",
+            "interests": json.dumps(["Rust", "Hackathons", "Ramen", "Games", "Synthwave"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "A matéria ou desafio que quase me enlouqueceu...",
+            "prompt1_a": "Teoria dos Grafos às 8h da manhã em uma segunda-feira chuvosa.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Jogar coop ou arcade juntos é o melhor teste de compatibilidade que existe.",
+            "prompt3_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt3_a": "No Bloco B disputando quem compila o código mais rápido.",
+            "gender": "Homem",
+            "target_gender": "Todos",
+            "songs": json.dumps(["The Midnight - Sunset", "Gunship - Tech Noir", "Daft Punk - Digital Love"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Gosto de cumplicidade sem rodeios, toques demorados e química no ponto. Curioso(a)? Só pedir acesso. 🔥",
+            "is_admin": 0
+        },
+        # Perfil 13: Carolina Meireles
+        {
+            "ra": "11202021013",
+            "password_hash": hash_password("123456"),
+            "email": "carolina.meireles@pontinho.app",
+            "name": "Carolina Meireles",
+            "age": 23,
+            "campus": "São Bernardo do Campo",
+            "course": "BC&H - Bacharelado em Ciências e Humanidades",
+            "specific_course": "Relações Internacionais",
+            "entity": "Atlética Geral",
+            "looking_for": "Algo sério",
+            "bio": "Futura diplomata, poliglota e apaixonada por geopolítica. Nas horas vagas sou capitã de handebol e fã incondicional de massas italianas.",
+            "interests": json.dumps(["Handebol", "Idiomas", "Viagens", "Vinho", "Geopolítica"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "Um date ideal no fim de noite tem...",
+            "prompt1_a": "Risotto feito a quatro mãos, taça de vinho e boas gargalhadas na cozinha.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Pessoa que trata bem garçom e funcionários já ganha 90% do meu coração.",
+            "prompt3_q": "Se você me chamar pra sair agora...",
+            "prompt3_a": "Aceito se for um lugar aconchegante com música ao vivo e iluminação baixa.",
+            "gender": "Mulher",
+            "target_gender": "Homens",
+            "songs": json.dumps(["Rosalía - Despechá", "Stromae - Santé", "Anavitória - Porque Eu Te Amo"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Postura elegante em público, mas entre quatro paredes adoro intensidade, pegada sem pudores e intimidade quente. 💋",
+            "is_admin": 0
+        },
+        # Perfil 14: Pedro Henrique (PH)
+        {
+            "ra": "11202021014",
+            "password_hash": hash_password("123456"),
+            "email": "pedro.henrique@pontinho.app",
+            "name": "Pedro Henrique (PH)",
+            "age": 22,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Engenharia Aeroespacial",
+            "entity": "Rocket Design",
+            "looking_for": "Algo casual",
+            "bio": "Engenharia Aeroespacial e piloto de kart amador nas horas vagas. Gosto de churrasco com amigos, sertanejo modão, rock clássico e quem sabe o que quer.",
+            "interests": json.dumps(["Kart", "Aeroespacial", "Churrasco", "Rock Clássico", "Fórmula 1"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "Se você me chamar pra sair agora...",
+            "prompt1_a": "Pego o carro, coloco uma playlist boa e a gente vai comer na melhor hamburgueria da região.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Date formal de cinema é furada; o bom mesmo é lugar onde dá pra conversar de verdade.",
+            "prompt3_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt3_a": "Calculando trajetórias ou assistindo vídeos de onboard da F1 no pátio.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
+            "songs": json.dumps(["Led Zeppelin - Whole Lotta Love", "Queen - Don't Stop Me Now", "Engenheiros do Hawaii - Infinita Highway"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Curto abraço apertado, beijo que rouba o ar e momentos que marcam sem complicação. Vem ver o resto no privado. 🚀",
+            "is_admin": 0
+        },
+        # Perfil 15: Luana Vasconcelos
+        {
+            "ra": "11202021015",
+            "password_hash": hash_password("123456"),
+            "email": "luana.vasconcelos@pontinho.app",
+            "name": "Luana Vasconcelos",
+            "age": 20,
+            "campus": "São Bernardo do Campo",
+            "course": "LCH - Licenciatura em Ciências Humanas",
+            "specific_course": "Filosofia",
+            "entity": "Centro Acadêmico BC&H",
+            "looking_for": "Amizade",
+            "bio": "Estudante de humanidades, poetisa de bloco de notas e defensora de causas sociais. Apaixonada por cinema independente, gatos malhados e debates no gramado do campus.",
+            "interests": json.dumps(["Poesia", "Cinema Independente", "Gatos", "Humanidades", "Teatro"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt1_a": "Debaixo das árvores do campus SBC escrevendo crônicas ou ouvindo MPB no fone.",
+            "prompt2_q": "Minha técnica infalível pra quebrar o gelo...",
+            "prompt2_a": "Perguntar qual foi o último filme que te fez chorar sem vergonha.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Chá quente, coberta dividida e conversas existenciais sobre o universo.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
+            "songs": json.dumps(["Gal Costa - Baby", "Clara Nunes - O Mar Serenou", "Letrux - Ninguém Perguntou Por Você"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Sensível e profunda por fora, mas com uma chama ardente que surpreende quem ganha minha confiança. Peça acesso se quiser desvendar. ✨",
+            "is_admin": 0
+        },
+        # Perfil 16: Rafael Duarte
+        {
+            "ra": "11202021016",
+            "password_hash": hash_password("123456"),
+            "email": "rafael.duarte@pontinho.app",
+            "name": "Rafael Duarte",
+            "age": 25,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Engenharia de Informação",
+            "entity": "Bateria Universitária",
+            "looking_for": "Algo casual",
+            "bio": "Redes, segurança da informação e percussão pesada na Bateria. Final de semana é praia pra surfar no litoral ou festival eletrônico até de manhã.",
+            "interests": json.dumps(["Surfe", "Percussão", "Techno", "Segurança da Informação", "Praia"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt1_a": "Afinando os instrumentos da bateria ou planejando a próxima viagem pra Maresias.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Se não rolar sintonia de humor e piada interna rápida, não vai pra frente.",
+            "prompt3_q": "Se você me chamar pra sair agora...",
+            "prompt3_a": "Bora pra um barzinho com música animada e cerveja bem gelada.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
+            "songs": json.dumps(["Boris Brejcha - Gravity", "Fisher - Losing It", "Natiruts - Sorri, Sou Rei"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Pele salgada do mar, energia pra dar e vender e aquela pegada que não dá pra esquecer fácil. Quer ver mais? Pede o privado. 🔥",
+            "is_admin": 0
+        },
+        # Perfil 17: Helena Borges
+        {
+            "ra": "11202021017",
+            "password_hash": hash_password("123456"),
+            "email": "helena.borges@pontinho.app",
+            "name": "Helena Borges",
+            "age": 21,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Biotecnologia",
+            "entity": "Atlética Geral",
+            "looking_for": "Algo sério",
+            "bio": "Biotecnologia e apaixonada por genética molecular. Atleta de natação pela Atlética, viciada em praia, brigadeiro de panela e playlists de pop anos 2000.",
+            "interests": json.dumps(["Natação", "Biotecnologia", "Pop 2000", "Praia", "Doces"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "Minha técnica infalível pra quebrar o gelo...",
+            "prompt1_a": "Cantarolar um refrão marcante da Britney ou Rihanna e ver se você acompanha.",
+            "prompt2_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt2_a": "Dando braçadas na piscina depois de um dia exaustivo de laboratório.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Gargalhadas sinceras, sobremesa dividida e aquela química palpável no ar.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
+            "songs": json.dumps(["Britney Spears - Toxic", "Rihanna - Only Girl", "Luísa Sonza - Chico"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Sorriso doce de menina, mas pegada firme e decidida de mulher. Se você despertar minha curiosidade, libero as melhores fotos. 💋",
+            "is_admin": 0
+        },
+        # Perfil 18: Arthur Zanin
+        {
+            "ra": "11202021018",
+            "password_hash": hash_password("123456"),
+            "email": "arthur.zanin@pontinho.app",
+            "name": "Arthur Zanin",
+            "age": 23,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Engenharia de Materiais",
+            "entity": "Baja",
+            "looking_for": "Algo sério",
+            "bio": "Engenharia de Materiais e mecânico da equipe de Baja. Na oficina mexo com solda e suspensão; em casa sou cozinheiro amador que faz as melhores massas do ABC.",
+            "interests": json.dumps(["Baja", "Culinária", "Engenharia de Materiais", "Mecânica", "Cinema"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "Se você me chamar pra sair agora...",
+            "prompt1_a": "Te convido pra vir aqui em casa experimentar meu carbonara feito do zero com pancetta.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Cozinhar juntos no primeiro ou segundo encontro é muito mais divertido do que restaurante formal.",
+            "prompt3_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt3_a": "Com a mão suja de graxa na oficina do Baja afinando o carro de competição.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
+            "songs": json.dumps(["Dire Straits - Sultans of Swing", "Pink Floyd - Time", "Raul Seixas - Metamorfose Ambulante"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Mãos firmes de quem trabalha com metal e coração que esquenta rápido quando bate a química certa. Peça acesso ao meu álbum secreto. 🔥",
+            "is_admin": 0
         }
     ]
 
@@ -495,9 +825,34 @@ def seed_database():
                 VALUES (?, ?, 'Toco sim! Na caixa! Bora tomar um drink ou café qualquer dia desses?', datetime('now', '-30 minutes'))
             """, (match_id, g_id))
 
+    # Match de exemplo 2: Larissa (larissa.prado) e Thiago (thiago.oliveira)
+    cursor.execute("SELECT id FROM users WHERE email = 'larissa.prado@pontinho.app'")
+    row_larissa = cursor.fetchone()
+    cursor.execute("SELECT id FROM users WHERE email = 'thiago.oliveira@pontinho.app'")
+    row_thiago = cursor.fetchone()
+
+    if row_larissa and row_thiago:
+        l_id = row_larissa["id"]
+        t_id = row_thiago["id"]
+        cursor.execute("INSERT OR IGNORE INTO swipes (from_user_id, to_user_id, action) VALUES (?, ?, 'like')", (l_id, t_id))
+        cursor.execute("INSERT OR IGNORE INTO swipes (from_user_id, to_user_id, action) VALUES (?, ?, 'like')", (t_id, l_id))
+        cursor.execute("INSERT OR IGNORE INTO matches (user1_id, user2_id) VALUES (?, ?)", (min(l_id, t_id), max(l_id, t_id)))
+        cursor.execute("SELECT id FROM matches WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)", (l_id, t_id, t_id, l_id))
+        m2_row = cursor.fetchone()
+        if m2_row:
+            m2_id = m2_row["id"]
+            cursor.execute("""
+                INSERT OR IGNORE INTO messages (match_id, sender_id, text, created_at)
+                VALUES (?, ?, 'Oi Larissa! Vi que você pesquisa biomateriais, achei incrível!', datetime('now', '-3 hours'))
+            """, (m2_id, t_id))
+            cursor.execute("""
+                INSERT OR IGNORE INTO messages (match_id, sender_id, text, created_at)
+                VALUES (?, ?, 'Oie Thiago! Obrigada! E você em Filosofia, adoro conversar sobre esses temas.', datetime('now', '-2 hours'))
+            """, (m2_id, l_id))
+
     conn.commit()
     conn.close()
-    print("Base recriada com sucesso com 8 perfis de exemplo + Administrador!")
+    print("Base recriada com sucesso com 18 perfis de exemplo + Administrador!")
 
 if __name__ == "__main__":
     seed_database()
