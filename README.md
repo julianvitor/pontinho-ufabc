@@ -31,8 +31,9 @@
 - **Detecção de Match**: Notificação comemorativa ao ocorrer like bilateral com atalho direto para a conversa.
 
 ### 3. Festas & Eventos Universitários (`/events.html`)
-- **Mural de Festas**: Lista cronológica de festas universitárias com fotos, data, local e link para compra de ingressos.
-- **Confirmação de Presença (RSVP)**: Os estudantes marcam presença com um clique e veem quem vai à festa antes de ir.
+- **Acesso Público**: As festas universitárias são abertas para qualquer pessoa visualizar na landing page e na aba de festas, aumentando a atratividade do app.
+- **Proteção da Lista de Presença**: A lista de estudantes confirmados e a amostra de participantes são exibidas **exclusivamente para estudantes autenticados**, garantindo total privacidade e segurança contra raspagem de dados.
+- **Confirmação de Presença (RSVP)**: Os estudantes autenticados marcam presença com um clique e veem quem vai à festa antes de ir.
 - **Regra de Nomes**: Nomes de festas com limite estrito de **no máximo 25 caracteres** para perfeita legibilidade.
 - **Gestão no Painel Admin**: Aba dedicada para cadastro, edição e exclusão de eventos com contador de caracteres.
 
@@ -40,7 +41,7 @@
 - **Fotos Públicas**: Mínimo de 2 fotos obrigatórias exibidas abertamente no feed.
 - **Fotos e Bio Privadas**: Conteúdo reservado para quem você autorizar após o match.
 - **Proteção Server-Side Destructive Blur**: A primeira foto privada é entregue como teaser no carrossel, porém **irreversivelmente borrada no servidor** (`backend/teaser.py`) antes de sair para o cliente. Hackers não conseguem extrair a foto original inspecionando o DOM ou requisições de rede.
-- **Carrossel no Modal de Detalhes**: Ao abrir os detalhes do perfil, as imagens são exibidas em um carrossel de alto destaque em vez de grade compacta.
+- **Carrossel no Modal de Detalhes**: Ao abrir os detalhes do perfil, as imagens são exibidas em um carrossel de alto destaque em vez de grade compacta, com visualização completa e controles posicionados fora da imagem.
 
 ### 5. Música de Fundo (YouTube Background Player)
 - Cada estudante pode cadastrar até 3 músicas preferidas no perfil.
@@ -50,7 +51,8 @@
 - Aba **Conversas** com lista de matches e indicador visual de mensagens não lidas.
 - **Desfazer Match (Unmatch)**: Opção para desfazer matches a qualquer momento.
 - **Denunciar e Bloquear**: Botão para bloquear usuários (com exclusão mútua do feed e conversas) e enviar denúncias com justificativa.
-- **Painel de Moderação**: Área dedicada no Admin exibindo os perfis denunciados, contagem e lista de denunciantes.
+- **Central de Ajuda & Ouvidoria Pública**: Botão de Ajuda na barra superior com descrição institucional do app e formulário de denúncia aberto a qualquer pessoa (mesmo sem conta ou login) para casos de perfis fakes, stalking (perseguição), assédio ou uso indevido de fotos.
+- **Painel de Moderação**: Área dedicada no Admin exibindo relatórios de usuários denunciados e ocorrências públicas da ouvidoria.
 
 ---
 
@@ -82,7 +84,8 @@ pontinho-ufabc/
 │       ├── feed.py           # Feed de descoberta, swipes e teaser do álbum secreto
 │       ├── matches.py        # Matches, mensagens e fluxo de autorização do álbum secreto
 │       ├── upload.py         # Upload seguro de fotos e GIFs animados com compressão
-│       └── users.py          # Perfil próprio, denúncias e bloqueios
+│       ├── users.py          # Perfil próprio, denúncias e bloqueios
+│       └── help.py           # Central de ajuda, segurança e ouvidoria pública
 └── frontend/                 # Interface estática mobile-first com Tailwind CSS
     ├── css/
     │   └── style.css         # Estilização visual, animações e responsividade

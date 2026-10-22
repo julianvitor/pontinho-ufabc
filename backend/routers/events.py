@@ -48,30 +48,32 @@ def list_events(request: Request):
             is_attending = cursor.fetchone() is not None
         evt["is_attending"] = is_attending
 
-        # Amostra de participantes (até 6) para exibir avatares nos cards
-        cursor.execute("""
-            SELECT u.id, u.name, u.photos, u.course, u.specific_course, u.campus
-            FROM event_attendees ea
-            JOIN users u ON u.id = ea.user_id
-            WHERE ea.event_id = ? AND ea.status = 'going'
-            ORDER BY ea.created_at DESC
-            LIMIT 6
-        """, (event_id,))
-        sample_rows = cursor.fetchall()
+        # Amostra de participantes (até 6): EXIBIDA APENAS PARA USUÁRIOS LOGADOS
         sample = []
-        for s in sample_rows:
-            photos = []
-            try:
-                photos = json.loads(s["photos"]) if s["photos"] else []
-            except Exception:
+        if user_id:
+            cursor.execute("""
+                SELECT u.id, u.name, u.photos, u.course, u.specific_course, u.campus
+                FROM event_attendees ea
+                JOIN users u ON u.id = ea.user_id
+                WHERE ea.event_id = ? AND ea.status = 'going'
+                ORDER BY ea.created_at DESC
+                LIMIT 6
+            """, (event_id,))
+            sample_rows = cursor.fetchall()
+            for s in sample_rows:
                 photos = []
-            sample.append({
-                "id": s["id"],
-                "name": s["name"],
-                "avatar": photos[0] if photos else None,
-                "course": s["specific_course"] or s["course"]
-            })
+                try:
+                    photos = json.loads(s["photos"]) if s["photos"] else []
+                except Exception:
+                    photos = []
+                sample.append({
+                    "id": s["id"],
+                    "name": s["name"],
+                    "avatar": photos[0] if photos else None,
+                    "course": s["specific_course"] or s["course"]
+                })
         evt["attendees_sample"] = sample
+        evt["attendees_locked"] = not bool(user_id)
         events.append(evt)
 
     conn.close()
@@ -81,7 +83,8 @@ def list_events(request: Request):
 @router.get("/api/events/{event_id}")
 def get_event_details(event_id: int, request: Request):
     """
-    Retorna detalhes completos de uma festa, incluindo a lista de todos os estudantes confirmados.
+    Retorna detalhes completos de uma festa.
+    A lista de estudantes confirmados é exibida EXCLUSIVAMENTE para usuários autenticados.
     """
     user_id = None
     try:
@@ -114,34 +117,38 @@ def get_event_details(event_id: int, request: Request):
         is_attending = cursor.fetchone() is not None
     evt["is_attending"] = is_attending
 
-    # Lista completa de participantes confirmados
-    cursor.execute("""
-        SELECT u.id, u.name, u.age, u.course, u.specific_course, u.campus, u.photos, u.bio, u.gender
-        FROM event_attendees ea
-        JOIN users u ON u.id = ea.user_id
-        WHERE ea.event_id = ? AND ea.status = 'going'
-        ORDER BY ea.created_at ASC
-    """, (event_id,))
-    attendees_rows = cursor.fetchall()
+    # Lista completa de participantes confirmados: APENAS PARA USUÁRIOS LOGADOS
     attendees = []
-    for a in attendees_rows:
-        photos = []
-        try:
-            photos = json.loads(a["photos"]) if a["photos"] else []
-        except Exception:
+    if user_id:
+        cursor.execute("""
+            SELECT u.id, u.name, u.age, u.course, u.specific_course, u.campus, u.photos, u.bio, u.gender
+            FROM event_attendees ea
+            JOIN users u ON u.id = ea.user_id
+            WHERE ea.event_id = ? AND ea.status = 'going'
+            ORDER BY ea.created_at ASC
+        """, (event_id,))
+        attendees_rows = cursor.fetchall()
+        for a in attendees_rows:
             photos = []
-        attendees.append({
-            "id": a["id"],
-            "name": a["name"],
-            "age": a["age"],
-            "campus": a["campus"],
-            "course": a["specific_course"] or a["course"],
-            "avatar": photos[0] if photos else None,
-            "photos": photos,
-            "bio": a["bio"],
-            "gender": a["gender"]
-        })
+            try:
+                photos = json.loads(a["photos"]) if a["photos"] else []
+            except Exception:
+                photos = []
+            attendees.append({
+                "id": a["id"],
+                "name": a["name"],
+                "age": a["age"],
+                "campus": a["campus"],
+                "course": a["specific_course"] or a["course"],
+                "avatar": photos[0] if photos else None,
+                "photos": photos,
+                "bio": a["bio"],
+                "gender": a["gender"]
+            })
     evt["attendees"] = attendees
+    evt["attendees_locked"] = not bool(user_id)
+    if not user_id:
+        evt["attendees_message"] = "Faça login com seu RA para ver os estudantes confirmados nesta festa."
 
     conn.close()
     return evt

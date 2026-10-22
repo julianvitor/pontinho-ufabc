@@ -8,5 +8,6 @@ from backend.routers.users import router as users_router
 from backend.routers.admin import router as admin_router
 from backend.routers.upload import router as upload_router
 from backend.routers.events import router as events_router
+from backend.routers.help import router as help_router
 
-__all__ = ["auth_router", "feed_router", "matches_router", "users_router", "admin_router", "upload_router", "events_router"]
+__all__ = ["auth_router", "feed_router", "matches_router", "users_router", "admin_router", "upload_router", "events_router", "help_router"]

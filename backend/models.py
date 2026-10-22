@@ -85,3 +85,10 @@ class EventCreateOrUpdate(BaseModel):
 class EventRsvpRequest(BaseModel):
     status: Optional[str] = Field(default="going", description="Status de presença: 'going' ou 'not_going'")
 
+class ComplaintCreate(BaseModel):
+    reporter_name: Optional[str] = Field(default="", description="Nome do denunciante (opcional)")
+    reporter_contact: str = Field(..., min_length=3, description="E-mail ou WhatsApp para contato e retorno da moderação")
+    complaint_type: str = Field(..., description="Tipo da ocorrência: fake_profile, harassment, stalking, image_misuse, defamation, other")
+    target_description: str = Field(..., min_length=2, description="Nome, RA, link ou descrição do perfil acusado")
+    details: str = Field(..., min_length=5, description="Descrição detalhada do ocorrido")
+

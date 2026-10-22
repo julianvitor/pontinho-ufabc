@@ -252,6 +252,23 @@ def init_db():
     );
     """)
 
+    # Tabela de Reclamações Públicas e Ouvidoria de Segurança (Fakes, Assédio, Perseguição, etc.)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS complaints (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reporter_id INTEGER DEFAULT NULL,
+        reporter_name TEXT DEFAULT '',
+        reporter_contact TEXT NOT NULL,
+        complaint_type TEXT NOT NULL,
+        target_description TEXT NOT NULL,
+        details TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        ip_address TEXT DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(reporter_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+    """)
+
     conn.commit()
     conn.close()
 

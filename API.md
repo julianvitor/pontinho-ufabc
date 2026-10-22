@@ -206,6 +206,11 @@ Registra uma ação de swipe (*Curtir* ou *Passar*). Se houver like recíproco, 
 
 ### `GET /api/events`
 Lista todas as festas e eventos universitários ordenados cronologicamente, com contagem de confirmados e indicação de RSVP do usuário logado.
+- **Acesso Público**: Disponível para qualquer visitante (mesmo sem autenticação).
+- **Proteção da Lista de Presença**:
+  - Para visitantes **não autenticados**, `attendees_sample` é entregue vazio (`[]`) e `attendees_locked: true`, protegendo a privacidade dos alunos confirmados.
+  - Para usuários **autenticados**, `attendees_sample` inclui os avatares dos primeiros confirmados.
+  - O contador total (`attendees_count`) é entregue publicamente para promover a adesão às festas.
 
 - **Resposta (200 OK)**:
 ```json
@@ -219,15 +224,9 @@ Lista todas as festas e eventos universitários ordenados cronologicamente, com 
     "image_url": "https://images.unsplash.com/photo-1516450360452?w=1000",
     "ticket_url": "https://blacktag.com.br",
     "attendees_count": 14,
-    "is_attending": true,
-    "attendees_preview": [
-      {
-        "id": 4,
-        "name": "Bia Costa",
-        "course": "Engenharia Aeroespacial",
-        "avatar": "/uploads/bia.webp"
-      }
-    ]
+    "is_attending": false,
+    "attendees_sample": [],
+    "attendees_locked": true
   }
 ]
 ```
@@ -235,7 +234,9 @@ Lista todas as festas e eventos universitários ordenados cronologicamente, com 
 ---
 
 ### `GET /api/events/{event_id}`
-Detalhes completos da festa com a lista de todos os estudantes que confirmaram presença.
+Detalhes completos da festa.
+- **Acesso Público**: Título, descrição, data, local e link de compra de ingressos são acessíveis a todos.
+- **Lista de Confirmados Privada**: A lista completa de participantes (`attendees`) é entregue **exclusivamente para estudantes autenticados**. Para visitantes deslogados, `attendees = []`, `attendees_locked: true` e `attendees_message` orienta o usuário a entrar com seu RA.
 
 ---
 
@@ -461,10 +462,42 @@ Realiza o upload seguro de fotos e **GIFs animados**.
 | `GET` | `/api/admin/prompts` | Lista quebra-gelos disponíveis para o perfil |
 | `POST` | `/api/admin/prompts` | Cadastra nova pergunta de perfil |
 | `DELETE` | `/api/admin/prompts/{id}` | Remove pergunta de perfil |
+| `GET` | `/api/admin/complaints` | Lista reclamações e denúncias públicas da ouvidoria (fakes, perseguição, assédio) |
+| `PUT` | `/api/admin/complaints/{id}/status` | Atualiza status de denúncia da ouvidoria (pending, under_review, resolved, dismissed) |
+| `DELETE` | `/api/admin/complaints/{id}` | Descarta ou exclui denúncia da ouvidoria |
 
 ---
 
-## 8. Arquivos Estáticos & Teasers
+## 8. Central de Ajuda & Ouvidoria Pública (`/api/help`)
+
+Canal de segurança acessível a **qualquer pessoa (mesmo sem conta ou login no aplicativo)** para denúncias de perfis fakes, stalking (perseguição), assédio, difamação ou uso não consentido de fotos.
+
+### `POST /api/help/complaint`
+- **Acesso**: Público (sem exigência de token JWT ou login).
+- **Payload**:
+```json
+{
+  "reporter_name": "Nome Opcional",
+  "reporter_contact": "vitima@exemplo.com ou (11) 99999-9999",
+  "complaint_type": "fake_profile",
+  "target_description": "Perfil de 'Lucas' com foto que não pertence a ele",
+  "details": "Estão utilizando minhas fotos do Instagram sem permissão para criar perfil no app."
+}
+```
+*(Tipos de ocorrência aceitos: `"fake_profile"`, `"stalking"`, `"harassment"`, `"image_misuse"`, `"defamation"`, `"other"`)*.
+
+- **Resposta (200 OK)**:
+```json
+{
+  "status": "success",
+  "id": 1,
+  "message": "Sua reclamação foi registrada com sucesso sob protocolo confidencial. Nossa equipe de moderação e segurança apurará com prioridade."
+}
+```
+
+---
+
+## 9. Arquivos Estáticos & Teasers
 
 - **`/uploads/{filename}`**: Imagens públicas dos perfis, avatares e banners de festas.
 - **`/uploads/teasers/{filename}`**: Imagens de teaser do Álbum Secreto processadas com **desfoque irreversível no servidor** (`radius=35`).
