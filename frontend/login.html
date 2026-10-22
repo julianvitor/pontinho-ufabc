@@ -57,92 +57,88 @@
       </button>
     </div>
 
-    <div class="p-6 sm:p-8">
+    <div class="p-5 sm:p-6">
       
       <!-- ABA 1: FORMULÁRIO DE LOGIN -->
-      <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+      <form id="form-login" onsubmit="handleLogin(event)" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail Acadêmico UFABC (ou RA) *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail ou RA</label>
           <input 
             id="login-email" 
             type="text" 
             required 
-            placeholder="Ex: seu.nome@aluno.ufabc.edu.br ou admin" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            placeholder="nome@aluno.ufabc.edu.br" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
           >
-          <p class="text-[10px] text-slate-400 mt-1">Você também pode digitar seu login sem @aluno.ufabc.edu.br</p>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Senha *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
           <input 
             id="login-password" 
             type="password" 
             required 
-            placeholder="Sua senha de acesso" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            placeholder="••••••••" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
           >
         </div>
 
         <button 
           type="submit" 
-          class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition"
+          class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition"
         >
-          Entrar no Pontinho 🔥
+          Entrar
         </button>
       </form>
 
       <!-- ABA 2: FORMULÁRIO DE CADASTRO -->
-      <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+      <form id="form-register" onsubmit="handleRegister(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail Acadêmico UFABC *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail UFABC</label>
           <input 
             id="reg-email" 
             type="email" 
             required 
-            placeholder="Ex: mariana.silva@aluno.ufabc.edu.br" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            placeholder="nome@aluno.ufabc.edu.br" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
           >
-          <p class="text-[10px] text-emerald-600 font-medium mt-1">
-            🔒 Exclusivo: apenas e-mails <b>@aluno.ufabc.edu.br</b> ou <b>@ufabc.edu.br</b>
-          </p>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Nome Completo *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nome</label>
           <input 
             id="reg-name" 
             type="text" 
             required 
-            placeholder="Como quer ser chamado(a) no campus" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            placeholder="Como quer ser chamado(a)" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
           >
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Crie sua Senha *</label>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
           <input 
             id="reg-password" 
             type="password" 
             required 
             minlength="4" 
             placeholder="Mínimo 4 caracteres" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
           >
         </div>
 
         <button 
           type="submit" 
-          class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 active:scale-95 transition"
+          class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition"
         >
-          Criar Minha Conta 🚀
+          Criar Conta
         </button>
       </form>
 
       <!-- ATALHOS RÁPIDOS PARA CONTAS DE TESTE -->
-      <div class="mt-8 pt-6 border-t border-slate-100 text-center">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2.5">
-          Contas de Demonstração (Clique para testar):
+      <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+          Contas Demo:
         </span>
         <div class="flex flex-wrap gap-1.5 justify-center">
           <button 

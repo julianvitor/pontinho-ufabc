@@ -78,17 +78,14 @@
       <!-- COLUNA DA ESQUERDA: LISTA DE MATCHES -->
       <div id="matches-sidebar" class="w-full md:w-80 border-r border-slate-100 flex flex-col bg-slate-50/50 h-full">
         
-        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h2 class="font-extrabold text-slate-900 text-lg">Seus Matches</h2>
-            <p class="text-xs text-slate-500">Estudantes que combinaram com você</p>
-          </div>
-          <span id="matches-count-badge" class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs">0</span>
+        <div class="p-3.5 border-b border-slate-100 flex items-center justify-between">
+          <h2 class="font-extrabold text-slate-900 text-base">Matches</h2>
+          <span id="matches-count-badge" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs">0</span>
         </div>
 
         <!-- Lista scrollável -->
         <div id="matches-list-container" class="flex-1 overflow-y-auto divide-y divide-slate-100 p-2 space-y-1">
-          <div class="p-8 text-center text-slate-400 text-sm">Carregando matches...</div>
+          <div class="p-8 text-center text-slate-400 text-xs">Carregando...</div>
         </div>
       </div>
 
@@ -97,57 +94,52 @@
         
         <!-- ESTADO QUANDO NENHUM MATCH ESTÁ SELECIONADO -->
         <div id="no-chat-selected" class="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
-          <div class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mb-3 shadow-inner">
+          <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mb-2.5">
             💬
           </div>
-          <h3 class="font-bold text-slate-700 text-lg">Nenhuma conversa selecionada</h3>
-          <p class="text-xs text-slate-400 max-w-xs mt-1">
-            Escolha um match à esquerda para começar a conversar por texto com outros alunos da UFABC.
-          </p>
+          <h3 class="font-bold text-slate-700 text-sm">Selecione uma conversa</h3>
         </div>
 
         <!-- ÁREA DO CHAT ATIVO -->
         <div id="active-chat-container" class="hidden flex-1 flex flex-col h-full">
           
           <!-- Cabeçalho do Chat -->
-          <div class="px-4 sm:px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-            <div class="flex items-center gap-3">
-              <button onclick="backToMatchesList()" class="md:hidden text-slate-600 hover:text-slate-900 px-2 py-1 bg-white rounded-xl shadow-xs border border-slate-200 font-bold text-xs">
-                ← Voltar
+          <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center gap-2.5">
+              <button onclick="backToMatchesList()" class="md:hidden text-slate-600 hover:text-slate-900 px-2 py-1 bg-white rounded-lg shadow-xs border border-slate-200 font-bold text-xs">
+                ←
               </button>
-              <img id="chat-partner-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm">
+              <img id="chat-partner-avatar" src="" alt="Avatar" class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500 shadow-sm">
               <div>
                 <h3 id="chat-partner-name" class="font-bold text-slate-900 text-sm leading-tight">Nome</h3>
                 <p id="chat-partner-sub" class="text-[11px] text-emerald-700 font-medium">Curso • Campus</p>
               </div>
             </div>
-            <a href="/" class="text-xs text-slate-500 hover:text-emerald-700 font-semibold px-2.5 py-1 rounded-lg hover:bg-slate-100 transition">
+            <a href="./index.html" class="text-xs text-slate-500 hover:text-emerald-700 font-semibold px-2 py-1 rounded-lg hover:bg-slate-100 transition">
               🔥 Feed
             </a>
           </div>
 
           <!-- Mensagens de Texto (Scroll) -->
-          <div id="messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-gradient-to-b from-white to-slate-50/50">
+          <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-2.5 bg-gradient-to-b from-white to-slate-50/50">
             <!-- Mensagens são adicionadas aqui -->
           </div>
 
-          <!-- Formulário de Envio (Texto Apenas) -->
-          <div class="p-3 sm:p-4 border-t border-slate-100 bg-white">
+          <!-- Formulário de Envio -->
+          <div class="p-3 border-t border-slate-100 bg-white">
             <form id="message-form" onsubmit="sendMessage(event)" class="flex items-center gap-2">
               <input 
                 id="message-input" 
                 type="text" 
-                placeholder="Digite sua mensagem de texto..." 
+                placeholder="Mensagem..." 
                 required 
                 maxlength="500" 
-                class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-3 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+                class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
               >
-              <button type="submit" class="px-4 sm:px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-xs sm:text-sm rounded-2xl shadow-md shadow-emerald-600/30 active:scale-95 transition flex items-center gap-1">
-                <span>Enviar</span>
-                <span>➤</span>
+              <button type="submit" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-xs rounded-xl shadow-sm transition">
+                Enviar
               </button>
             </form>
-            <p class="text-[10px] text-slate-400 mt-1 ml-2">Chat exclusivo de texto entre estudantes da UFABC.</p>
           </div>
 
         </div>

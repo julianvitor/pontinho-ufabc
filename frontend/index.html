@@ -102,96 +102,74 @@
         <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
           Pontinho <span class="text-rose-400">UFABC</span>
         </h1>
-        <p class="text-xs sm:text-sm text-emerald-200 mt-2 font-medium max-w-sm mx-auto leading-relaxed">
-          O app de conexões e encontros exclusivo para estudantes da Federal do ABC.
+        <p class="text-xs sm:text-sm text-emerald-200 mt-2 font-medium max-w-sm mx-auto">
+          Conexões e encontros na Federal do ABC.
         </p>
 
-        <!-- Destaques -->
-        <div class="grid grid-cols-3 gap-2 my-6 text-left">
-          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xs">
-            <span class="text-lg block">🎓</span>
+        <!-- Destaques Curtos -->
+        <div class="grid grid-cols-3 gap-2 my-6 text-center">
+          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10">
+            <span class="text-base block">🎓</span>
             <span class="text-[11px] font-bold text-white block mt-1">100% UFABC</span>
-            <span class="text-[9px] text-slate-300">Autenticação acadêmica</span>
           </div>
-          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xs">
-            <span class="text-lg block">🎵</span>
-            <span class="text-[11px] font-bold text-white block mt-1">Trilha Sonora</span>
-            <span class="text-[9px] text-slate-300">YouTube de fundo no perfil</span>
+          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10">
+            <span class="text-base block">🎵</span>
+            <span class="text-[11px] font-bold text-white block mt-1">Músicas</span>
           </div>
-          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xs">
-            <span class="text-lg block">📍</span>
+          <div class="p-2.5 bg-white/5 rounded-2xl border border-white/10">
+            <span class="text-base block">📍</span>
             <span class="text-[11px] font-bold text-white block mt-1">SA & SBC</span>
-            <span class="text-[9px] text-slate-300">Filtre por curso e campus</span>
           </div>
         </div>
 
-        <!-- Botões de Ação Principal -->
-        <div class="space-y-2.5">
-          <a href="./login.html?tab=register" class="block w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-500/30 transition transform active:scale-98">
-            Criar Conta com E-mail UFABC 🎓
+        <!-- Botões de Ação -->
+        <div class="space-y-2">
+          <a href="./login.html?tab=register" class="block w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-sm rounded-xl shadow-lg transition">
+            Criar Conta
           </a>
-          <a href="./login.html?tab=login" class="block w-full py-3 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm rounded-xl border border-white/20 transition">
-            Já tenho conta • Fazer Login
+          <a href="./login.html?tab=login" class="block w-full py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm rounded-xl border border-white/20 transition">
+            Entrar
           </a>
         </div>
       </div>
 
-      <!-- SEÇÃO DE CONTAS DEMONSTRAÇÃO (1 CLIQUE PARA TESTAR) -->
-      <div class="w-full bg-white rounded-3xl p-5 shadow-xl border border-slate-200/80 text-left">
-        <div class="flex items-center justify-between mb-2">
-          <div>
-            <h2 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Acesso Imediato para Demonstração</h2>
-            <h3 class="text-sm font-extrabold text-slate-900">Entrar como Perfil Demo (1 Clique)</h3>
-          </div>
-          <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Pronto</span>
-        </div>
-        <p class="text-xs text-slate-500 mb-3.5">
-          Permite testar os swipes, chat e músicas de perfil sem precisar digitar credenciais:
-        </p>
+      <!-- CONTAS DEMO -->
+      <div class="w-full bg-white rounded-3xl p-4 shadow-xl border border-slate-200/80 text-left">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2.5">
+          Contas Demo
+        </h3>
 
-        <div class="space-y-2">
+        <div class="space-y-1.5">
           <button type="button" onclick="loginAsDemo(2)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-3">
-              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800" class="w-9 h-9 rounded-full object-cover">
-              <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Mariana Silva, 21</p>
-                <p class="text-[10px] text-slate-500">BC&T • Neurociência • SA 🎵 Arctic Monkeys</p>
-              </div>
+            <div class="flex items-center gap-2.5">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800" class="w-8 h-8 rounded-full object-cover">
+              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Mariana, 21 • Neurociência</span>
             </div>
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
           </button>
 
           <button type="button" onclick="loginAsDemo(3)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-3">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" class="w-9 h-9 rounded-full object-cover">
-              <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Lucas Mendes, 22</p>
-                <p class="text-[10px] text-slate-500">BC&H • RI • SBC 🎵 Tame Impala</p>
-              </div>
+            <div class="flex items-center gap-2.5">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" class="w-8 h-8 rounded-full object-cover">
+              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Lucas, 22 • RI</span>
             </div>
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
           </button>
 
           <button type="button" onclick="loginAsDemo(4)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-3">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800" class="w-9 h-9 rounded-full object-cover">
-              <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Bia Costa, 20</p>
-                <p class="text-[10px] text-slate-500">BC&T • Aeroespacial • Foguetes 🎵 Taylor Swift</p>
-              </div>
+            <div class="flex items-center gap-2.5">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800" class="w-8 h-8 rounded-full object-cover">
+              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Bia, 20 • Aeroespacial</span>
             </div>
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
           </button>
 
           <button type="button" onclick="loginAsDemo(5)" class="w-full p-2.5 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 transition flex items-center justify-between group">
-            <div class="flex items-center gap-3">
-              <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800" class="w-9 h-9 rounded-full object-cover">
-              <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-emerald-700">Gabriel Santos, 23</p>
-                <p class="text-[10px] text-slate-500">Ciência da Computação • Bateria 🎵 Criolo</p>
-              </div>
+            <div class="flex items-center gap-2.5">
+              <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800" class="w-8 h-8 rounded-full object-cover">
+              <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Gabriel, 23 • Computação</span>
             </div>
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-100/60 px-2 py-1 rounded-xl">Entrar ➔</span>
+            <span class="text-xs font-semibold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-lg">Entrar</span>
           </button>
         </div>
       </div>
@@ -199,37 +177,37 @@
 
     <!-- SEÇÃO DE SWIPES (QUANDO AUTENTICADO) -->
     <div id="swipe-section" class="w-full max-w-md mx-auto flex flex-col items-center">
-      <!-- BARRA DE AJUDA / DICAS UFABC -->
-      <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-2.5 px-1">
+      <!-- BARRA SUPERIOR -->
+      <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-2 px-1">
         <div class="flex items-center gap-1.5">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          <span class="font-medium text-slate-700">Federal do ABC Online</span>
+          <span class="font-medium text-slate-700 text-xs">Online</span>
         </div>
-        <button onclick="resetSwipes()" class="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline flex items-center gap-1">
-          <span>🔄</span> Resetar Swipes
+        <button onclick="resetSwipes()" class="text-slate-400 hover:text-emerald-700 text-xs font-medium hover:underline flex items-center gap-1">
+          <span>🔄</span> Resetar
         </button>
       </div>
 
-      <!-- CONTAINER DOS CARDS COM ALTURA OTIMIZADA PARA MOBILE (DVH) -->
+      <!-- CONTAINER DOS CARDS -->
       <div id="deck-container" class="relative w-full h-[64dvh] sm:h-[580px] max-h-[620px] rounded-3xl shadow-2xl bg-white border border-slate-200/80 overflow-hidden flex items-center justify-center">
         
         <!-- ESTADO DE CARREGANDO -->
-        <div id="loading-spinner" class="flex flex-col items-center gap-3 text-slate-400">
-          <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-sm font-medium">Buscando estudantes no campus...</p>
+        <div id="loading-spinner" class="flex flex-col items-center gap-2 text-slate-400">
+          <div class="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-xs font-medium">Buscando...</p>
         </div>
 
-        <!-- ESTADO VAZIO (QUANDO ACABAREM OS CARDS) -->
-        <div id="empty-state" class="hidden flex flex-col items-center justify-center text-center p-6 space-y-4">
-          <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-3xl shadow-inner border border-emerald-100">
+        <!-- ESTADO VAZIO -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center text-center p-6 space-y-3">
+          <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-2xl border border-emerald-100">
             🎓
           </div>
           <div>
-            <h3 class="text-xl font-bold text-slate-800">Você zerou os perfis por aqui!</h3>
-            <p class="text-sm text-slate-500 mt-1 max-w-xs">Não há mais estudantes na sua fila de swipe no momento.</p>
+            <h3 class="text-lg font-bold text-slate-800">Fim dos perfis</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Sem novos alunos no momento.</p>
           </div>
-          <button onclick="resetSwipes()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 transition-all">
-            🔄 Rever Todos os Perfis
+          <button onclick="resetSwipes()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-xs rounded-xl shadow-md transition hover:scale-105 active:scale-95">
+            Recomeçar
           </button>
         </div>
 
@@ -302,25 +280,25 @@
       <div class="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl"></div>
       <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
 
-      <span class="inline-block text-5xl mb-2 animate-bounce">🎉</span>
-      <h2 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-300 via-teal-200 to-rose-300 bg-clip-text text-transparent">
-        Deu Match no Pontinho!
+      <span class="inline-block text-4xl mb-2 animate-bounce">🎉</span>
+      <h2 class="text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-300 via-teal-200 to-rose-300 bg-clip-text text-transparent">
+        Deu Match!
       </h2>
-      <p id="match-subtitle" class="text-slate-300 text-sm mt-1 mb-6">Vocês dois curtiram um ao outro.</p>
+      <p id="match-subtitle" class="text-slate-300 text-xs mt-1 mb-5">Vocês se curtiram.</p>
 
       <!-- Fotos Lado a Lado -->
-      <div class="flex items-center justify-center gap-3 my-4">
-        <img id="match-my-photo" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-xl" src="" alt="Sua foto">
-        <div class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-lg shadow-lg">🔥</div>
-        <img id="match-partner-photo" class="w-24 h-24 rounded-full object-cover border-4 border-emerald-400 shadow-xl" src="" alt="Foto do Match">
+      <div class="flex items-center justify-center gap-3 my-3">
+        <img id="match-my-photo" class="w-20 h-20 rounded-full object-cover border-3 border-white shadow-xl" src="" alt="Sua foto">
+        <div class="w-9 h-9 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-base shadow-lg">🔥</div>
+        <img id="match-partner-photo" class="w-20 h-20 rounded-full object-cover border-3 border-emerald-400 shadow-xl" src="" alt="Foto do Match">
       </div>
 
-      <div class="space-y-3 mt-6">
-        <a id="match-chat-btn" href="./matches.html" class="block w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/40 transition">
-          Mandar Mensagem Agora 💬
+      <div class="space-y-2 mt-5">
+        <a id="match-chat-btn" href="./matches.html" class="block w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl shadow-lg transition">
+          Conversar 💬
         </a>
-        <button onclick="closeMatchModal()" class="w-full py-2.5 text-slate-400 hover:text-white font-medium text-sm transition">
-          Continuar Swiping
+        <button onclick="closeMatchModal()" class="w-full py-2 text-slate-400 hover:text-white font-medium text-xs transition">
+          Continuar
         </button>
       </div>
     </div>
@@ -501,23 +479,23 @@
 
             <!-- Curso -->
             <p class="text-xs sm:text-sm text-emerald-300 font-medium mt-0.5 line-clamp-1">
-              🎓 ${user.course} ➔ ${user.specific_course}
+              🎓 ${user.specific_course || user.course}
             </p>
 
             <!-- Bio resumida -->
-            ${user.bio ? `<p class="text-xs sm:text-sm text-slate-200 mt-1.5 line-clamp-2">${user.bio}</p>` : ''}
+            ${user.bio ? `<p class="text-xs text-slate-200 mt-1 line-clamp-2">${user.bio}</p>` : ''}
 
-            <!-- Indicador de Trilha Sonora -->
+            <!-- Indicador de Música -->
             ${(user.songs && user.songs.length) ? `
               <div class="mt-2 flex items-center gap-1.5 text-[11px] text-purple-200 bg-purple-950/70 backdrop-blur-md px-2.5 py-1 rounded-xl border border-purple-400/30 truncate">
                 <span>🎵</span>
-                <span class="truncate">Trilha: <strong>${user.songs[0]}</strong></span>
+                <span class="truncate">${user.songs[0]}</span>
               </div>
             ` : ''}
 
-            <!-- Botão de Ver Detalhes, Músicas e Perguntas -->
+            <!-- Botão de Ver Perfil -->
             <button onclick="openDetailsModal()" class="mt-2.5 w-full py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 border border-white/20 active:scale-98">
-              <span>💬 Ver perfil completo, músicas & perguntas</span>
+              <span>Ver perfil</span>
             </button>
           </div>
         </div>
@@ -760,47 +738,37 @@
       `).join('');
 
       const songsSectionHtml = currentProfileSongs.length > 0 ? `
-        <!-- TRILHA SONORA DO PERFIL (YOUTUBE) -->
-        <div class="space-y-3">
+        <!-- MÚSICAS DO PERFIL (YOUTUBE) -->
+        <div class="space-y-2">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
-              <span>🎵</span> Trilha Sonora do Perfil
+              <span>🎵</span> Músicas
             </h4>
             <span class="text-[10px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span> YouTube Player
+              <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span> YouTube
             </span>
           </div>
 
-          <div class="p-3.5 bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white rounded-2xl border border-purple-500/30 shadow-lg">
+          <div class="p-3 bg-gradient-to-r from-purple-950 via-slate-900 to-indigo-950 text-white rounded-2xl border border-purple-500/30 shadow-lg">
             <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="relative w-10 h-10 rounded-full bg-purple-900/60 flex items-center justify-center shrink-0 border border-purple-400/40 shadow-inner">
-                  <span id="player-vinyl-icon" class="text-lg inline-block animate-spin" style="animation-duration: 3s;">💿</span>
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5">
-                    <span class="bg-rose-600 text-white font-extrabold text-[9px] uppercase px-1.5 py-0.5 rounded tracking-wider">YouTube</span>
-                    <span id="player-status-badge" class="text-[10px] text-purple-200">Tocando no Perfil</span>
-                  </div>
-                  <p id="player-current-song-title" class="text-xs font-bold text-white truncate mt-0.5">
-                    ${currentProfileSongs[0]}
-                  </p>
-                </div>
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span id="player-vinyl-icon" class="text-base inline-block animate-spin" style="animation-duration: 3s;">💿</span>
+                <p id="player-current-song-title" class="text-xs font-bold text-white truncate">
+                  ${currentProfileSongs[0]}
+                </p>
               </div>
 
               <div class="flex items-center gap-2 shrink-0">
-                <button id="player-toggle-btn" type="button" onclick="toggleProfileAudio()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center transition active:scale-95" title="Pausar / Tocar">
+                <button id="player-toggle-btn" type="button" onclick="toggleProfileAudio()" class="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center transition active:scale-95" title="Pausar / Tocar">
                   ⏸️
                 </button>
               </div>
             </div>
 
-            <!-- Visualizador de Áudio de Fundo (Equalizer) -->
-            <div id="player-visualizer-bar" class="flex items-center justify-between px-3 py-2 bg-black/40 rounded-xl border border-white/5 mt-2.5">
-              <span class="text-[11px] text-purple-200 font-medium flex items-center gap-1.5">
-                <span>🔊</span> Áudio de Fundo
-              </span>
-              <div id="player-equalizer-waves" class="flex items-end gap-1 h-3.5">
+            <!-- Visualizador de Ondas Sonoras -->
+            <div id="player-visualizer-bar" class="flex items-center justify-between px-2.5 py-1.5 bg-black/40 rounded-xl border border-white/5 mt-2">
+              <span id="player-status-badge" class="text-[10px] text-purple-200 font-medium">Áudio de fundo</span>
+              <div id="player-equalizer-waves" class="flex items-end gap-1 h-3">
                 <span class="w-1 bg-purple-400 rounded-full animate-pulse" style="height: 60%; animation-duration: 0.8s;"></span>
                 <span class="w-1 bg-rose-400 rounded-full animate-pulse" style="height: 100%; animation-duration: 0.5s;"></span>
                 <span class="w-1 bg-purple-300 rounded-full animate-pulse" style="height: 40%; animation-duration: 0.9s;"></span>
@@ -809,19 +777,19 @@
               </div>
             </div>
 
-            <!-- Host Oculto do Iframe do YouTube (Fora da tela para tocar somente áudio sem mostrar vídeo) -->
+            <!-- Host Oculto do Iframe do YouTube -->
             <div id="modal-youtube-container" style="position:fixed; top:-9999px; left:-9999px; width:300px; height:300px; opacity:0.001; pointer-events:none; overflow:hidden;"></div>
 
-            <!-- Chips com todas as músicas cadastradas pela pessoa -->
-            <div class="flex flex-wrap gap-1.5 pt-2.5 mt-2.5 border-t border-white/10">
+            <!-- Chips de músicas -->
+            <div class="flex flex-wrap gap-1.5 pt-2 mt-2 border-t border-white/10">
               ${currentProfileSongs.map((s, idx) => `
                 <button 
                   id="song-chip-${idx}" 
                   type="button"
                   onclick="selectProfileSong(${idx})" 
-                  class="song-chip text-[11px] font-semibold px-2.5 py-1 rounded-xl transition flex items-center gap-1.5 ${idx === 0 ? 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-300' : 'bg-white/10 text-purple-200 hover:bg-white/20'}"
+                  class="song-chip text-[11px] font-semibold px-2 py-0.5 rounded-lg transition flex items-center gap-1 ${idx === 0 ? 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-300' : 'bg-white/10 text-purple-200 hover:bg-white/20'}"
                 >
-                  <span>🎧</span> <span class="truncate max-w-[130px]">${s}</span>
+                  <span>🎧</span> <span class="truncate max-w-[120px]">${s}</span>
                 </button>
               `).join('')}
             </div>
@@ -832,63 +800,63 @@
       content.innerHTML = `
         <!-- Galeria de Fotos -->
         <div>
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Fotos do Perfil (${(u.photos || []).length})</h4>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Fotos</h4>
           <div class="grid grid-cols-2 gap-2">
             ${(u.photos || []).map(p => `
-              <img src="${p}" class="w-full h-48 object-cover rounded-2xl shadow-sm">
+              <img src="${p}" class="w-full h-44 object-cover rounded-2xl shadow-sm">
             `).join('')}
           </div>
         </div>
 
-        <!-- Trilha Sonora do Perfil (YouTube) -->
+        <!-- Músicas -->
         ${songsSectionHtml}
 
         <!-- Dados Básicos -->
         <div>
           <div class="flex items-baseline gap-2">
-            <h3 class="text-2xl font-extrabold text-slate-900">${u.name}</h3>
-            <span class="text-lg text-slate-400 font-light">${u.age} anos</span>
+            <h3 class="text-2xl font-black text-slate-900">${u.name}</h3>
+            <span class="text-lg text-slate-400 font-light">${u.age}</span>
           </div>
-          <p class="text-sm text-emerald-700 font-medium mt-0.5">
-            🎓 ${u.course} ➔ ${u.specific_course}
+          <p class="text-xs sm:text-sm text-emerald-700 font-medium mt-0.5">
+            🎓 ${u.specific_course || u.course}
           </p>
-          <div class="flex flex-wrap gap-2 mt-2">
-            <span class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-emerald-200/50">
-              📍 Campus ${u.campus}
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <span class="bg-emerald-50 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-emerald-200/50">
+              📍 ${u.campus}
             </span>
             ${u.gender && u.gender !== 'Não informado' ? `
-              <span class="bg-indigo-50 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-indigo-200/50">
-                ⚧️ ${u.gender}
+              <span class="bg-indigo-50 text-indigo-800 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-indigo-200/50">
+                ${u.gender}
               </span>
             ` : ''}
-            <span class="bg-rose-50 text-rose-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-rose-200/50">
-              ❤️ ${u.looking_for}
+            <span class="bg-rose-50 text-rose-800 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-rose-200/50">
+              ${u.looking_for}
             </span>
-            <span class="bg-amber-50 text-amber-900 text-xs font-semibold px-2.5 py-1 rounded-lg border border-amber-200/50">
+            <span class="bg-amber-50 text-amber-900 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-amber-200/50">
               🏛️ ${u.entity}
             </span>
           </div>
         </div>
 
-        <!-- Biografia -->
+        <!-- Bio -->
         ${u.bio ? `
-          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Sobre mim</h4>
-            <p class="text-sm text-slate-700 leading-relaxed">${u.bio}</p>
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Bio</h4>
+            <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${u.bio}</p>
           </div>
         ` : ''}
 
         <!-- Interesses -->
         ${u.interests && u.interests.length ? `
           <div>
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Interesses</h4>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Interesses</h4>
             <div class="flex flex-wrap gap-1.5">${interestsList}</div>
           </div>
         ` : ''}
 
-        <!-- 3 Perguntinhas com Respostas -->
-        <div class="space-y-3 pt-2 border-t border-slate-100">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-700">3 Perguntinhas UFABC</h4>
+        <!-- Perguntas -->
+        <div class="space-y-2.5 pt-2 border-t border-slate-100">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-700">Perguntas</h4>
           
           ${u.prompt1_q && u.prompt1_a ? `
             <div class="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100">
