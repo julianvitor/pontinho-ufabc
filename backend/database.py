@@ -62,12 +62,13 @@ def init_db():
         gender TEXT NOT NULL DEFAULT 'Não informado', -- 'Mulher', 'Homem', 'Não-binário', 'Outro'
         target_gender TEXT NOT NULL DEFAULT 'Todos', -- 'Mulheres', 'Homens', 'Não-binário', 'Todos'
         songs TEXT NOT NULL DEFAULT '[]', -- Músicas favoritas / trilha do perfil
+        terms_accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         is_admin INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
 
-    # Migração automática caso o banco já existisse sem ra, password_hash, gender, target_gender ou songs
+    # Migração automática caso o banco já existisse sem ra, password_hash, gender, target_gender, songs ou terms_accepted_at
     cursor.execute("PRAGMA table_info(users)")
     existing_cols = [row["name"] for row in cursor.fetchall()]
     if "ra" not in existing_cols:
@@ -85,6 +86,9 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN private_photos TEXT DEFAULT '[]'")
     if "private_bio" not in existing_cols:
         cursor.execute("ALTER TABLE users ADD COLUMN private_bio TEXT DEFAULT ''")
+    if "terms_accepted_at" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN terms_accepted_at TIMESTAMP")
+        cursor.execute("UPDATE users SET terms_accepted_at = datetime('now') WHERE terms_accepted_at IS NULL")
 
     # Tabela de Solicitações de Acesso a Conteúdo Privado (Fotos & Bio Secreta)
     cursor.execute("""

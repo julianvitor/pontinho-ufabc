@@ -19,6 +19,12 @@ def register_user(data: RegisterRequest, response: Response):
     cleaned_pw = data.password.strip()
     cleaned_ra = (data.ra or "").strip()
 
+    if not data.terms_accepted:
+        raise HTTPException(
+            status_code=400,
+            detail="É obrigatório aceitar os Termos de Uso e a Política de Privacidade (LGPD) para se cadastrar."
+        )
+
     if not cleaned_name or not cleaned_pw:
         raise HTTPException(status_code=400, detail="Nome e Senha são obrigatórios.")
 
@@ -54,13 +60,13 @@ def register_user(data: RegisterRequest, response: Response):
             ra, password_hash, email, name, age, campus, course, specific_course,
             entity, looking_for, bio, interests, photos,
             prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
-            gender, target_gender
+            gender, target_gender, terms_accepted_at
         ) VALUES (?, ?, ?, ?, 20, 'Santo André', 'Ciência e Tecnologia', 'Ciência da Computação',
                   'Geral', 'Amizade', 'Olá, estou no Pontinho!', '["Música", "Tecnologia"]', ?,
                   'O melhor lugar para relaxar é...', 'Ouvindo música boa',
                   'Minha opinião impopular...', 'Conversa olho no olho supera qualquer mensagem',
                   'No intervalo você me encontra...', 'Tomando um café',
-                  'Não informado', 'Todos')
+                  'Não informado', 'Todos', datetime('now'))
     """, (cleaned_ra, pw_hash, sanitized_email, cleaned_name, json.dumps(default_photos)))
 
     conn.commit()

@@ -131,6 +131,18 @@
           >
         </div>
 
+        <div class="flex items-start gap-2.5 pt-1 text-left">
+          <input 
+            id="reg-terms" 
+            type="checkbox" 
+            required 
+            class="mt-0.5 w-4 h-4 rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500/30 cursor-pointer"
+          >
+          <label for="reg-terms" class="text-[11px] text-slate-400 leading-tight cursor-pointer">
+            Li e concordo com os <a href="./terms.html" target="_blank" class="text-emerald-400 hover:underline font-semibold">Termos de Uso</a> e autorizo o tratamento de dados pessoais segundo a <a href="./terms.html#lgpd" target="_blank" class="text-emerald-400 hover:underline font-semibold">Política de Privacidade (LGPD)</a>.
+          </label>
+        </div>
+
         <button 
           type="submit" 
           class="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 hover:shadow-emerald-900/60 transition active:scale-[0.99]"
@@ -151,6 +163,13 @@
 
     </div>
   </div>
+
+  <!-- RODAPÉ DE PRIVACIDADE E TERMOS DE USO -->
+  <footer class="mt-6 text-center text-xs text-slate-500 flex items-center justify-center gap-3">
+    <a href="./terms.html" class="hover:text-emerald-400 transition">Termos de Uso</a>
+    <span>•</span>
+    <a href="./terms.html#lgpd" class="hover:text-emerald-400 transition">Privacidade & LGPD</a>
+  </footer>
 
   <script src="./js/app.js"></script>
   <script>
@@ -248,6 +267,12 @@
       const name = document.getElementById('reg-name').value.trim();
       const password = document.getElementById('reg-password').value;
 
+      const termsChecked = document.getElementById('reg-terms').checked;
+      if (!termsChecked) {
+        Pontinho.showToast('Você precisa aceitar os Termos de Uso e a Política de Privacidade (LGPD).', 'error');
+        return;
+      }
+
       // Sanitização no cliente
       let email = rawEmail.toLowerCase();
       if (!email.includes('@')) {
@@ -262,7 +287,7 @@
       try {
         const data = await Pontinho.apiFetch('/api/auth/register', {
           method: 'POST',
-          body: JSON.stringify({ email, name, password })
+          body: JSON.stringify({ email, name, password, terms_accepted: true })
         });
 
         Pontinho.setCurrentUserId(data.user_id);

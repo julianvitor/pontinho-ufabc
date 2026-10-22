@@ -409,6 +409,39 @@
 
       </form>
 
+      <!-- SEÇÃO LGPD E GESTÃO DE PRIVACIDADE -->
+      <div class="mt-8 pt-6 border-t border-slate-800 space-y-4">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🛡️</span>
+          <div>
+            <h3 class="text-sm font-black text-white">Privacidade & Direitos LGPD</h3>
+            <p class="text-[11px] text-slate-400">Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/70 p-4 sm:p-5 rounded-2xl border border-slate-800/80 space-y-3">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Como titular de dados, você possui pleno controle sobre suas informações pessoais cadastradas no Pontinho. Você pode solicitar uma cópia dos seus dados ou revogar o consentimento e excluir sua conta a qualquer momento.
+          </p>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
+            <button type="button" onclick="exportMyDataLGPD()" class="flex-1 px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 transition flex items-center justify-center gap-2">
+              <span>📥</span> Baixar Meus Dados (Portabilidade JSON)
+            </button>
+            
+            <button type="button" onclick="deleteMyAccountLGPD()" class="px-4 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 text-xs font-bold rounded-xl border border-rose-500/30 transition flex items-center justify-center gap-2">
+              <span>🗑️</span> Excluir Minha Conta (Esquecimento)
+            </button>
+          </div>
+
+          <div class="pt-2 text-center sm:text-left">
+            <a href="./terms.html" target="_blank" class="text-[11px] text-emerald-400 hover:underline font-semibold inline-flex items-center gap-1.5">
+              <span>📄</span> Ver Termos de Uso e Política de Privacidade completa
+            </a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
@@ -764,6 +797,52 @@
       }).catch(err => {
         Pontinho.showToast(err.message, 'error');
       });
+    }
+
+    // --- LGPD: DIREITOS DO TITULAR ---
+    async function exportMyDataLGPD() {
+      try {
+        Pontinho.showToast('Preparando o pacote com todos os seus dados pessoais (LGPD)...');
+        const data = await Pontinho.apiFetch('/api/users/me/export');
+        const jsonStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `meus-dados-pontinho-${data.titular.ra || 'usuario'}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        Pontinho.showToast('Seus dados foram exportados com sucesso! 📥', 'success');
+      } catch (err) {
+        Pontinho.showToast(err.message || 'Erro ao exportar dados.', 'error');
+      }
+    }
+
+    async function deleteMyAccountLGPD() {
+      const confirmed = confirm(
+        '⚠️ ATENÇÃO - DIREITO AO ESQUECIMENTO (LGPD):\n\n' +
+        'Tem certeza absoluta que deseja excluir sua conta do Pontinho?\n\n' +
+        'Esta ação é permanente e irreversível. Todos os seus dados, fotos públicas e privadas, curtidas, matches e histórico de mensagens serão eliminados definitivamente dos nossos servidores.'
+      );
+      if (!confirmed) return;
+
+      const secondConfirm = prompt('Para confirmar a exclusão permanente, digite EXCLUIR:');
+      if (secondConfirm !== 'EXCLUIR') {
+        Pontinho.showToast('Exclusão cancelada.');
+        return;
+      }
+
+      try {
+        await Pontinho.apiFetch('/api/users/me', { method: 'DELETE' });
+        Pontinho.showToast('Sua conta foi excluída permanentemente. Até logo! 👋', 'success');
+        setTimeout(() => {
+          window.location.href = './login.html';
+        }, 1200);
+      } catch (err) {
+        Pontinho.showToast(err.message || 'Erro ao excluir conta.', 'error');
+      }
     }
   </script>
 </body>

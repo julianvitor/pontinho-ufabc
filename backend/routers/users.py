@@ -3,7 +3,7 @@ Rotas de Gerenciamento de Usuário e Perfil do Pontinho UFABC
 """
 import json
 import sqlite3
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db
 from backend.models import UserCreateOrUpdate
 from backend.auth import get_current_user_id
@@ -113,3 +113,117 @@ def create_new_user(data: UserCreateOrUpdate):
     except sqlite3.IntegrityError:
         conn.close()
         raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado.")
+
+@router.get("/me/export")
+def export_my_data_lgpd(request: Request):
+    """
+    LGPD - Art. 18, II e V (Direito de Acesso e Portabilidade dos Dados).
+    Retorna todo o histórico e dados pessoais armazenados sobre o usuário no formato JSON.
+    """
+    user_id = get_current_user_id(request)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 1. Dados cadastrais e perfil
+    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    user_row = cursor.fetchone()
+    if not user_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    user_dict = dict(user_row)
+    # Por segurança, removemos o hash da senha da exportação
+    user_dict.pop("password_hash", None)
+    user_dict["interests"] = json.loads(user_dict["interests"]) if user_dict.get("interests") else []
+    user_dict["photos"] = json.loads(user_dict["photos"]) if user_dict.get("photos") else []
+    user_dict["songs"] = json.loads(user_dict["songs"]) if user_dict.get("songs") else []
+    user_dict["private_photos"] = json.loads(user_dict["private_photos"]) if user_dict.get("private_photos") else []
+
+    # 2. Histórico de Swipes efetuados
+    cursor.execute("""
+        SELECT s.to_user_id, u.name as target_name, s.action, s.created_at
+        FROM swipes s
+        LEFT JOIN users u ON u.id = s.to_user_id
+        WHERE s.from_user_id = ?
+        ORDER BY s.created_at DESC
+    """, (user_id,))
+    swipes = [dict(r) for r in cursor.fetchall()]
+
+    # 3. Matches ativos
+    cursor.execute("""
+        SELECT m.id as match_id, m.created_at,
+               u.id as matched_user_id, u.name as matched_user_name
+        FROM matches m
+        JOIN users u ON (u.id = CASE WHEN m.user1_id = ? THEN m.user2_id ELSE m.user1_id END)
+        WHERE m.user1_id = ? OR m.user2_id = ?
+        ORDER BY m.created_at DESC
+    """, (user_id, user_id, user_id))
+    matches = [dict(r) for r in cursor.fetchall()]
+
+    # 4. Mensagens enviadas e recebidas
+    cursor.execute("""
+        SELECT msg.id, msg.match_id, msg.sender_id, msg.text, msg.created_at,
+               (msg.sender_id = ?) as sent_by_me
+        FROM messages msg
+        JOIN matches m ON m.id = msg.match_id
+        WHERE m.user1_id = ? OR m.user2_id = ?
+        ORDER BY msg.created_at ASC
+    """, (user_id, user_id, user_id))
+    messages = [dict(r) for r in cursor.fetchall()]
+
+    # 5. Solicitações de fotos privadas
+    cursor.execute("""
+        SELECT par.id, par.match_id, par.requester_id, par.target_id, par.status, par.created_at
+        FROM private_access_requests par
+        WHERE par.requester_id = ? OR par.target_id = ?
+    """, (user_id, user_id))
+    private_requests = [dict(r) for r in cursor.fetchall()]
+
+    conn.close()
+
+    from datetime import datetime, timezone
+    return {
+        "lgpd_compliance": {
+            "law": "Lei Geral de Proteção de Dados (Lei nº 13.709/2018)",
+            "article": "Artigo 18 - Direitos do Titular (Acesso e Portabilidade de Dados)",
+            "platform": "Pontinho UFABC",
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "contact_dpo": "privacidade@pontinho.app"
+        },
+        "titular": user_dict,
+        "swipes_historico": swipes,
+        "matches": matches,
+        "mensagens": messages,
+        "solicitacoes_privadas": private_requests
+    }
+
+@router.delete("/me")
+def delete_my_account_lgpd(request: Request, response: Response):
+    """
+    LGPD - Art. 18, VI (Direito à Eliminação dos Dados Pessoais / Direito ao Esquecimento).
+    Exclui permanentemente a conta do usuário e todos os registros vinculados
+    (swipes, matches, mensagens e solicitações privadas em cascata).
+    """
+    user_id = get_current_user_id(request)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Confirma existência
+    cursor.execute("SELECT id, name FROM users WHERE id = ?", (user_id,))
+    user = cursor.fetchone()
+    if not user:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    # Exclui o usuário (Foreign keys em ON DELETE CASCADE limpam swipes, matches, messages, private_access_requests)
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+    # Remove o cookie de sessão
+    response.delete_cookie(key="pontinho_user_id", path="/")
+
+    return {
+        "success": True,
+        "message": "Sua conta e todos os seus dados pessoais foram eliminados permanentemente do Pontinho conforme a LGPD."
+    }

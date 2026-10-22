@@ -9,6 +9,7 @@ class RegisterRequest(BaseModel):
     name: str = Field(..., min_length=2, description="Nome completo")
     password: str = Field(..., min_length=4, description="Senha de acesso")
     ra: Optional[str] = Field(default="", description="RA (Registro Acadêmico) opcional")
+    terms_accepted: bool = Field(default=True, description="Concordância com os Termos de Uso e Política de Privacidade (LGPD)")
 
 class LoginRequest(BaseModel):
     email: str = Field(..., description="E-mail de acesso")
