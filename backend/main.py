@@ -4,6 +4,7 @@ Pontinho - Ponto de Entrada Principal da Aplicação FastAPI
 import sys
 from pathlib import Path
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -20,6 +21,16 @@ app = FastAPI(
     title="Pontinho API",
     description="Backend modularizado do aplicativo de conexões Pontinho",
     version="2.0.0"
+)
+
+# Habilita CORS para permitir que o frontend seja servido separadamente
+# (ex: servidor com live refresh na porta 3000 ou 5500)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Inicializa banco de dados SQLite e migrações automáticas

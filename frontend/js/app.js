@@ -16,6 +16,17 @@ const Pontinho = {
     }
   },
 
+  // Retorna a URL base da API quando o frontend for servido em porta desacoplada (ex: 3000 com live refresh)
+  getApiBase() {
+    if (window.PONTINHO_API_URL) {
+      return window.PONTINHO_API_URL;
+    }
+    if (window.location.port && window.location.port !== '8000') {
+      return `${window.location.protocol}//${window.location.hostname}:8000`;
+    }
+    return '';
+  },
+
   // Realiza requisição para a API FastAPI ou faz fallback automático para o MockStore local
   async apiFetch(url, options = {}) {
     const headers = options.headers || {};
@@ -30,10 +41,13 @@ const Pontinho = {
       return PontinhoMock.handle(url, options);
     }
 
+    const targetUrl = url.startsWith('http') ? url : `${this.getApiBase()}${url}`;
+
     try {
-      const response = await fetch(url, {
+      const response = await fetch(targetUrl, {
         ...options,
-        headers
+        headers,
+        credentials: 'include'
       });
 
       if (response.status === 401 && !window.location.pathname.includes('login.html')) {
