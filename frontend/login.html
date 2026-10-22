@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,16 +8,20 @@
   <link rel="stylesheet" href="./css/style.css">
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             ufabc: {
               50: '#f0fdf4',
               100: '#dcfce7',
+              400: '#34d399',
               500: '#10b981',
               600: '#059669',
               700: '#047857',
               800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
             }
           }
         }
@@ -25,29 +29,33 @@
     }
   </script>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 min-h-[100dvh] flex flex-col justify-center items-center p-3 sm:p-4 text-slate-100 font-sans antialiased">
+<body class="bg-[#090d16] min-h-[100dvh] flex flex-col justify-center items-center p-3 sm:p-4 text-slate-100 font-sans antialiased relative overflow-x-hidden">
+  
+  <!-- Efeito de Luz de Fundo com Verde UFABC -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-0 right-0 w-[400px] h-[300px] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
 
   <!-- CARD PRINCIPAL DE AUTENTICAÇÃO -->
-  <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 text-slate-800 transition-all">
+  <div class="w-full max-w-md bg-slate-900/90 rounded-3xl shadow-2xl overflow-hidden border border-slate-800/80 backdrop-blur-xl text-slate-100 transition-all shadow-black/80">
     
     <!-- CABEÇALHO -->
-    <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 py-6 px-8 text-center text-white relative">
-      <h1 class="text-3xl font-black tracking-tight">Pontinho</h1>
+    <div class="bg-gradient-to-b from-emerald-950/60 via-slate-900 to-slate-900/90 py-7 px-8 text-center relative border-b border-emerald-500/20">
+      <h1 class="text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">Pontinho</h1>
     </div>
 
     <!-- SELETOR DE ABAS: LOGIN OU CADASTRO -->
-    <div class="flex border-b border-slate-100 bg-slate-50">
+    <div class="flex border-b border-slate-800 bg-slate-950/60">
       <button 
         id="tab-btn-login" 
         onclick="switchAuthTab('login')" 
-        class="flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-700 border-b-2 border-emerald-600 bg-white transition"
+        class="flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80 transition"
       >
         Entrar
       </button>
       <button 
         id="tab-btn-register" 
         onclick="switchAuthTab('register')" 
-        class="flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition"
+        class="flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 transition"
       >
         Cadastrar-se
       </button>
@@ -58,30 +66,30 @@
       <!-- ABA 1: FORMULÁRIO DE LOGIN -->
       <form id="form-login" onsubmit="handleLogin(event)" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail ou RA</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail ou RA</label>
           <input 
             id="login-email" 
             type="text" 
             required 
             placeholder="nome@aluno.ufabc.edu.br" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Senha</label>
           <input 
             id="login-password" 
             type="password" 
             required 
             placeholder="••••••••" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
         </div>
 
         <button 
           type="submit" 
-          class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition"
+          class="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 hover:shadow-emerald-900/60 transition active:scale-[0.99]"
         >
           Entrar
         </button>
@@ -90,54 +98,54 @@
       <!-- ABA 2: FORMULÁRIO DE CADASTRO -->
       <form id="form-register" onsubmit="handleRegister(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail</label>
           <input 
             id="reg-email" 
             type="email" 
             required 
             placeholder="seu.email@exemplo.com" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Nome</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Nome</label>
           <input 
             id="reg-name" 
             type="text" 
             required 
             placeholder="Como quer ser chamado(a)" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Senha</label>
           <input 
             id="reg-password" 
             type="password" 
             required 
             minlength="4" 
             placeholder="Mínimo 4 caracteres" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+            class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
         </div>
 
         <button 
           type="submit" 
-          class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition"
+          class="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 hover:shadow-emerald-900/60 transition active:scale-[0.99]"
         >
           Criar Conta
         </button>
       </form>
 
       <!-- ATALHOS RÁPIDOS PARA CONTAS DE TESTE (CARREGADOS DINAMICAMENTE DO BACKEND) -->
-      <div id="demo-section" class="mt-6 pt-5 border-t border-slate-100 text-center">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+      <div id="demo-section" class="mt-6 pt-5 border-t border-slate-800 text-center">
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2.5">
           Contas Demo:
         </span>
         <div id="demo-buttons-container" class="flex flex-wrap gap-1.5 justify-center">
-          <span class="text-xs text-slate-400">Carregando contas...</span>
+          <span class="text-xs text-slate-500">Carregando contas...</span>
         </div>
       </div>
 
@@ -169,8 +177,8 @@
         container.innerHTML = accounts.map(acc => {
           const isAdmin = acc.is_admin;
           const btnClass = isAdmin 
-            ? "px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[11px] font-bold border border-amber-200/60 transition"
-            : "px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 rounded-lg text-[11px] font-medium transition";
+            ? "px-2.5 py-1 bg-amber-950/50 hover:bg-amber-900/60 text-amber-300 rounded-lg text-[11px] font-bold border border-amber-600/40 transition"
+            : "px-2.5 py-1 bg-slate-800/80 hover:bg-emerald-950/70 hover:text-emerald-300 hover:border-emerald-500/40 text-slate-300 rounded-lg text-[11px] font-medium border border-slate-700/60 transition";
           
           const shortName = (acc.name || 'Usuário').split(' ')[0];
           const displayName = isAdmin ? `${shortName} (Admin)` : shortName;
@@ -192,13 +200,13 @@
       const regForm = document.getElementById('form-register');
 
       if (tab === 'login') {
-        loginBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-700 border-b-2 border-emerald-600 bg-white transition';
-        regBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition';
+        loginBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80 transition';
+        regBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 transition';
         loginForm.classList.remove('hidden');
         regForm.classList.add('hidden');
       } else {
-        regBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-700 border-b-2 border-emerald-600 bg-white transition';
-        loginBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 transition';
+        regBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80 transition';
+        loginBtn.className = 'flex-1 py-3.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 transition';
         regForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
       }

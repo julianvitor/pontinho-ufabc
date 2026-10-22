@@ -209,10 +209,15 @@ const Pontinho = {
     }
 
     const toast = document.createElement('div');
-    const bgClass = type === 'success' ? 'bg-emerald-600 text-white shadow-emerald-600/30' : type === 'error' ? 'bg-rose-600 text-white shadow-rose-600/30' : 'bg-slate-800 text-white shadow-slate-900/30';
-    toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0 text-xs sm:text-sm font-semibold pointer-events-auto border border-white/10`;
+    const colorClasses = type === 'success' 
+      ? 'bg-slate-900/95 text-emerald-300 border-emerald-500/40 shadow-emerald-950/60' 
+      : type === 'error' 
+        ? 'bg-slate-900/95 text-rose-300 border-rose-500/40 shadow-rose-950/60' 
+        : 'bg-slate-900/95 text-teal-300 border-teal-500/40 shadow-teal-950/60';
+        
+    toast.className = `${colorClasses} backdrop-blur-md px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0 text-xs sm:text-sm font-semibold pointer-events-auto border`;
     toast.innerHTML = `
-      <span class="text-base">${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span>
+      <span class="text-base font-black">${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span>
       <span class="flex-1">${message}</span>
     `;
 
@@ -236,7 +241,7 @@ const Pontinho = {
       const currentId = this.getCurrentUserId();
 
       select.innerHTML = users.map(u => `
-        <option value="${u.id}" ${u.id === currentId ? 'selected' : ''}>
+        <option value="${u.id}" class="bg-slate-900 text-slate-100" ${u.id === currentId ? 'selected' : ''}>
           ${u.name} (${u.ra || u.email})
         </option>
       `).join('');
