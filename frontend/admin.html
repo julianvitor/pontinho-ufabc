@@ -371,7 +371,7 @@
         }
 
         tbody.innerHTML = users.map(u => {
-          const photo = (u.photos && u.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+          const photo = (u.photos && u.photos[0]) ? Pontinho.resolveMediaUrl(u.photos[0]) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
           return `
             <tr class="hover:bg-slate-50 transition">
               <td class="py-3 px-3 flex items-center gap-2.5">

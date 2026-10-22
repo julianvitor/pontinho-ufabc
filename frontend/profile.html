@@ -102,17 +102,34 @@
             <!-- Fotos inseridas dinamicamente -->
           </div>
 
-          <!-- Input para adicionar nova foto -->
-          <div class="flex gap-2">
-            <input 
-              id="new-photo-input" 
-              type="url" 
-              placeholder="Cole a URL da foto..." 
-              class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-            >
-            <button type="button" onclick="addPhotoUrl()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition">
-              Adicionar
-            </button>
+          <!-- Ações de Adicionar Foto Pública (Upload Direto ou Link) -->
+          <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <label for="public-file-input" class="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95">
+                <span>📁</span>
+                <span id="public-upload-label">Enviar Imagem do Dispositivo</span>
+                <input 
+                  id="public-file-input" 
+                  type="file" 
+                  accept="image/jpeg,image/png,image/webp,image/gif" 
+                  class="hidden" 
+                  onchange="handleImageUpload(event, 'public')"
+                >
+              </label>
+              <span class="text-[11px] text-slate-400">Comprimido automaticamente em WebP</span>
+            </div>
+
+            <div class="flex gap-2 pt-1 border-t border-slate-200/60">
+              <input 
+                id="new-photo-input" 
+                type="url" 
+                placeholder="Ou cole o link de uma imagem da web..." 
+                class="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              >
+              <button type="button" onclick="addPhotoUrl()" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition">
+                Adicionar Link
+              </button>
+            </div>
           </div>
         </div>
 
@@ -248,16 +265,34 @@
               <!-- Fotos privadas renderizadas dinamicamente -->
             </div>
 
-            <div class="flex gap-2">
-              <input 
-                id="new-private-photo-input" 
-                type="url" 
-                placeholder="Cole a URL da foto privada..." 
-                class="flex-1 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-rose-200/40 focus:outline-none focus:ring-2 focus:ring-rose-500/60"
-              >
-              <button type="button" onclick="addPrivatePhotoUrl()" class="px-4 py-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                Adicionar
-              </button>
+            <!-- Ações de Adicionar Foto Privada (Upload Direto ou Link) -->
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-3 space-y-2">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <label for="private-file-input" class="inline-flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95">
+                  <span>🔒</span>
+                  <span id="private-upload-label">Enviar Foto Privada</span>
+                  <input 
+                    id="private-file-input" 
+                    type="file" 
+                    accept="image/jpeg,image/png,image/webp,image/gif" 
+                    class="hidden" 
+                    onchange="handleImageUpload(event, 'private')"
+                  >
+                </label>
+                <span class="text-[11px] text-rose-200/60">Privacidade garantida (sem metadados)</span>
+              </div>
+
+              <div class="flex gap-2 pt-1 border-t border-white/10">
+                <input 
+                  id="new-private-photo-input" 
+                  type="url" 
+                  placeholder="Ou cole a URL da foto privada..." 
+                  class="flex-1 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-rose-200/40 focus:outline-none focus:ring-2 focus:ring-rose-500/60"
+                >
+                <button type="button" onclick="addPrivatePhotoUrl()" class="px-3.5 py-2 bg-white/15 hover:bg-white/25 text-rose-100 rounded-xl text-xs font-bold transition shadow-sm">
+                  Adicionar Link
+                </button>
+              </div>
             </div>
           </div>
 
@@ -460,6 +495,38 @@
       }
     }
 
+    async function handleImageUpload(event, type) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const labelId = type === 'public' ? 'public-upload-label' : 'private-upload-label';
+      const label = document.getElementById(labelId);
+      const originalText = label ? label.innerText : '';
+
+      try {
+        if (label) label.innerText = 'Comprimindo...';
+        Pontinho.showToast('Sanitizando e otimizando imagem...', 'info');
+
+        const result = await Pontinho.uploadPhoto(file);
+        
+        if (type === 'public') {
+          currentPhotos.push(result.url);
+          renderPhotosGrid();
+        } else {
+          currentPrivatePhotos.push(result.url);
+          renderPrivatePhotosGrid();
+        }
+
+        const sizeKb = Math.round(result.compressed_size / 1024);
+        Pontinho.showToast(`Foto otimizada em WebP (${sizeKb} KB, economia de ${result.compression_ratio})!`, 'success');
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      } finally {
+        if (label) label.innerText = originalText;
+        event.target.value = '';
+      }
+    }
+
     function renderPhotosGrid() {
       const grid = document.getElementById('photos-grid');
       const indicator = document.getElementById('photos-count-indicator');
@@ -482,7 +549,7 @@
 
       grid.innerHTML = currentPhotos.map((url, i) => `
         <div class="relative group rounded-2xl overflow-hidden aspect-square border border-slate-200 shadow-sm">
-          <img src="${url}" class="w-full h-full object-cover">
+          <img src="${Pontinho.resolveMediaUrl(url)}" class="w-full h-full object-cover">
           <button 
             type="button" 
             onclick="removePhoto(${i})" 
@@ -534,7 +601,7 @@
 
       grid.innerHTML = currentPrivatePhotos.map((url, i) => `
         <div class="relative group rounded-2xl overflow-hidden aspect-square border border-rose-500/40 shadow-sm">
-          <img src="${url}" class="w-full h-full object-cover">
+          <img src="${Pontinho.resolveMediaUrl(url)}" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <button 
             type="button" 

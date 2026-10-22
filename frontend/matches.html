@@ -238,7 +238,7 @@
 
         container.innerHTML = matchesList.map(m => {
           const partner = m.partner;
-          const photo = (partner.photos && partner.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+          const photo = (partner.photos && partner.photos[0]) ? Pontinho.resolveMediaUrl(partner.photos[0]) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
           const lastMsg = m.last_message ? m.last_message.text : 'Novo match! Diga um oi 👋';
           const isSelected = m.match_id === selectedMatchId;
 
@@ -434,7 +434,7 @@
       if (photos.length > 0) {
         grid.innerHTML = photos.map((p, idx) => `
           <div class="relative rounded-2xl overflow-hidden aspect-square border border-rose-500/40 shadow-lg group">
-            <img src="${p}" class="w-full h-full object-cover">
+            <img src="${Pontinho.resolveMediaUrl(p)}" class="w-full h-full object-cover">
             <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-bold">
               #${idx + 1}
             </span>
@@ -459,7 +459,7 @@
         
         // Atualiza header
         const partner = data.partner;
-        const photo = (partner.photos && partner.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+        const photo = (partner.photos && partner.photos[0]) ? Pontinho.resolveMediaUrl(partner.photos[0]) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
         document.getElementById('chat-partner-avatar').src = photo;
         document.getElementById('chat-partner-name').innerText = partner.name || 'Estudante';
         document.getElementById('chat-partner-sub').innerText = `${partner.course || 'Curso'} • Campus ${partner.campus || 'SA'}`;

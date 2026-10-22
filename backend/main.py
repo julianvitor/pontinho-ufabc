@@ -1,10 +1,12 @@
 """
 Pontinho - Ponto de Entrada Principal da Aplicação FastAPI (API REST Pura)
 """
+import os
 import sys
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # Configuração de paths
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -13,7 +15,14 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.database import init_db
-from backend.routers import auth_router, feed_router, matches_router, users_router, admin_router
+from backend.routers import (
+    auth_router,
+    feed_router,
+    matches_router,
+    users_router,
+    admin_router,
+    upload_router
+)
 
 app = FastAPI(
     title="Pontinho API",
@@ -34,12 +43,19 @@ app.add_middleware(
 # Inicializa banco de dados SQLite e migrações automáticas
 init_db()
 
+# Cria e monta o diretório de uploads estáticos
+DATA_DIR = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent
+UPLOAD_DIR = DATA_DIR / "uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+
 # Inclusão dos Roteadores Modulares da API
 app.include_router(auth_router)
 app.include_router(feed_router)
 app.include_router(matches_router)
 app.include_router(users_router)
 app.include_router(admin_router)
+app.include_router(upload_router)
 
 @app.get("/")
 def api_root():

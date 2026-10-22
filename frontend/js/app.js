@@ -27,6 +27,55 @@ const Pontinho = {
     return '';
   },
 
+  // Resolve URLs de mídia (seja URL externa completa ou arquivo em /uploads)
+  resolveMediaUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
+      return url;
+    }
+    if (url.startsWith('/uploads/')) {
+      const base = this.getApiBase();
+      return base ? `${base}${url}` : url;
+    }
+    return url;
+  },
+
+  // Upload seguro de foto para a API com streaming e compressão WebP
+  async uploadPhoto(file) {
+    if (!file) throw new Error('Selecione uma imagem para enviar.');
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('A imagem selecionada ultrapassa o limite de 10 MB.');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const headers = {};
+    const userId = this.getCurrentUserId();
+    if (userId) {
+      headers['X-User-Id'] = userId.toString();
+    }
+
+    const targetUrl = `${this.getApiBase()}/api/upload/photo`;
+    const response = await fetch(targetUrl, {
+      method: 'POST',
+      headers,
+      body: formData,
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      let errorMsg = 'Erro ao enviar imagem.';
+      try {
+        const err = await response.json();
+        errorMsg = err.detail || errorMsg;
+      } catch (e) {}
+      throw new Error(errorMsg);
+    }
+
+    return await response.json();
+  },
+
   // Realiza requisição para a API FastAPI no backend
   async apiFetch(url, options = {}) {
     const headers = options.headers || {};

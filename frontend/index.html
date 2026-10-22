@@ -327,7 +327,7 @@
         }
 
         container.innerHTML = accounts.map(acc => {
-          const photo = (acc.photos && acc.photos[0]) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+          const photo = (acc.photos && acc.photos[0]) ? Pontinho.resolveMediaUrl(acc.photos[0]) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
           const courseText = acc.specific_course || acc.course || 'Estudante';
           const ageText = acc.age ? `${acc.age} anos • ` : '';
           const adminBadge = acc.is_admin ? '<span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded ml-1">Admin</span>' : '';
@@ -427,7 +427,7 @@
           <div id="stamp-nope" class="swipe-stamp nope">PASSO</div>
 
           <!-- Foto Principal -->
-          <img id="card-photo" src="${photos[0]}" alt="${user.name}" class="w-full h-full object-cover pointer-events-none">
+          <img id="card-photo" src="${Pontinho.resolveMediaUrl(photos[0])}" alt="${user.name}" class="w-full h-full object-cover pointer-events-none">
 
           <!-- Áreas clicáveis para trocar de foto (esquerda = anterior, direita = próxima) -->
           <div class="absolute inset-y-0 left-0 w-1/3 z-10 cursor-pointer" onclick="prevPhoto(event)"></div>
@@ -640,7 +640,7 @@
     function updatePhotoView(photos) {
       const img = document.getElementById('card-photo');
       const countLabel = document.getElementById('photo-count-label');
-      if (img) img.src = photos[currentPhotoIndex];
+      if (img) img.src = Pontinho.resolveMediaUrl(photos[currentPhotoIndex]);
       if (countLabel) countLabel.innerText = `${currentPhotoIndex + 1}/${photos.length} fotos`;
 
       document.querySelectorAll('.photo-indicator').forEach((ind, i) => {
@@ -801,7 +801,7 @@
           <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Fotos</h4>
           <div class="grid grid-cols-2 gap-2">
             ${(u.photos || []).map(p => `
-              <img src="${p}" class="w-full h-44 object-cover rounded-2xl shadow-sm">
+              <img src="${Pontinho.resolveMediaUrl(p)}" class="w-full h-44 object-cover rounded-2xl shadow-sm">
             `).join('')}
           </div>
         </div>
