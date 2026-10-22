@@ -1,109 +1,128 @@
-# Pontinho UFABC 🔥
-> O aplicativo de paquera e amizades simplificado e desenhado para os membros da Universidade Federal do ABC.
+# Pontinho
+> Aplicativo mobile-first para conexões, conversas e encontros, com fotos secretas, trilha sonora e swipes interativos.
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Backend**: Python 3 com **FastAPI** e **Uvicorn**.
-- **Banco de Dados**: **SQLite3** nativo (sintaxe simples, queries legíveis e de fácil manutenção).
-- **Frontend**: Páginas HTML estáticas estruturadas com **Tailwind CSS**, sem complexidade de build.
-- **Validação de Dados**: **Pydantic** para integridade de tipos e regras de negócio.
+- **Backend**: Python 3 com **FastAPI** e **Uvicorn** estruturado em roteadores modulares.
+- **Banco de Dados**: **SQLite3** nativo com migrações automáticas e suporte a persistência em volume Docker.
+- **Frontend**: HTML5 semântico, JavaScript moderno (ES6+) e estilização com **Tailwind CSS**.
+- **Player de Áudio**: Integração com YouTube IFrame API para reprodução de música de fundo com player oculto.
+- **Validação de Dados**: **Pydantic** para integridade de tipos e validação de regras de negócio.
+- **Containers**: **Docker** e **Docker Compose** para orquestração e deploy simplificado.
 
 ---
 
-## 📋 Funcionalidades Implementadas
+## 📋 Funcionalidades Principais
 
-### 1. Autenticação (Login & Cadastro com E-mail Acadêmico UFABC)
-- **E-mail Institucional Obrigatório**: validação e sanitização estrita para que apenas e-mails acadêmicos da UFABC (`@aluno.ufabc.edu.br` ou `@ufabc.edu.br`) possam se cadastrar.
-- **Sanitização Inteligente**: converte para minúsculas, remove espaços e completa automaticamente com `@aluno.ufabc.edu.br` caso o estudante digite apenas o usuário.
-- **Login por E-mail e Senha**: autenticação segura por hash com sessão persistida via cookie e localStorage.
-- **Página de Login (`/login.html`)**: interface moderna e responsiva com abas para entrar ou se cadastrar, além de atalhos rápidos para contas de teste da UFABC.
+### 1. Autenticação & Demonstração Rápida
+- **Cadastro e Login**: Criação de conta com validação de e-mail e senha com hash seguro.
+- **Sessão Persistente**: Gerenciada via cookies HTTP e cabeçalhos de autenticação.
+- **Atalhos Demo (1-Clique)**: Acesso instantâneo a 8 perfis de demonstração e à conta de Administrador na tela de login.
+- **Modo Estático / Offline**: O frontend possui suporte autônomo com mock local (`localStorage`), permitindo demonstrações estáticas em serviços como GitHub Pages ou Vercel.
 
 ### 2. Feed & Swipes
-- **Deck de Cards de Estudantes**: fotos em tela cheia com alternância rápida (toque no lado esquerdo ou direito), indicador de progresso no topo (estilo Stories/Tinder).
-- **Informações do Aluno**:
-  - Nome, idade e bio.
-  - Campus: Santo André ou São Bernardo do Campo.
-  - Curso Base: BC&T, BC&H, LC&T, LCH.
-  - Curso Específico: Ciência da Computação, Engenharia Aeroespacial, Neurociência, Relações Internacionais, Economia, etc.
-  - Gênero: *Mulher*, *Homem*, *Não-binário*, *Outro*.
-  - **Gênero que busca**: *Mulheres*, *Homens*, *Não-binário*, *Todos* (com filtragem dinâmica no feed de swipes).
-  - Entidade que participa: Atlética Geral, Bateria UFABC, Caiás, Baja, Centro Acadêmico, etc.
-  - O que procura: *Algo sério*, *Algo casual*, *Amizade*.
-  - Tags de interesses.
-  - **3 Perguntinhas com Respostas**: quebra-gelo temático da UFABC (ex: *"O melhor lugar para matar aula na UFABC é..."*, *"Minha opinião impopular sobre o RU..."*).
-- **Publicidade Intercalada (Ads)**: cards patrocinados inseridos a cada N cards de perfil conforme frequência configurada no painel administrativo.
-- **Detecção de Match**: ao ocorrer like mútuo, um modal comemorativo é exibido com fotos de ambos os estudantes e atalho para o chat.
+- **Deck de Cards Mobile-First**: Visualização de fotos em tela cheia com toque intuitivo (estilo Stories/Tinder).
+- **Informações do Perfil**: Nome, idade, campus, curso, o que procura, interesses e perguntinhas quebra-gelo.
+- **Filtro de Gênero**: Filtragem dinâmica conforme a orientação de quem busca (*Mulheres*, *Homens*, *Todos*).
+- **Publicidade Intercalada (Ads)**: Anúncios e eventos exibidos entre os cards do feed com frequência configurável.
+- **Detecção de Match**: Notificação comemorativa ao ocorrer like bilateral com atalho direto para a conversa.
 
-### 2. Validação Obrigatória de Fotos
-- Regra de negócio estrita: **o perfil do estudante deve ter obrigatoriamente ao menos duas fotos** cadastradas (validado no frontend e no backend via Pydantic).
+### 3. Música de Fundo (YouTube Background Player)
+- Cada usuário pode configurar até 3 músicas preferidas no perfil.
+- Ao abrir os detalhes do perfil de outro usuário, a trilha sonora toca automaticamente em segundo plano.
+- O vídeo do YouTube permanece oculto, mantendo a experiência focada apenas no áudio.
 
-### 3. Conversas & Chat Básico
-- Aba **Conversas** com a lista de todos os matches mútuos.
-- **Chat exclusivo de texto**: envio e visualização de mensagens em tempo real entre alunos combinados.
+### 4. Fotos Públicas vs. Fotos e Bio Privadas (Álbum Secreto)
+- **Fotos Públicas**: Mínimo de 2 fotos obrigatórias visíveis no feed para todos os usuários.
+- **Fotos e Bio Privadas**: Conteúdo reservado com tom mais ousado e exclusivo.
+- **Fluxo de Autorização**:
+  1. Apenas usuários com **match mútuo** podem solicitar acesso às fotos privadas.
+  2. O proprietário do perfil visualiza a solicitação no chat e pode **autorizar** ou **recusar**.
+  3. Uma vez autorizado, o álbum secreto e a bio privada ficam desbloqueados para o parceiro.
 
-### 4. Meu Perfil
-- Edição completa de perfil com dropdowns dinâmicos carregados do banco SQLite.
-- Gerenciamento de fotos com pré-visualização e contagem de fotos mínima exigida.
-- Seletor de usuário para alternar facilmente entre perfis durante testes.
+### 5. Conversas & Chat em Tempo Real
+- Aba **Conversas** com lista de matches ativos.
+- Chat em tempo real com mensagens de texto e status das solicitações de acesso privado.
 
-### 5. Painel Administrativo (`/admin.html`)
-- **Moderar Usuários**: visualizar todos os cadastros e **apagar usuários** (com exclusão em cascata de matches e mensagens).
-- **Modificar Lista de Cursos**: adicionar e remover cursos base (BI) e específicos (pós-BI).
-- **Modificar Lista de Entidades**: cadastrar e gerenciar atléticas, centros acadêmicos e coletivos estudantis.
-- **Modificar as Perguntinhas**: adicionar e remover perguntas de perfil temáticas.
-- **Publicidade nos Swipes**: criar anúncios com imagem, título, texto promocional, link externo e frequência de exibição.
+### 6. Painel Administrativo (`/admin.html`)
+- **Moderação de Usuários**: Consulta e remoção de contas com exclusão em cascata.
+- **Gestão de Cursos e Entidades**: Cadastro e controle de cursos e associações.
+- **Perguntas de Quebra-Gelo**: Customização das perguntas exibidas nos perfis.
+- **Campanhas de Publicidade**: Criação de anúncios com imagem, descrição, link e frequência de exibição.
+
+---
+
+## 👥 Perfis de Exemplo Disponíveis
+
+A base já vem pré-configurada com 8 perfis completos de demonstração (fotos públicas e privadas, trilha sonora e bio personalizada):
+
+1. **Mariana Silva** (21 anos, Neurociência) - Vôlei, indie e café; match inicial pré-configurado com Gabriel.
+2. **Lucas Mendes** (22 anos, Relações Internacionais) - Cinema cult, carona noturna e papo direto.
+3. **Bia Costa** (20 anos, Engenharia Aeroespacial) - Astronomia, sci-fi e Taylor Swift.
+4. **Gabriel Santos** (23 anos, Ciência da Computação) - Programador e ritmista de bateria universitária.
+5. **Camila Rocha** (21 anos, Ciências Econômicas) - Trilhas, sustentabilidade e yoga.
+6. **Rodrigo Alves** (24 anos, Engenharia de Gestão) - Treino pesado, música eletrônica e viagens.
+7. **Isabela Martins** (22 anos, Biotecnologia) - Festivais, fotografia e vinho tinto.
+8. **Felipe Ramos** (23 anos, Ciências Econômicas) - Hip-hop, basquete de rua e debates.
+9. **Administrador** (28 anos, Gestão & Moderação) - Acesso ao painel administrativo.
 
 ---
 
 ## 📁 Estrutura de Pastas do Projeto
 
-O projeto é organizado com separação clara de responsabilidades entre backend, frontend estático e persistência de dados:
-
 ```text
 pontinho-ufabc/
-├── backend/                  # Aplicação Python / FastAPI
+├── backend/                  # Aplicação Python / FastAPI modular
 │   ├── __init__.py
-│   ├── database.py           # Conexão SQLite3, migrações automáticas e helpers
-│   ├── main.py               # Rotas da API REST, autenticação, feed e swipes
-│   └── seed.py               # Mocks da UFABC (cursos, entidades, perguntas, perfis)
+│   ├── auth.py               # Utilitários de autenticação e validação de e-mail
+│   ├── database.py           # Conexão SQLite3, esquemas e migrações automáticas
+│   ├── models.py             # Modelos de validação de dados Pydantic
+│   ├── main.py               # Configuração do FastAPI e montagem das rotas
+│   ├── seed.py               # Semente com os 8 perfis de exemplo, ads e entidades
+│   └── routers/              # Rotas modulares da API
+│       ├── __init__.py
+│       ├── admin.py          # Gestão de cursos, entidades, prompts e publicidades
+│       ├── auth.py           # Rotas de login, registro e sessão
+│       ├── feed.py           # Swipes, likes, dislikes e feed de descoberta
+│       ├── matches.py        # Matches, mensagens e pedidos de fotos privadas
+│       └── users.py          # Perfil, músicas e fotos do usuário
 ├── frontend/                 # Interface estática mobile-first com Tailwind CSS
 │   ├── css/
-│   │   └── style.css         # Estilos personalizados e animações de swipe
+│   │   └── style.css         # Estilização visual, animações e responsividade
 │   ├── js/
-│   │   └── app.js            # Utilitários compartilhados, autenticação e toast
-│   ├── index.html            # Feed de swipes com física de toque e cards
-│   ├── login.html            # Tela de login e cadastro com e-mail @ufabc.edu.br
-│   ├── profile.html          # Edição de perfil, gênero de interesse e fotos
-│   ├── matches.html          # Lista de combinações e chat de texto
-│   └── admin.html            # Painel de moderação e gerenciamento de publicidades
-├── data/                     # Volume persistente para o banco SQLite (pontinho.db)
-├── docker-compose.yml        # Orquestração do container Docker com montagem de volume
-├── Dockerfile                # Imagem de produção baseada em Python slim
-├── entrypoint.sh             # Script de inicialização (migração + servidor Uvicorn)
-├── requirements.txt          # Dependências Python (FastAPI, Uvicorn, etc.)
-└── README.md                 # Documentação do projeto
+│   │   └── app.js            # Lógica cliente, player de áudio e modo demo
+│   ├── index.html            # Feed principal de swipes
+│   ├── login.html            # Tela de login e cadastro com atalhos de demonstração
+│   ├── profile.html          # Edição de perfil, seleção de músicas e fotos
+│   ├── matches.html          # Conversas e autorizações de conteúdo privado
+│   └── admin.html            # Painel administrativo
+├── data/                     # Diretório de persistência do SQLite (pontinho.db)
+├── docker-compose.yml        # Configuração de containers Docker
+├── Dockerfile                # Imagem Docker otimizada (Python slim)
+├── entrypoint.sh             # Script de inicialização do container
+├── requirements.txt          # Dependências do backend Python
+└── README.md                 # Documentação oficial
 ```
 
 ---
 
-## 💻 Como Rodar o Projeto
+## 💻 Como Executar o Projeto
 
-### Opção 1: Via Docker & Docker Compose (Recomendado para Deploy)
+### Opção 1: Via Docker & Docker Compose (Recomendado)
 
-1. **Subir com Docker Compose**:
+1. **Construir a imagem e subir os serviços**:
    ```bash
    docker compose up --build -d
    ```
-   *O container inicializa automaticamente o banco SQLite e popula com os dados iniciais se necessário. O banco fica persistido na pasta `./data/pontinho.db` no seu host.*
 
-2. **Ver logs do container**:
+2. **Acompanhar os logs do servidor**:
    ```bash
    docker compose logs -f
    ```
 
-3. **Parar a aplicação**:
+3. **Parar os serviços**:
    ```bash
    docker compose down
    ```
@@ -117,22 +136,23 @@ pontinho-ufabc/
    pip install -r requirements.txt
    ```
 
-2. **Popular o banco com dados de teste da UFABC**:
+2. **Inicializar e semear a base de dados**:
    ```bash
    python -m backend.seed
    ```
 
-3. **Iniciar o servidor**:
+3. **Executar o servidor**:
    ```bash
    uvicorn backend.main:app --reload --port 8000
    ```
 
 ---
 
-### 🌐 Acessar no Navegador
-- Swipes (Feed Principal): [http://localhost:8000](http://localhost:8000)
-- Login / Cadastro: [http://localhost:8000/login.html](http://localhost:8000/login.html)
-- Chat & Matches: [http://localhost:8000/matches.html](http://localhost:8000/matches.html)
-- Meu Perfil: [http://localhost:8000/profile.html](http://localhost:8000/profile.html)
-- Painel Admin: [http://localhost:8000/admin.html](http://localhost:8000/admin.html)
+## 🌐 URLs de Acesso
 
+- **Feed Principal (Swipes)**: [http://localhost:8000](http://localhost:8000)
+- **Login & Cadastro**: [http://localhost:8000/login.html](http://localhost:8000/login.html)
+- **Meu Perfil**: [http://localhost:8000/profile.html](http://localhost:8000/profile.html)
+- **Conversas & Matches**: [http://localhost:8000/matches.html](http://localhost:8000/matches.html)
+- **Painel Administrativo**: [http://localhost:8000/admin.html](http://localhost:8000/admin.html)
+- **Documentação da API (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
