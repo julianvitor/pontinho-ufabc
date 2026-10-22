@@ -71,12 +71,12 @@
     </div>
   </header>
 
-  <!-- ÁREA DE CHAT & MATCHES -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col">
-    <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden flex-1 flex flex-col md:flex-row min-h-[580px]">
+  <!-- ÁREA DE CHAT & MATCHES (MOBILE-FIRST) -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-2 sm:p-6 pb-24 md:pb-6 flex flex-col h-[calc(100dvh-75px)] md:h-[620px]">
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden flex-1 flex flex-col md:flex-row h-full">
       
       <!-- COLUNA DA ESQUERDA: LISTA DE MATCHES -->
-      <div id="matches-sidebar" class="w-full md:w-80 border-r border-slate-100 flex flex-col bg-slate-50/50">
+      <div id="matches-sidebar" class="w-full md:w-80 border-r border-slate-100 flex flex-col bg-slate-50/50 h-full">
         
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
           <div>
@@ -93,7 +93,7 @@
       </div>
 
       <!-- COLUNA DA DIREITA: JANELA DO CHAT -->
-      <div id="chat-window" class="flex-1 flex flex-col bg-white">
+      <div id="chat-window" class="flex-1 hidden md:flex flex-col bg-white h-full">
         
         <!-- ESTADO QUANDO NENHUM MATCH ESTÁ SELECIONADO -->
         <div id="no-chat-selected" class="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
@@ -110,19 +110,19 @@
         <div id="active-chat-container" class="hidden flex-1 flex flex-col h-full">
           
           <!-- Cabeçalho do Chat -->
-          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <div class="px-4 sm:px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
             <div class="flex items-center gap-3">
-              <button onclick="backToMatchesList()" class="md:hidden text-slate-500 hover:text-slate-800 p-1 font-bold">
-                ←
+              <button onclick="backToMatchesList()" class="md:hidden text-slate-600 hover:text-slate-900 px-2 py-1 bg-white rounded-xl shadow-xs border border-slate-200 font-bold text-xs">
+                ← Voltar
               </button>
-              <img id="chat-partner-avatar" src="" alt="Avatar" class="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 shadow-sm">
+              <img id="chat-partner-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm">
               <div>
                 <h3 id="chat-partner-name" class="font-bold text-slate-900 text-sm leading-tight">Nome</h3>
                 <p id="chat-partner-sub" class="text-[11px] text-emerald-700 font-medium">Curso • Campus</p>
               </div>
             </div>
-            <a href="/" class="text-xs text-slate-500 hover:text-emerald-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">
-              🔥 Ver feed
+            <a href="/" class="text-xs text-slate-500 hover:text-emerald-700 font-semibold px-2.5 py-1 rounded-lg hover:bg-slate-100 transition">
+              🔥 Feed
             </a>
           </div>
 
@@ -137,17 +137,17 @@
               <input 
                 id="message-input" 
                 type="text" 
-                placeholder="Digite sua mensagem de texto para o match..." 
+                placeholder="Digite sua mensagem de texto..." 
                 required 
                 maxlength="500" 
-                class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
+                class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-3 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition"
               >
-              <button type="submit" class="px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-2xl shadow-md shadow-emerald-600/30 active:scale-95 transition flex items-center gap-1.5">
+              <button type="submit" class="px-4 sm:px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-xs sm:text-sm rounded-2xl shadow-md shadow-emerald-600/30 active:scale-95 transition flex items-center gap-1">
                 <span>Enviar</span>
                 <span>➤</span>
               </button>
             </form>
-            <p class="text-[10px] text-slate-400 mt-1.5 ml-2">Chat básico de texto apenas entre alunos da UFABC.</p>
+            <p class="text-[10px] text-slate-400 mt-1 ml-2">Chat exclusivo de texto entre estudantes da UFABC.</p>
           </div>
 
         </div>
@@ -156,6 +156,26 @@
 
     </div>
   </main>
+
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE (BOTTOM BAR) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 mobile-bottom-nav flex items-center justify-around py-2.5 shadow-lg">
+    <a href="/" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
+      <span class="text-xl">🔥</span>
+      <span>Swipes</span>
+    </a>
+    <a href="/matches.html" class="flex flex-col items-center gap-1 text-emerald-700 font-bold text-[11px]">
+      <span class="text-xl">💬</span>
+      <span>Conversas</span>
+    </a>
+    <a href="/profile.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
+      <span class="text-xl">👤</span>
+      <span>Perfil</span>
+    </a>
+    <a href="/admin.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-600 font-semibold text-[11px] transition">
+      <span class="text-xl">⚙️</span>
+      <span>Admin</span>
+    </a>
+  </nav>
 
   <script src="/static/app.js"></script>
   <script>

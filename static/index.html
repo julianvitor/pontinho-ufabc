@@ -78,22 +78,22 @@
     </div>
   </header>
 
-  <!-- CONTEÚDO PRINCIPAL: ÁREA DE SWIPES -->
-  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 sm:py-6 flex flex-col items-center justify-center relative">
+  <!-- CONTEÚDO PRINCIPAL: ÁREA DE SWIPES (MOBILE-FIRST) -->
+  <main class="flex-1 max-w-md w-full mx-auto px-3 sm:px-4 pt-3 pb-24 md:pb-6 flex flex-col items-center justify-center relative">
     
     <!-- BARRA DE AJUDA / DICAS UFABC -->
-    <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-3 px-1">
-      <div class="flex items-center gap-1">
+    <div class="w-full flex items-center justify-between text-xs text-slate-500 mb-2.5 px-1">
+      <div class="flex items-center gap-1.5">
         <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
         <span class="font-medium text-slate-700">Federal do ABC Online</span>
       </div>
-      <button onclick="resetSwipes()" class="text-emerald-600 hover:text-emerald-700 font-medium hover:underline flex items-center gap-1">
+      <button onclick="resetSwipes()" class="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline flex items-center gap-1">
         <span>🔄</span> Resetar Swipes
       </button>
     </div>
 
-    <!-- CONTAINER DOS CARDS -->
-    <div id="deck-container" class="relative w-full aspect-[3/4.6] max-h-[640px] rounded-3xl shadow-2xl bg-white border border-slate-200/80 overflow-hidden flex items-center justify-center">
+    <!-- CONTAINER DOS CARDS COM ALTURA OTIMIZADA PARA MOBILE (DVH) -->
+    <div id="deck-container" class="relative w-full h-[64dvh] sm:h-[580px] max-h-[620px] rounded-3xl shadow-2xl bg-white border border-slate-200/80 overflow-hidden flex items-center justify-center">
       
       <!-- ESTADO DE CARREGANDO -->
       <div id="loading-spinner" class="flex flex-col items-center gap-3 text-slate-400">
@@ -121,7 +121,7 @@
     </div>
 
     <!-- BOTÕES DE CONTROLE INFERIORES -->
-    <div id="action-controls" class="flex items-center justify-center gap-5 mt-5">
+    <div id="action-controls" class="flex items-center justify-center gap-6 mt-4 sm:mt-5">
       <!-- Botão Pass (X) -->
       <button onclick="handleSwipe('pass')" class="w-14 h-14 rounded-full bg-white shadow-xl border border-slate-200 text-rose-500 text-2xl flex items-center justify-center hover:scale-110 active:scale-95 hover:bg-rose-50 hover:border-rose-300 transition-all focus:outline-none" title="Passar (Não curti)">
         ✕
@@ -139,6 +139,26 @@
     </div>
 
   </main>
+
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE (NATIVE BOTTOM BAR) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 mobile-bottom-nav flex items-center justify-around py-2.5 shadow-lg">
+    <a href="/" class="flex flex-col items-center gap-1 text-emerald-700 font-bold text-[11px]">
+      <span class="text-xl">🔥</span>
+      <span>Swipes</span>
+    </a>
+    <a href="/matches.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
+      <span class="text-xl">💬</span>
+      <span>Conversas</span>
+    </a>
+    <a href="/profile.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-600 font-semibold text-[11px] transition">
+      <span class="text-xl">👤</span>
+      <span>Perfil</span>
+    </a>
+    <a href="/admin.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-600 font-semibold text-[11px] transition">
+      <span class="text-xl">⚙️</span>
+      <span>Admin</span>
+    </a>
+  </nav>
 
   <!-- MODAL DE DETALHES COMPLETOS DO PERFIL & PERGUNTINHAS -->
   <div id="details-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
@@ -268,13 +288,17 @@
       }
 
       cardWrapper.innerHTML = `
-        <div id="active-card" class="tinder-card w-full h-full relative cursor-grab select-none">
+        <div id="active-card" class="tinder-card w-full h-full relative cursor-grab active:cursor-grabbing select-none">
+          <!-- Carimbos de Arraste (CURTI / PASSO) -->
+          <div id="stamp-like" class="swipe-stamp like">CURTI</div>
+          <div id="stamp-nope" class="swipe-stamp nope">PASSO</div>
+
           <!-- Foto Principal -->
           <img id="card-photo" src="${photos[0]}" alt="${user.name}" class="w-full h-full object-cover pointer-events-none">
 
           <!-- Áreas clicáveis para trocar de foto (esquerda = anterior, direita = próxima) -->
-          <div class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer" onclick="prevPhoto(event)"></div>
-          <div class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer" onclick="nextPhoto(event)"></div>
+          <div class="absolute inset-y-0 left-0 w-1/3 z-10 cursor-pointer" onclick="prevPhoto(event)"></div>
+          <div class="absolute inset-y-0 right-0 w-1/3 z-10 cursor-pointer" onclick="nextPhoto(event)"></div>
 
           ${indicatorsHtml}
 
@@ -287,17 +311,17 @@
           <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none"></div>
 
           <!-- Informações Principais do Estudante -->
-          <div class="absolute inset-x-0 bottom-0 p-5 z-20 text-white flex flex-col justify-end pointer-events-auto">
+          <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5 z-20 text-white flex flex-col justify-end pointer-events-auto">
             
             <!-- Badges de Campus e Entidade -->
             <div class="flex flex-wrap items-center gap-1.5 mb-2">
-              <span class="bg-emerald-600/90 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+              <span class="bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                 📍 ${user.campus}
               </span>
-              <span class="bg-rose-500/90 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+              <span class="bg-rose-500/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
                 ${user.looking_for}
               </span>
-              <span class="bg-amber-500/90 backdrop-blur-md text-slate-900 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+              <span class="bg-amber-500/90 backdrop-blur-md text-slate-900 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
                 🏛️ ${user.entity}
               </span>
             </div>
@@ -314,21 +338,27 @@
             </p>
 
             <!-- Bio resumida -->
-            ${user.bio ? `<p class="text-xs sm:text-sm text-slate-200 mt-2 line-clamp-2">${user.bio}</p>` : ''}
+            ${user.bio ? `<p class="text-xs sm:text-sm text-slate-200 mt-1.5 line-clamp-2">${user.bio}</p>` : ''}
 
             <!-- Botão de Ver Perguntinhas -->
-            <button onclick="openDetailsModal()" class="mt-3 w-full py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 border border-white/20">
+            <button onclick="openDetailsModal()" class="mt-2.5 w-full py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 border border-white/20 active:scale-98">
               <span>💬 Ver 3 perguntinhas & interesses</span>
             </button>
           </div>
         </div>
       `;
+
+      setupCardDrag(document.getElementById('active-card'));
     }
 
     function renderAdCard(ad) {
       const cardWrapper = document.getElementById('card-wrapper');
       cardWrapper.innerHTML = `
-        <div id="active-card" class="tinder-card w-full h-full relative select-none bg-slate-900">
+        <div id="active-card" class="tinder-card w-full h-full relative select-none bg-slate-900 cursor-grab active:cursor-grabbing">
+          <!-- Carimbos de Arraste -->
+          <div id="stamp-like" class="swipe-stamp like">CONFERIR</div>
+          <div id="stamp-nope" class="swipe-stamp nope">PULAR</div>
+
           <img src="${ad.image_url}" alt="${ad.title}" class="w-full h-full object-cover">
           <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
 
@@ -355,6 +385,85 @@
           </div>
         </div>
       `;
+
+      setupCardDrag(document.getElementById('active-card'));
+    }
+
+    function setupCardDrag(card) {
+      if (!card) return;
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let currentY = 0;
+
+      const stampLike = card.querySelector('#stamp-like');
+      const stampNope = card.querySelector('#stamp-nope');
+
+      function onPointerDown(e) {
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        currentX = startX;
+        currentY = startY;
+        card.classList.remove('animating');
+        try { card.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        currentX = e.clientX;
+        currentY = e.clientY;
+        const dx = currentX - startX;
+        const dy = currentY - startY;
+
+        const rot = dx * 0.06;
+        card.style.transform = `translate(${dx}px, ${dy * 0.3}px) rotate(${rot}deg)`;
+
+        if (stampLike && stampNope) {
+          if (dx > 25) {
+            stampLike.style.opacity = Math.min(1, (dx - 25) / 75);
+            stampNope.style.opacity = '0';
+          } else if (dx < -25) {
+            stampNope.style.opacity = Math.min(1, (-dx - 25) / 75);
+            stampLike.style.opacity = '0';
+          } else {
+            stampLike.style.opacity = '0';
+            stampNope.style.opacity = '0';
+          }
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        const dx = currentX - startX;
+
+        if (stampLike) stampLike.style.opacity = '0';
+        if (stampNope) stampNope.style.opacity = '0';
+
+        if (dx > 85) {
+          card.style.transform = '';
+          handleSwipe('like');
+        } else if (dx < -85) {
+          card.style.transform = '';
+          handleSwipe('pass');
+        } else {
+          // Volta suavemente para a posição inicial
+          card.classList.add('animating');
+          card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+          setTimeout(() => {
+            card.classList.remove('animating');
+            card.style.transform = '';
+          }, 280);
+        }
+      }
+
+      card.addEventListener('pointerdown', onPointerDown);
+      card.addEventListener('pointermove', onPointerMove);
+      card.addEventListener('pointerup', onPointerUp);
+      card.addEventListener('pointercancel', onPointerUp);
     }
 
     function prevPhoto(e) {

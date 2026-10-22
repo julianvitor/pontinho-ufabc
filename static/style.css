@@ -1,34 +1,75 @@
-/* Estilos personalizados e animações para Pontinho UFABC */
+/* Estilos personalizados e animações para Pontinho UFABC (Mobile-First) */
 
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
-  }
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
 
 .tinder-card {
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.25s ease;
   will-change: transform, opacity;
   user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.tinder-card.animating {
+  transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
 }
 
 .tinder-card.swiping-left {
-  transform: translateX(-120%) rotate(-20deg) !important;
+  transform: translate(-140%, 15px) rotate(-25deg) !important;
   opacity: 0;
+  transition: transform 0.35s ease-in, opacity 0.3s ease-in;
 }
 
 .tinder-card.swiping-right {
-  transform: translateX(120%) rotate(20deg) !important;
+  transform: translate(140%, 15px) rotate(25deg) !important;
   opacity: 0;
+  transition: transform 0.35s ease-in, opacity 0.3s ease-in;
+}
+
+/* Carimbo de Like (arrastando pra direita) */
+.swipe-stamp {
+  position: absolute;
+  top: 40px;
+  padding: 6px 14px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  border-width: 4px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 30;
+}
+
+.swipe-stamp.like {
+  left: 24px;
+  color: #10b981;
+  border-color: #10b981;
+  transform: rotate(-18deg);
+  background-color: rgba(16, 185, 129, 0.15);
+}
+
+.swipe-stamp.nope {
+  right: 24px;
+  color: #f43f5e;
+  border-color: #f43f5e;
+  transform: rotate(18deg);
+  background-color: rgba(244, 63, 94, 0.15);
 }
 
 /* Indicadores de foto no topo do card (estilo Instagram Stories / Tinder) */
 .photo-indicator {
-  height: 4px;
-  background-color: rgba(255, 255, 255, 0.4);
+  height: 3.5px;
+  background-color: rgba(255, 255, 255, 0.35);
   border-radius: 9999px;
   transition: background-color 0.2s ease;
 }
@@ -37,17 +78,22 @@
   background-color: #ffffff;
 }
 
-/* Scrollbar personalizada */
+/* Barra de navegação inferior mobile (Bottom Bar) */
+.mobile-bottom-nav {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
