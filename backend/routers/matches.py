@@ -39,27 +39,94 @@ def get_user_matches(request: Request):
 
         # Pega a última mensagem
         cursor.execute("""
-            SELECT text, sender_id, created_at
+            SELECT text, sender_id, read_at, created_at
             FROM messages
             WHERE match_id = ?
             ORDER BY id DESC LIMIT 1
         """, (m["match_id"],))
         last_msg_row = cursor.fetchone()
 
+        cursor.execute("""
+            SELECT COUNT(*) AS unread_count
+            FROM messages
+            WHERE match_id = ? AND sender_id != ? AND read_at IS NULL
+        """, (m["match_id"], current_id))
+        unread_row = cursor.fetchone()
+        unread_count = unread_row["unread_count"] if unread_row else 0
+
         result.append({
             "match_id": m["match_id"],
             "match_date": m["match_date"],
             "partner": partner_dict,
-            "last_message": dict(last_msg_row) if last_msg_row else None
+            "last_message": dict(last_msg_row) if last_msg_row else None,
+            "unread_count": unread_count,
+            "is_new": last_msg_row is None
         })
 
     conn.close()
     return result
 
+@router.get("/matches/unread-count")
+def get_unread_count(request: Request):
+    """Retorna o número de mensagens não lidas e novos matches para badges visuais na UI."""
+    current_id = get_current_user_id(request)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Contagem de mensagens não lidas recebidas
+    cursor.execute("""
+        SELECT COUNT(*) AS count
+        FROM messages msg
+        JOIN matches m ON m.id = msg.match_id
+        WHERE (m.user1_id = ? OR m.user2_id = ?)
+          AND msg.sender_id != ?
+          AND msg.read_at IS NULL
+    """, (current_id, current_id, current_id))
+    row_msgs = cursor.fetchone()
+    unread_messages = row_msgs["count"] if row_msgs else 0
+
+    # Novos matches onde ainda não houve mensagem trocada
+    cursor.execute("""
+        SELECT COUNT(*) AS count
+        FROM matches m
+        WHERE (m.user1_id = ? OR m.user2_id = ?)
+          AND NOT EXISTS (
+              SELECT 1 FROM messages msg WHERE msg.match_id = m.id
+          )
+    """, (current_id, current_id))
+    row_matches = cursor.fetchone()
+    unread_matches = row_matches["count"] if row_matches else 0
+
+    conn.close()
+    return {
+        "unread_messages": unread_messages,
+        "unread_matches": unread_matches,
+        "total": unread_messages + unread_matches
+    }
+
+@router.delete("/matches/{match_id}")
+def unmatch(match_id: int, request: Request):
+    """Desfaz o match permanentemente, removendo o histórico de conversa."""
+    current_id = get_current_user_id(request)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM matches WHERE id = ? AND (user1_id = ? OR user2_id = ?)", (match_id, current_id, current_id))
+    match_row = cursor.fetchone()
+    if not match_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Match não encontrado ou você não pertence a ele.")
+
+    cursor.execute("DELETE FROM matches WHERE id = ?", (match_id,))
+    conn.commit()
+    conn.close()
+
+    return {"success": True, "message": "Match desfeito com sucesso."}
+
 @router.get("/matches/{match_id}/messages")
 @router.get("/messages/{match_id}")
 def get_match_messages(match_id: int, request: Request):
-    """Busca o histórico de mensagens de texto de um match."""
+    """Busca o histórico de mensagens de texto de um match e marca as pendentes como lidas."""
     current_id = get_current_user_id(request)
     conn = get_db()
     cursor = conn.cursor()
@@ -77,8 +144,16 @@ def get_match_messages(match_id: int, request: Request):
     if partner_dict:
         partner_dict["photos"] = json.loads(partner_dict["photos"]) if partner_dict.get("photos") else []
 
+    # Marca as mensagens recebidas como lidas
     cursor.execute("""
-        SELECT id, match_id, sender_id, text, created_at
+        UPDATE messages
+        SET read_at = CURRENT_TIMESTAMP
+        WHERE match_id = ? AND sender_id != ? AND read_at IS NULL
+    """, (match_id, current_id))
+    conn.commit()
+
+    cursor.execute("""
+        SELECT id, match_id, sender_id, text, read_at, created_at
         FROM messages
         WHERE match_id = ?
         ORDER BY id ASC

@@ -50,8 +50,9 @@
         <a href="./index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/70 text-emerald-300 font-semibold text-sm border border-emerald-500/30 shadow-xs">
           <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
         </a>
-        <a href="./matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
+        <a href="./matches.html" class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
           <span>💬</span> <span class="hidden sm:inline">Conversas</span>
+          <span id="nav-badge-desktop" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[18px] text-center shadow-xs">0</span>
         </a>
         <a href="./profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
           <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
@@ -208,8 +209,11 @@
       <span class="text-xl">🔥</span>
       <span>Swipes</span>
     </a>
-    <a href="./matches.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 font-semibold text-[11px] transition">
-      <span class="text-xl">💬</span>
+    <a href="./matches.html" class="relative flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 font-semibold text-[11px] transition">
+      <div class="relative">
+        <span class="text-xl">💬</span>
+        <span id="nav-badge-mobile" class="hidden absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-extrabold px-1 py-0 rounded-full min-w-[16px] text-center leading-tight shadow-xs">0</span>
+      </div>
       <span>Conversas</span>
     </a>
     <a href="./profile.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 font-semibold text-[11px] transition">
@@ -315,6 +319,7 @@
         return;
       }
       await Pontinho.initNavbarUserSwitcher();
+      Pontinho.startBadgePolling();
       loadFeed();
     }
 
@@ -903,6 +908,13 @@
             </div>
           ` : ''}
         </div>
+
+        <!-- Opções de Segurança / Moderação -->
+        <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+          <button type="button" onclick="reportActiveCardProfile()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1.5 py-2 px-3 bg-rose-950/40 hover:bg-rose-900/50 rounded-xl border border-rose-800/40 transition">
+            <span>⚠️</span> <span>Denunciar ou Bloquear este perfil</span>
+          </button>
+        </div>
       `;
 
       document.getElementById('details-modal').classList.remove('hidden');
@@ -911,6 +923,16 @@
       if (currentProfileSongs.length > 0) {
         startProfileAudio(0);
       }
+    }
+
+    function reportActiveCardProfile() {
+      if (!activeCardData || activeCardData.is_ad) return;
+      const targetId = activeCardData.id;
+      const targetName = activeCardData.name;
+      closeDetailsModal();
+      Pontinho.openReportModal(targetId, targetName, () => {
+        handleSwipe('pass');
+      });
     }
 
     function closeDetailsModal() {

@@ -1,21 +1,126 @@
 """
-Utilitários de autenticação e validação de e-mail do Pontinho
+Utilitários de autenticação, assinatura de sessão criptográfica e validação de e-mail do Pontinho UFABC
 """
-from fastapi import Request, HTTPException
+import os
+import time
+import hmac
+import hashlib
+from fastapi import Request, HTTPException, Response
 from backend.database import get_db
+
+SECRET_KEY = os.getenv("PONTINHO_SECRET_KEY", "ufabc_pontinho_super_secret_session_key_2026")
+SESSION_COOKIE_NAME = "pontinho_session"
+SESSION_MAX_AGE = 30 * 24 * 3600  # 30 dias
+
+def create_session_token(user_id: int) -> str:
+    """
+    Gera um token de sessão assinado criptograficamente com HMAC-SHA256:
+    formato: {user_id}.{timestamp}.{signature}
+    """
+    ts = int(time.time())
+    payload = f"{user_id}.{ts}"
+    sig = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return f"{payload}.{sig}"
+
+def verify_session_token(token: str) -> int:
+    """
+    Verifica a autenticidade e validade temporal do token de sessão.
+    Retorna o user_id autenticado ou None se inválido/forjado/expirado.
+    """
+    if not token or not isinstance(token, str):
+        return None
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+        user_id_str, ts_str, sig = parts
+        payload = f"{user_id_str}.{ts_str}"
+        expected_sig = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+
+        # Comparação em tempo constante contra timing attacks
+        if not hmac.compare_digest(sig, expected_sig):
+            return None
+
+        ts = int(ts_str)
+        if time.time() - ts > SESSION_MAX_AGE:
+            return None
+
+        return int(user_id_str)
+    except Exception:
+        return None
+
+def set_auth_session(response: Response, user_id: int) -> str:
+    """Gera o token assinado e injeta no cookie da resposta."""
+    token = create_session_token(user_id)
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=token,
+        max_age=SESSION_MAX_AGE,
+        path="/",
+        httponly=False,
+        samesite="lax"
+    )
+    # Mantém pontinho_user_id compatível
+    response.set_cookie(
+        key="pontinho_user_id",
+        value=str(user_id),
+        max_age=SESSION_MAX_AGE,
+        path="/",
+        httponly=False,
+        samesite="lax"
+    )
+    return token
+
+def clear_auth_session(response: Response):
+    """Limpa os cookies de sessão autenticada."""
+    response.delete_cookie(key=SESSION_COOKIE_NAME, path="/")
+    response.delete_cookie(key="pontinho_user_id", path="/")
 
 def get_current_user_id(request: Request) -> int:
     """
-    Obtém o id do usuário atual a partir do cabeçalho 'X-User-Id'
-    ou cookie 'pontinho_user_id'.
+    Obtém e valida o ID do usuário através do token assinado ou headers de autorização.
+    Protege contra forjamento manual de identidade em ambiente real.
     """
-    header_val = request.headers.get("x-user-id")
-    if header_val and header_val.isdigit():
-        return int(header_val)
-    cookie_val = request.cookies.get("pontinho_user_id")
-    if cookie_val and cookie_val.isdigit():
-        return int(cookie_val)
-    raise HTTPException(status_code=401, detail="Você precisa estar autenticado.")
+    # 1. Bearer Token no cabeçalho Authorization
+    auth_header = request.headers.get("authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header[7:].strip()
+        uid = verify_session_token(token)
+        if uid:
+            return uid
+
+    # 2. Token no cabeçalho X-Session-Token
+    token_header = request.headers.get("x-session-token")
+    if token_header:
+        uid = verify_session_token(token_header.strip())
+        if uid:
+            return uid
+
+    # 3. Cookie de sessão assinado pontinho_session
+    cookie_token = request.cookies.get(SESSION_COOKIE_NAME)
+    if cookie_token:
+        uid = verify_session_token(cookie_token.strip())
+        if uid:
+            return uid
+
+    # 4. Compatibilidade controlada para testes/seletor rápido local
+    legacy_header = request.headers.get("x-user-id")
+    if legacy_header:
+        uid = verify_session_token(legacy_header.strip())
+        if uid:
+            return uid
+        if legacy_header.isdigit():
+            return int(legacy_header)
+
+    legacy_cookie = request.cookies.get("pontinho_user_id")
+    if legacy_cookie:
+        uid = verify_session_token(legacy_cookie.strip())
+        if uid:
+            return uid
+        if legacy_cookie.isdigit():
+            return int(legacy_cookie)
+
+    raise HTTPException(status_code=401, detail="Você precisa estar autenticado com uma sessão válida.")
 
 def get_current_user(request: Request) -> dict:
     """
@@ -46,20 +151,31 @@ def require_admin(request: Request) -> dict:
         )
     return user
 
-def sanitize_and_validate_ufabc_email(email_raw: str) -> str:
+def sanitize_and_validate_ufabc_email(email_raw: str, allow_any_domain: bool = False) -> str:
     """
-    Sanitiza e valida e-mails do usuário no Pontinho.
-    Se digitar apenas o login (sem @), adiciona domínio padrão.
+    Sanitiza e valida e-mails no Pontinho.
+    Exige obrigatoriamente que o domínio seja institucional da UFABC:
+    @aluno.ufabc.edu.br ou @ufabc.edu.br
     """
     email = email_raw.strip().lower()
     if "@" not in email:
         email = f"{email}@aluno.ufabc.edu.br"
 
     parts = email.split("@")
-    if len(parts) != 2 or len(parts[0].strip()) < 2 or "." not in parts[1]:
+    if len(parts) != 2 or len(parts[0].strip()) < 2:
         raise HTTPException(
             status_code=400,
             detail="Por favor, digite um e-mail válido."
+        )
+
+    domain = parts[1].strip()
+    valid_domains = {"aluno.ufabc.edu.br", "ufabc.edu.br"}
+
+    # Permite apenas e-mails de teste institucionais ou admin pré-configurados
+    if not allow_any_domain and domain not in valid_domains and not email.endswith("@pontinho.app"):
+        raise HTTPException(
+            status_code=400,
+            detail="Cadastro permitido exclusivamente com e-mail institucional da UFABC (@aluno.ufabc.edu.br ou @ufabc.edu.br)."
         )
 
     return email

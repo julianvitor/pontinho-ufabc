@@ -5,8 +5,8 @@ import json
 import sqlite3
 from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db
-from backend.models import UserCreateOrUpdate
-from backend.auth import get_current_user_id
+from backend.models import UserCreateOrUpdate, ReportCreate
+from backend.auth import get_current_user_id, clear_auth_session
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -220,10 +220,101 @@ def delete_my_account_lgpd(request: Request, response: Response):
     conn.commit()
     conn.close()
 
-    # Remove o cookie de sessão
+    # Remove o cookie de sessão e limpa autenticação assinada
     response.delete_cookie(key="pontinho_user_id", path="/")
+    clear_auth_session(response)
 
     return {
         "success": True,
         "message": "Sua conta e todos os seus dados pessoais foram eliminados permanentemente do Pontinho conforme a LGPD."
     }
+
+@router.post("/{target_user_id}/block")
+def block_user(target_user_id: int, request: Request):
+    """Bloqueia um usuário, removendo qualquer match ativo entre ambos."""
+    current_id = get_current_user_id(request)
+    if current_id == target_user_id:
+        raise HTTPException(status_code=400, detail="Você não pode bloquear a si mesmo.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, name FROM users WHERE id = ?", (target_user_id,))
+    target = cursor.fetchone()
+    if not target:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    # Insere bloqueio mútuo
+    cursor.execute("""
+        INSERT INTO blocks (blocker_id, blocked_id)
+        VALUES (?, ?)
+        ON CONFLICT(blocker_id, blocked_id) DO NOTHING
+    """, (current_id, target_user_id))
+
+    # Remove qualquer match ativo entre ambos (e mensagens em cascata)
+    cursor.execute("""
+        DELETE FROM matches
+        WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
+    """, (current_id, target_user_id, target_user_id, current_id))
+
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": f"{target['name']} foi bloqueado com sucesso."}
+
+@router.post("/{target_user_id}/report")
+def report_user(target_user_id: int, data: ReportCreate, request: Request):
+    """Envia uma denúncia sobre um usuário para a moderação e opcionalmente o bloqueia."""
+    current_id = get_current_user_id(request)
+    if current_id == target_user_id:
+        raise HTTPException(status_code=400, detail="Você não pode denunciar a si mesmo.")
+
+    reason_clean = (data.reason or "").strip()
+    if not reason_clean:
+        raise HTTPException(status_code=400, detail="Motivo da denúncia é obrigatório.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, name FROM users WHERE id = ?", (target_user_id,))
+    target = cursor.fetchone()
+    if not target:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    # Insere denúncia
+    cursor.execute("""
+        INSERT INTO reports (reporter_id, reported_id, reason, details, status)
+        VALUES (?, ?, ?, ?, 'pending')
+    """, (current_id, target_user_id, reason_clean, (data.details or "").strip()))
+
+    # Se selecionado para também bloquear
+    if data.block_user:
+        cursor.execute("""
+            INSERT INTO blocks (blocker_id, blocked_id)
+            VALUES (?, ?)
+            ON CONFLICT(blocker_id, blocked_id) DO NOTHING
+        """, (current_id, target_user_id))
+
+        cursor.execute("""
+            DELETE FROM matches
+            WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
+        """, (current_id, target_user_id, target_user_id, current_id))
+
+    conn.commit()
+    conn.close()
+    return {
+        "success": True,
+        "message": "Denúncia enviada à moderação com sucesso. Agradecemos por ajudar a manter o Pontinho seguro!"
+    }
+
+@router.post("/{target_user_id}/unblock")
+def unblock_user(target_user_id: int, request: Request):
+    """Desbloqueia um usuário previamente bloqueado."""
+    current_id = get_current_user_id(request)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM blocks WHERE blocker_id = ? AND blocked_id = ?", (current_id, target_user_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Usuário desbloqueado com sucesso."}

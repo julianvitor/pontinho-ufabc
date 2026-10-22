@@ -58,13 +58,112 @@ def get_admin_overview(request: Request):
     cursor.execute("SELECT COUNT(*) AS count FROM ads")
     total_ads = cursor.fetchone()["count"]
 
+    cursor.execute("SELECT COUNT(*) AS count FROM reports WHERE status = 'pending'")
+    pending_reports = cursor.fetchone()["count"]
+
     conn.close()
     return {
         "total_users": total_users,
         "total_matches": total_matches,
         "total_messages": total_messages,
-        "total_ads": total_ads
+        "total_ads": total_ads,
+        "pending_reports": pending_reports
     }
+
+@router.get("/api/admin/reports")
+def get_admin_reports(request: Request):
+    """
+    Retorna a lista de denúncias detalhadas e um resumo agrupado por usuário denunciado,
+    incluindo quem denunciou, os motivos, detalhes e a contagem total de denúncias.
+    """
+    require_admin(request)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 1. Denúncias individuais detalhadas
+    cursor.execute("""
+        SELECT
+            r.id, r.reporter_id, r.reported_id, r.reason, r.details, r.status, r.created_at,
+            u_rep.name AS reporter_name, u_rep.email AS reporter_email, u_rep.ra AS reporter_ra,
+            u_tar.name AS reported_name, u_tar.email AS reported_email, u_tar.ra AS reported_ra,
+            u_tar.photos AS reported_photos
+        FROM reports r
+        JOIN users u_rep ON u_rep.id = r.reporter_id
+        JOIN users u_tar ON u_tar.id = r.reported_id
+        ORDER BY r.id DESC
+    """)
+    raw_reports = cursor.fetchall()
+    reports_list = []
+    for row in raw_reports:
+        d = dict(row)
+        photos = json.loads(d["reported_photos"]) if d.get("reported_photos") else []
+        d["reported_photo"] = photos[0] if photos else ""
+        d.pop("reported_photos", None)
+        reports_list.append(d)
+
+    # 2. Resumo consolidado por usuário denunciado
+    cursor.execute("""
+        SELECT
+            r.reported_id AS user_id,
+            u.name AS user_name,
+            u.email AS user_email,
+            u.ra AS user_ra,
+            u.photos AS user_photos,
+            COUNT(r.id) AS total_reports,
+            MAX(r.created_at) AS last_report_date
+        FROM reports r
+        JOIN users u ON u.id = r.reported_id
+        GROUP BY r.reported_id
+        ORDER BY total_reports DESC, last_report_date DESC
+    """)
+    raw_summary = cursor.fetchall()
+    summary_list = []
+    for row in raw_summary:
+        d = dict(row)
+        photos = json.loads(d["user_photos"]) if d.get("user_photos") else []
+        d["user_photo"] = photos[0] if photos else ""
+        d.pop("user_photos", None)
+
+        # Buscar detalhes dos denunciantes deste usuário
+        cursor.execute("""
+            SELECT r.id, r.reporter_id, u_rep.name AS reporter_name, u_rep.email AS reporter_email, r.reason, r.details, r.created_at, r.status
+            FROM reports r
+            JOIN users u_rep ON u_rep.id = r.reporter_id
+            WHERE r.reported_id = ?
+            ORDER BY r.id DESC
+        """, (d["user_id"],))
+        d["complaints"] = [dict(c) for c in cursor.fetchall()]
+        summary_list.append(d)
+
+    conn.close()
+    return {
+        "reports": reports_list,
+        "summary": summary_list,
+        "total_pending": len([r for r in reports_list if r["status"] == "pending"])
+    }
+
+@router.delete("/api/admin/reports/{report_id}")
+def delete_report(report_id: int, request: Request):
+    """Exclui ou descarta uma denúncia específica."""
+    require_admin(request)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM reports WHERE id = ?", (report_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Denúncia descartada com sucesso."}
+
+@router.put("/api/admin/reports/{report_id}/status")
+def update_report_status(report_id: int, status_data: dict, request: Request):
+    """Atualiza o status de uma denúncia ('resolved' ou 'dismissed')."""
+    require_admin(request)
+    new_status = status_data.get("status", "resolved")
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE reports SET status = ? WHERE id = ?", (new_status, report_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": f"Status atualizado para {new_status}."}
 
 @router.get("/api/admin/users")
 def get_admin_users(request: Request):

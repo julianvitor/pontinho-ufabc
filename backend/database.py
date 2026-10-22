@@ -181,9 +181,44 @@ def init_db():
         match_id INTEGER NOT NULL,
         sender_id INTEGER NOT NULL,
         text TEXT NOT NULL,
+        read_at TIMESTAMP DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(match_id) REFERENCES matches(id) ON DELETE CASCADE,
         FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    """)
+
+    # Migração para coluna read_at em messages
+    cursor.execute("PRAGMA table_info(messages)")
+    msg_cols = [row["name"] for row in cursor.fetchall()]
+    if "read_at" not in msg_cols:
+        cursor.execute("ALTER TABLE messages ADD COLUMN read_at TIMESTAMP DEFAULT NULL")
+
+    # Tabela de Denúncias (Reports)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS reports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reporter_id INTEGER NOT NULL,
+        reported_id INTEGER NOT NULL,
+        reason TEXT NOT NULL,
+        details TEXT DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'resolved', 'dismissed'
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY(reported_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    """)
+
+    # Tabela de Bloqueios Mútuos (Blocks)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS blocks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        blocker_id INTEGER NOT NULL,
+        blocked_id INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(blocker_id, blocked_id),
+        FOREIGN KEY(blocker_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY(blocked_id) REFERENCES users(id) ON DELETE CASCADE
     );
     """)
 

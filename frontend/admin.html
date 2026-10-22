@@ -94,52 +94,66 @@
   <main id="admin-main" class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 pb-24 md:pb-6 space-y-6">
     
     <!-- RESUMO / STATS CARDS -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="bg-slate-900/90 backdrop-blur-md p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-2xl flex items-center justify-center font-bold">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-3 sm:gap-4">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xl sm:text-2xl flex items-center justify-center font-bold">
           👥
         </div>
         <div>
-          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Estudantes</span>
-          <span id="stat-users" class="text-2xl font-black text-white">0</span>
+          <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Estudantes</span>
+          <span id="stat-users" class="text-xl sm:text-2xl font-black text-white">0</span>
         </div>
       </div>
 
-      <div class="bg-slate-900/90 backdrop-blur-md p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-rose-950/60 border border-rose-500/30 text-rose-400 text-2xl flex items-center justify-center font-bold">
+      <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-3 sm:gap-4">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-rose-950/60 border border-rose-500/30 text-rose-400 text-xl sm:text-2xl flex items-center justify-center font-bold">
           🎉
         </div>
         <div>
-          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Matches</span>
-          <span id="stat-matches" class="text-2xl font-black text-white">0</span>
+          <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Matches</span>
+          <span id="stat-matches" class="text-xl sm:text-2xl font-black text-white">0</span>
         </div>
       </div>
 
-      <div class="bg-slate-900/90 backdrop-blur-md p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-teal-950/60 border border-teal-500/30 text-teal-400 text-2xl flex items-center justify-center font-bold">
+      <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-3 sm:gap-4">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-teal-950/60 border border-teal-500/30 text-teal-400 text-xl sm:text-2xl flex items-center justify-center font-bold">
           💬
         </div>
         <div>
-          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Mensagens</span>
-          <span id="stat-messages" class="text-2xl font-black text-white">0</span>
+          <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Mensagens</span>
+          <span id="stat-messages" class="text-xl sm:text-2xl font-black text-white">0</span>
         </div>
       </div>
 
-      <div class="bg-slate-900/90 backdrop-blur-md p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-amber-400 text-2xl flex items-center justify-center font-bold">
+      <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-3 sm:gap-4">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-amber-400 text-xl sm:text-2xl flex items-center justify-center font-bold">
           📢
         </div>
         <div>
-          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Anúncios</span>
-          <span id="stat-ads" class="text-2xl font-black text-white">0</span>
+          <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Anúncios</span>
+          <span id="stat-ads" class="text-xl sm:text-2xl font-black text-white">0</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-rose-500/30 shadow-xl flex items-center gap-3 sm:gap-4 col-span-2 sm:col-span-1">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-400 text-xl sm:text-2xl flex items-center justify-center font-bold">
+          ⚠️
+        </div>
+        <div>
+          <span class="text-[11px] text-rose-400 font-bold uppercase tracking-wider block">Denúncias</span>
+          <span id="stat-reports" class="text-xl sm:text-2xl font-black text-rose-200">0</span>
         </div>
       </div>
     </div>
 
     <!-- NAVEGAÇÃO DE ABAS DO ADMIN -->
     <div class="flex items-center gap-2 border-b border-slate-800/80 pb-2 overflow-x-auto">
-      <button onclick="switchTab('users')" id="tab-btn-users" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm transition">
-        👥 Usuários & Moderação
+      <button onclick="switchTab('reports')" id="tab-btn-reports" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm transition flex items-center gap-1.5">
+        <span>⚠️</span> <span>Denúncias & Moderação</span>
+        <span id="tab-badge-reports" class="hidden bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">0</span>
+      </button>
+      <button onclick="switchTab('users')" id="tab-btn-users" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition">
+        👥 Usuários & Perfis
       </button>
       <button onclick="switchTab('ads')" id="tab-btn-ads" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition">
         📢 Publicidade & Anúncios
@@ -155,8 +169,33 @@
       </button>
     </div>
 
+    <!-- ABA 0: DENÚNCIAS & MODERAÇÃO -->
+    <section id="tab-content-reports" class="tab-content bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-rose-500/30 shadow-2xl p-4 sm:p-6 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800/80">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">⚠️</span>
+            <h2 class="text-xl font-black text-white">Denúncias & Moderação de Usuários</h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            Relatórios enviados por estudantes com informações sobre quem denunciou, os motivos, detalhes do ocorrido e total de denúncias por usuário.
+          </p>
+        </div>
+        <button onclick="loadReportsData()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5 self-start sm:self-auto">
+          <span>🔄</span> <span>Atualizar Denúncias</span>
+        </button>
+      </div>
+
+      <!-- LISTA DE USUÁRIOS DENUNCIADOS COM DETALHAMENTO DE QUEM DENUNCIOU -->
+      <div class="space-y-4">
+        <div id="reported-users-container" class="space-y-4">
+          <div class="p-8 text-center text-slate-400 text-xs">Carregando denúncias...</div>
+        </div>
+      </div>
+    </section>
+
     <!-- ABA 1: GERENCIAR USUÁRIOS (APAGAR USUÁRIOS) -->
-    <section id="tab-content-users" class="tab-content bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl p-6 space-y-4">
+    <section id="tab-content-users" class="tab-content hidden bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl p-6 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-800/80">
         <div>
           <h2 class="text-xl font-black text-white">Gerenciamento de Usuários</h2>
@@ -360,6 +399,7 @@
 
       await Pontinho.initNavbarUserSwitcher();
       loadStats();
+      loadReportsData();
       loadUsersTable();
       loadAds();
       loadCourses();
@@ -376,7 +416,13 @@
       const activeBtn = document.getElementById(`tab-btn-${tab}`);
       const activeContent = document.getElementById(`tab-content-${tab}`);
 
-      if (activeBtn) activeBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm transition';
+      if (activeBtn) {
+        if (tab === 'reports') {
+          activeBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm transition flex items-center gap-1.5';
+        } else {
+          activeBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm transition';
+        }
+      }
       if (activeContent) activeContent.classList.remove('hidden');
     }
 
@@ -387,9 +433,162 @@
         document.getElementById('stat-matches').innerText = stats.total_matches;
         document.getElementById('stat-messages').innerText = stats.total_messages;
         document.getElementById('stat-ads').innerText = stats.total_ads;
+        const statReports = document.getElementById('stat-reports');
+        if (statReports) statReports.innerText = stats.pending_reports || 0;
       } catch (err) {
         console.error(err);
       }
+    }
+
+    // --- DENÚNCIAS & MODERAÇÃO ---
+    async function loadReportsData() {
+      const container = document.getElementById('reported-users-container');
+      const badge = document.getElementById('tab-badge-reports');
+      const statReports = document.getElementById('stat-reports');
+
+      try {
+        const data = await Pontinho.apiFetch('/api/admin/reports');
+        if (statReports) statReports.innerText = data.total_pending || 0;
+
+        if (badge) {
+          if (data.total_pending > 0) {
+            badge.innerText = data.total_pending;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        }
+
+        if (!data.summary || data.summary.length === 0) {
+          container.innerHTML = `
+            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 space-y-2">
+              <span class="text-3xl block">✨</span>
+              <h4 class="font-bold text-white text-sm">Nenhuma denúncia registrada</h4>
+              <p class="text-xs">A comunidade do Pontinho está tranquila e sem infrações reportadas no momento.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = data.summary.map(u => {
+          const photo = u.user_photo ? Pontinho.resolveMediaUrl(u.user_photo) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
+          
+          const complaintsHtml = (u.complaints || []).map(c => {
+            const time = new Date(c.created_at).toLocaleString('pt-BR');
+            const statusBadge = c.status === 'pending'
+              ? '<span class="text-[10px] font-bold bg-amber-950/70 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">Pendente</span>'
+              : '<span class="text-[10px] font-bold bg-emerald-950/70 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">Resolvida</span>';
+
+            return `
+              <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-rose-300">👤 Denunciado por:</span>
+                    <span class="text-xs font-semibold text-white">${c.reporter_name}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">(${c.reporter_email})</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    ${statusBadge}
+                    <button onclick="dismissReport(${c.id})" class="text-[11px] text-slate-400 hover:text-rose-400 font-medium px-2 py-0.5 rounded hover:bg-slate-900 transition" title="Descartar esta denúncia">
+                      ✕ Descartar
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex items-baseline gap-2">
+                  <span class="text-[11px] font-bold text-amber-400">Motivo:</span>
+                  <span class="text-xs font-semibold text-slate-200">${c.reason}</span>
+                </div>
+
+                ${c.details ? `
+                  <div class="p-2 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 italic">
+                    "${escapeHtml(c.details)}"
+                  </div>
+                ` : ''}
+
+                <div class="text-[10px] text-slate-500 pt-1 text-right">
+                  ${time}
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div class="p-4 sm:p-5 rounded-2xl bg-slate-950/90 border border-rose-500/30 shadow-xl space-y-4">
+              <!-- Header do Aluno Denunciado -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                  <img src="${photo}" class="w-12 h-12 rounded-full object-cover border-2 border-rose-500/60 shadow-md">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h4 class="font-black text-white text-base">${u.user_name}</h4>
+                      <span class="bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                        🚨 ${u.total_reports} denúncia(s)
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-mono">
+                      <span>${u.user_email}</span>
+                      ${u.user_ra ? `<span class="text-emerald-400 font-bold">• RA: ${u.user_ra}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button onclick="deleteUserFromReport(${u.user_id}, '${escapeQuote(u.user_name)}')" class="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 text-white text-xs font-black rounded-xl shadow-lg shadow-rose-950/60 transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <span>🚫</span> <span>Banir / Excluir Estudante</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Lista de Denúncias Recebidas -->
+              <div class="space-y-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                  Histórico de Denúncias Recebidas (${u.complaints.length})
+                </span>
+                <div class="space-y-2">
+                  ${complaintsHtml}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        container.innerHTML = `<div class="p-4 text-xs text-rose-500">${err.message}</div>`;
+      }
+    }
+
+    async function dismissReport(reportId) {
+      if (!confirm('Deseja descartar esta denúncia?')) return;
+      try {
+        await Pontinho.apiFetch(`/api/admin/reports/${reportId}`, { method: 'DELETE' });
+        Pontinho.showToast('Denúncia descartada com sucesso.');
+        loadReportsData();
+        loadStats();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function deleteUserFromReport(userId, userName) {
+      if (!confirm(`ATENÇÃO: Deseja realmente banir e excluir o perfil de ${userName} permanentemente do Pontinho?`)) {
+        return;
+      }
+      try {
+        await Pontinho.apiFetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+        Pontinho.showToast(`Usuário ${userName} foi excluído do sistema.`, 'success');
+        loadReportsData();
+        loadUsersTable();
+        loadStats();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text || '';
+      return div.innerHTML;
     }
 
     // --- USUÁRIOS ---

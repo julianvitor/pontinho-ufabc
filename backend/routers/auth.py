@@ -5,7 +5,12 @@ import json
 from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db, hash_password, verify_password
 from backend.models import RegisterRequest, LoginRequest
-from backend.auth import get_current_user_id, sanitize_and_validate_ufabc_email
+from backend.auth import (
+    get_current_user_id,
+    sanitize_and_validate_ufabc_email,
+    set_auth_session,
+    clear_auth_session
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -73,19 +78,13 @@ def register_user(data: RegisterRequest, response: Response):
     new_user_id = cursor.lastrowid
     conn.close()
 
-    # Define o cookie de sessão para autenticação imediata
-    response.set_cookie(
-        key="pontinho_user_id",
-        value=str(new_user_id),
-        max_age=30 * 24 * 3600,
-        path="/",
-        httponly=False,
-        samesite="lax"
-    )
+    # Define a sessão criptograficamente assinada
+    session_token = set_auth_session(response, new_user_id)
 
     return {
         "success": True,
         "user_id": new_user_id,
+        "token": session_token,
         "name": cleaned_name,
         "email": sanitized_email,
         "ra": cleaned_ra,
@@ -126,17 +125,12 @@ def login_user(data: LoginRequest, response: Response):
     if not valid:
         raise HTTPException(status_code=401, detail="Senha incorreta.")
 
-    response.set_cookie(
-        key="pontinho_user_id",
-        value=str(user["id"]),
-        max_age=30 * 24 * 3600,
-        path="/",
-        httponly=False,
-        samesite="lax"
-    )
+    # Define a sessão criptograficamente assinada
+    session_token = set_auth_session(response, user["id"])
 
     return {
         "success": True,
+        "token": session_token,
         "user": {
             "id": user["id"],
             "ra": user["ra"],
@@ -148,8 +142,8 @@ def login_user(data: LoginRequest, response: Response):
 
 @router.post("/logout")
 def logout_user(response: Response):
-    """Encerra a sessão removendo o cookie pontinho_user_id."""
-    response.delete_cookie(key="pontinho_user_id", path="/")
+    """Encerra a sessão removendo os cookies criptografados."""
+    clear_auth_session(response)
     return {"success": True, "message": "Desconectado com sucesso."}
 
 @router.get("/me")

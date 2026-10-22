@@ -43,8 +43,9 @@
         <a href="./index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
           <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
         </a>
-        <a href="./matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/70 text-emerald-300 font-bold text-sm border border-emerald-500/30 shadow-sm">
+        <a href="./matches.html" class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/70 text-emerald-300 font-bold text-sm border border-emerald-500/30 shadow-sm">
           <span>💬</span> <span class="hidden sm:inline">Conversas</span>
+          <span id="nav-badge-desktop" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[18px] text-center shadow-xs">0</span>
         </a>
         <a href="./profile.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
           <span>👤</span> <span class="hidden sm:inline">Meu Perfil</span>
@@ -110,9 +111,30 @@
                 <p id="chat-partner-sub" class="text-[11px] text-emerald-400 font-medium">Curso • Campus</p>
               </div>
             </div>
-            <a href="./index.html" class="text-xs text-slate-400 hover:text-emerald-400 font-semibold px-2 py-1 rounded-lg hover:bg-slate-800/60 transition">
-              🔥 Feed
-            </a>
+            
+            <div class="flex items-center gap-2">
+              <!-- Menu de Opções (Desfazer Match / Denunciar / Bloquear) -->
+              <div class="relative">
+                <button id="chat-options-btn" type="button" onclick="toggleChatOptionsMenu(event)" class="text-xs text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-1.5 font-bold shadow-xs">
+                  <span>⋮</span> <span>Opções</span>
+                </button>
+                <div id="chat-options-menu" class="hidden absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl py-1.5 z-40 text-xs">
+                  <button type="button" onclick="confirmUnmatch()" class="w-full text-left px-3.5 py-2 text-amber-400 hover:bg-slate-800 flex items-center gap-2 transition font-medium">
+                    <span>💔</span> <span>Desfazer Match</span>
+                  </button>
+                  <button type="button" onclick="openReportModalFromChat()" class="w-full text-left px-3.5 py-2 text-rose-400 hover:bg-slate-800 flex items-center gap-2 transition font-medium">
+                    <span>⚠️</span> <span>Denunciar Perfil</span>
+                  </button>
+                  <button type="button" onclick="confirmBlockFromChat()" class="w-full text-left px-3.5 py-2 text-rose-300 hover:bg-slate-800 flex items-center gap-2 transition font-medium">
+                    <span>🚫</span> <span>Bloquear Usuário</span>
+                  </button>
+                </div>
+              </div>
+
+              <a href="./index.html" class="text-xs text-slate-400 hover:text-emerald-400 font-semibold px-2 py-1 rounded-lg hover:bg-slate-800/60 transition hidden sm:inline-block">
+                🔥 Feed
+              </a>
+            </div>
           </div>
 
           <!-- BANNER DE CONTEÚDO PRIVADO & PICANTE -->
@@ -162,8 +184,11 @@
       <span class="text-xl">🔥</span>
       <span>Swipes</span>
     </a>
-    <a href="./matches.html" class="flex flex-col items-center gap-1 text-emerald-400 font-bold text-[11px]">
-      <span class="text-xl">💬</span>
+    <a href="./matches.html" class="relative flex flex-col items-center gap-1 text-emerald-400 font-bold text-[11px]">
+      <div class="relative">
+        <span class="text-xl">💬</span>
+        <span id="nav-badge-mobile" class="hidden absolute -top-1 -right-2 bg-rose-500 text-white text-[9px] font-extrabold px-1 py-0 rounded-full min-w-[16px] text-center leading-tight shadow-xs">0</span>
+      </div>
       <span>Conversas</span>
     </a>
     <a href="./profile.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 font-semibold text-[11px] transition">
@@ -212,6 +237,7 @@
   <script>
     let matchesList = [];
     let selectedMatchId = null;
+    let currentPartner = null;
     let pollInterval = null;
     let currentPrivateStatus = null;
 
@@ -219,6 +245,7 @@
       const user = await Pontinho.requireAuth();
       if (!user) return;
       await Pontinho.initNavbarUserSwitcher();
+      Pontinho.startBadgePolling();
       loadMatches();
     });
 
@@ -246,18 +273,34 @@
           const lastMsg = m.last_message ? m.last_message.text : 'Novo match! Diga um oi 👋';
           const isSelected = m.match_id === selectedMatchId;
 
+          const unreadBadge = m.unread_count > 0 ? `
+            <span class="bg-rose-500 text-white font-extrabold text-[10px] px-1.5 py-0.2 rounded-full shadow-xs animate-pulse">
+              ${m.unread_count}
+            </span>
+          ` : (m.is_new ? `
+            <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+              Novo
+            </span>
+          ` : '');
+
           return `
             <div 
               onclick="selectMatch(${m.match_id})"
               class="p-3 rounded-2xl cursor-pointer transition flex items-center gap-3 ${isSelected ? 'bg-emerald-950/50 border border-emerald-500/40 shadow-sm' : 'hover:bg-slate-900/80 border border-transparent'}"
             >
-              <img src="${photo}" class="w-12 h-12 rounded-full object-cover border border-slate-700 shadow-sm">
+              <div class="relative shrink-0">
+                <img src="${photo}" class="w-12 h-12 rounded-full object-cover border border-slate-700 shadow-sm">
+                ${m.unread_count > 0 ? '<span class="absolute top-0 right-0 w-3 h-3 bg-rose-500 border-2 border-slate-900 rounded-full"></span>' : ''}
+              </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between">
                   <h4 class="font-bold text-white text-sm truncate">${partner.name}</h4>
-                  <span class="text-[10px] text-emerald-400 font-semibold">${partner.campus === 'Santo André' ? 'SA' : 'SBC'}</span>
+                  <div class="flex items-center gap-1.5">
+                    ${unreadBadge}
+                    <span class="text-[10px] text-emerald-400 font-semibold">${partner.campus === 'Santo André' ? 'SA' : 'SBC'}</span>
+                  </div>
                 </div>
-                <p class="text-xs text-slate-400 truncate mt-0.5">${lastMsg}</p>
+                <p class="text-xs ${m.unread_count > 0 ? 'text-white font-semibold' : 'text-slate-400'} truncate mt-0.5">${lastMsg}</p>
               </div>
             </div>
           `;
@@ -463,10 +506,14 @@
         
         // Atualiza header
         const partner = data.partner;
+        currentPartner = partner;
         const photo = (partner.photos && partner.photos[0]) ? Pontinho.resolveMediaUrl(partner.photos[0]) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800';
         document.getElementById('chat-partner-avatar').src = photo;
         document.getElementById('chat-partner-name').innerText = partner.name || 'Estudante';
         document.getElementById('chat-partner-sub').innerText = `${partner.course || 'Curso'} • Campus ${partner.campus || 'SA'}`;
+
+        // Atualiza badges não lidas
+        Pontinho.updateUnreadBadges();
 
         // Renderiza mensagens
         const container = document.getElementById('messages-container');
@@ -528,6 +575,73 @@
       } catch (err) {
         Pontinho.showToast(err.message, 'error');
       }
+    }
+
+    function toggleChatOptionsMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('chat-options-menu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', () => {
+      const menu = document.getElementById('chat-options-menu');
+      if (menu && !menu.classList.contains('hidden')) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    async function confirmUnmatch() {
+      if (!selectedMatchId) return;
+      toggleChatOptionsMenu();
+      const partnerName = currentPartner ? currentPartner.name : 'este perfil';
+      if (!confirm(`Deseja desfazer o match com ${partnerName}? O histórico da conversa será apagado permanentemente para ambos.`)) {
+        return;
+      }
+
+      try {
+        await Pontinho.apiFetch(`/api/matches/${selectedMatchId}`, { method: 'DELETE' });
+        Pontinho.showToast('Match desfeito com sucesso.', 'success');
+        selectedMatchId = null;
+        currentPartner = null;
+        if (pollInterval) clearInterval(pollInterval);
+        document.getElementById('no-chat-selected').classList.remove('hidden');
+        document.getElementById('active-chat-container').classList.add('hidden');
+        backToMatchesList();
+        loadMatches();
+        Pontinho.updateUnreadBadges();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function openReportModalFromChat() {
+      toggleChatOptionsMenu();
+      if (!currentPartner) return;
+      Pontinho.openReportModal(currentPartner.id, currentPartner.name, () => {
+        selectedMatchId = null;
+        currentPartner = null;
+        if (pollInterval) clearInterval(pollInterval);
+        document.getElementById('no-chat-selected').classList.remove('hidden');
+        document.getElementById('active-chat-container').classList.add('hidden');
+        backToMatchesList();
+        loadMatches();
+        Pontinho.updateUnreadBadges();
+      });
+    }
+
+    function confirmBlockFromChat() {
+      toggleChatOptionsMenu();
+      if (!currentPartner) return;
+      Pontinho.blockUser(currentPartner.id, currentPartner.name, () => {
+        selectedMatchId = null;
+        currentPartner = null;
+        if (pollInterval) clearInterval(pollInterval);
+        document.getElementById('no-chat-selected').classList.remove('hidden');
+        document.getElementById('active-chat-container').classList.add('hidden');
+        backToMatchesList();
+        loadMatches();
+        Pontinho.updateUnreadBadges();
+      });
     }
 
     function escapeHtml(text) {

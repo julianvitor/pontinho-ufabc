@@ -22,6 +22,11 @@ class SwipeRequest(BaseModel):
 class MessageCreate(BaseModel):
     text: str
 
+class ReportCreate(BaseModel):
+    reason: str = Field(..., description="Motivo da denúncia")
+    details: Optional[str] = Field(default="", description="Detalhes adicionais ou contexto")
+    block_user: Optional[bool] = Field(default=True, description="Se também deve bloquear o usuário denunciado")
+
 class UserCreateOrUpdate(BaseModel):
     email: Optional[str] = ""
     name: str

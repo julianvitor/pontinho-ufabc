@@ -125,14 +125,21 @@ def get_feed(request: Request):
     elif target_gender in ("Não-binário", "Nao-binario", "nao binario"):
         gender_filter_sql = " AND LOWER(gender) IN ('não-binário', 'nao-binario', 'não binário', 'nao binario')"
 
-    # Buscar perfis ainda não avaliados respeitando o filtro de gênero
+    # Buscar perfis ainda não avaliados respeitando o filtro de gênero e exclusão de bloqueios mútuos
     cursor.execute(f"""
         SELECT * FROM users
-        WHERE id != ? AND id NOT IN (
-            SELECT to_user_id FROM swipes WHERE from_user_id = ?
-        ) {gender_filter_sql}
+        WHERE id != ?
+          AND id NOT IN (
+              SELECT to_user_id FROM swipes WHERE from_user_id = ?
+          )
+          AND id NOT IN (
+              SELECT blocked_id FROM blocks WHERE blocker_id = ?
+              UNION
+              SELECT blocker_id FROM blocks WHERE blocked_id = ?
+          )
+          {gender_filter_sql}
         ORDER BY id ASC
-    """, (current_id, current_id))
+    """, (current_id, current_id, current_id, current_id))
 
     rows = cursor.fetchall()
     conn.close()

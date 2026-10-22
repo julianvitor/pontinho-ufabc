@@ -98,14 +98,15 @@
       <!-- ABA 2: FORMULÁRIO DE CADASTRO -->
       <form id="form-register" onsubmit="handleRegister(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail Institucional UFABC</label>
           <input 
             id="reg-email" 
             type="email" 
             required 
-            placeholder="seu.email@exemplo.com" 
+            placeholder="nome.sobrenome@aluno.ufabc.edu.br" 
             class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
+          <p class="text-[10px] text-slate-500 mt-1">Exclusivo para estudantes e servidores (@aluno.ufabc.edu.br ou @ufabc.edu.br)</p>
         </div>
 
         <div>
@@ -249,7 +250,7 @@
           body: JSON.stringify({ email, password })
         });
 
-        Pontinho.setCurrentUserId(data.user.id);
+        Pontinho.setCurrentUserId(data.user.id, data.token);
         Pontinho.showToast(`Bem-vindo(a) de volta, ${data.user.name}! 🔥`, 'success');
         
         setTimeout(() => {
@@ -280,7 +281,7 @@
       }
 
       if (!email.endsWith('@aluno.ufabc.edu.br') && !email.endsWith('@ufabc.edu.br')) {
-        Pontinho.showToast('Insira um e-mail institucional válido.', 'error');
+        Pontinho.showToast('Cadastro permitido exclusivamente com e-mail @aluno.ufabc.edu.br ou @ufabc.edu.br.', 'error');
         return;
       }
 
@@ -290,7 +291,7 @@
           body: JSON.stringify({ email, name, password, terms_accepted: true })
         });
 
-        Pontinho.setCurrentUserId(data.user_id);
+        Pontinho.setCurrentUserId(data.user_id, data.token);
         Pontinho.showToast(`Cadastro realizado com sucesso! Bem-vindo(a), ${data.name}! 🎓`, 'success');
 
         // Redireciona para completar o perfil (fotos e preferências)
