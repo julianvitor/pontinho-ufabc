@@ -875,7 +875,7 @@ def seed_database():
 
     sample_events = [
         {
-            "title": "Cervejada da Geral - Open Bar UFABC",
+            "title": "Cervejada Geral UFABC",
             "description": "A maior cervejada universitária do Grande ABC com 6h de open bar com cerveja trincando, gummy e beats. Pista com DJ residente, funk universitário, eletrônica e a Bateria Universitária ao vivo!",
             "event_date": "2026-11-14 22:00",
             "location": "Espaço Modular - Santo André (Av. dos Estados)",
@@ -884,7 +884,7 @@ def seed_database():
             "created_by": admin_id
         },
         {
-            "title": "Bixolândia & Integração BC&T / BC&H",
+            "title": "Bixolândia Integração",
             "description": "Tradicional integração entre calouros e veteranos da UFABC. Apresentação da Bateria Universitária, roda de samba, chopp em dobro e ativações especiais do Pontinho!",
             "event_date": "2026-11-21 18:00",
             "location": "Galpão Universitário - São Bernardo do Campo",
@@ -893,7 +893,7 @@ def seed_database():
             "created_by": admin_id
         },
         {
-            "title": "Noite do Branco - Baile de Gala da Atlética",
+            "title": "Noite do Branco Atlética",
             "description": "O encerramento do quadrimestre com estilo! Traje branco obrigatório. Pista principal com música ao vivo, lounge eletrônico e open bar premium com drinks especiais.",
             "event_date": "2026-12-05 23:00",
             "location": "Mansão Santo André - Grand Eventos",

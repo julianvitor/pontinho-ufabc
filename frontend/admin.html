@@ -400,8 +400,11 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1">Nome da Festa / Evento *</label>
-              <input id="event-title" type="text" required placeholder="Ex: Cervejada da Geral 2026" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+              <div class="flex justify-between items-center mb-1">
+                <label class="block text-xs font-bold text-slate-300">Nome da Festa / Evento *</label>
+                <span id="event-title-count" class="text-[10px] text-slate-500 font-medium">0/25</span>
+              </div>
+              <input id="event-title" type="text" required maxlength="25" placeholder="Ex: Cervejada Geral UFABC" oninput="updateEventTitleCount(this.value)" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
             </div>
 
             <div>
@@ -1091,6 +1094,19 @@
       }
     }
 
+    function updateEventTitleCount(val) {
+      const el = document.getElementById('event-title-count');
+      if (el) {
+        const len = (val || '').length;
+        el.innerText = `${len}/25`;
+        if (len >= 25) {
+          el.className = 'text-[10px] text-amber-400 font-bold';
+        } else {
+          el.className = 'text-[10px] text-slate-500 font-medium';
+        }
+      }
+    }
+
     async function saveEvent(event) {
       event.preventDefault();
       const editId = document.getElementById('event-edit-id').value;
@@ -1100,6 +1116,16 @@
       const image_url = document.getElementById('event-image-url').value.trim();
       const ticket_url = document.getElementById('event-ticket-url').value.trim();
       const description = document.getElementById('event-desc').value.trim();
+
+      if (!title) {
+        Pontinho.showToast('Informe o nome da festa.', 'warning');
+        return;
+      }
+
+      if (title.length > 25) {
+        Pontinho.showToast('O nome da festa deve ter no máximo 25 caracteres.', 'warning');
+        return;
+      }
 
       const payload = {
         title,
@@ -1141,6 +1167,7 @@
 
       document.getElementById('event-edit-id').value = ev.id;
       document.getElementById('event-title').value = ev.title;
+      updateEventTitleCount(ev.title);
       document.getElementById('event-date').value = ev.event_date;
       document.getElementById('event-location').value = ev.location;
       document.getElementById('event-image-url').value = ev.image_url || '';
@@ -1157,6 +1184,7 @@
     function resetEventForm() {
       document.getElementById('event-edit-id').value = '';
       document.getElementById('event-form').reset();
+      updateEventTitleCount('');
       document.getElementById('event-form-title').innerHTML = `<span>🎉</span> Cadastrar Nova Festa ou Evento`;
       document.getElementById('event-submit-btn').innerText = '+ Cadastrar Festa';
       document.getElementById('cancel-event-edit-btn').classList.add('hidden');

@@ -75,7 +75,7 @@ class AdCreateOrUpdate(BaseModel):
     frequency: Optional[int] = 4
 
 class EventCreateOrUpdate(BaseModel):
-    title: str = Field(..., min_length=2, description="Nome da festa ou evento")
+    title: str = Field(..., min_length=2, max_length=25, description="Nome da festa ou evento (máximo 25 caracteres)")
     description: Optional[str] = Field(default="", description="Descrição completa da festa")
     event_date: str = Field(..., description="Data e horário do evento (ex: 2026-11-14 22:00)")
     location: str = Field(..., min_length=2, description="Local ou Campus do evento")

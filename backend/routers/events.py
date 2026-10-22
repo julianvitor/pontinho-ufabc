@@ -222,6 +222,10 @@ def create_event(payload: EventCreateOrUpdate, request: Request):
     require_admin(request)
     admin_id = get_current_user_id(request)
 
+    title = payload.title.strip()
+    if len(title) > 25:
+        raise HTTPException(status_code=400, detail="O nome da festa deve ter no máximo 25 caracteres.")
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -229,7 +233,7 @@ def create_event(payload: EventCreateOrUpdate, request: Request):
         INSERT INTO events (title, description, event_date, location, image_url, ticket_url, created_by)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
-        payload.title.strip(),
+        title,
         payload.description.strip() if payload.description else "",
         payload.event_date.strip(),
         payload.location.strip(),
@@ -254,6 +258,10 @@ def update_event(event_id: int, payload: EventCreateOrUpdate, request: Request):
     Atualiza dados de uma festa/evento existente (apenas Admin).
     """
     require_admin(request)
+    title = payload.title.strip()
+    if len(title) > 25:
+        raise HTTPException(status_code=400, detail="O nome da festa deve ter no máximo 25 caracteres.")
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -267,7 +275,7 @@ def update_event(event_id: int, payload: EventCreateOrUpdate, request: Request):
         SET title = ?, description = ?, event_date = ?, location = ?, image_url = ?, ticket_url = ?
         WHERE id = ?
     """, (
-        payload.title.strip(),
+        title,
         payload.description.strip() if payload.description else "",
         payload.event_date.strip(),
         payload.location.strip(),
