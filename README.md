@@ -141,10 +141,19 @@ pontinho-ufabc/
    python -m backend.seed
    ```
 
-3. **Executar o servidor**:
+### Opção 3: Frontend Desacoplado com Live Reload (Desenvolvimento Rápido)
+
+Para editar HTML, CSS e JavaScript e ver o navegador recarregar automaticamente a cada alteração:
+
+1. **Subir o servidor frontend com Live Reload**:
    ```bash
-   uvicorn backend.main:app --reload --port 8000
+   python3 serve_frontend.py --port 3000
    ```
+   *(ou `python3 -m frontend.serve`)*
+
+2. **Acessar o frontend desacoplado**:
+   - [http://127.0.0.1:3000](http://127.0.0.1:3000)
+   - O frontend se comunica automaticamente com a API backend na porta `8000` via CORS configurado.
 
 ---
 
