@@ -218,10 +218,10 @@
     let currentFilter = 'all';
 
     document.addEventListener('DOMContentLoaded', async () => {
-      Pontinho.checkAuth();
-      await Pontinho.initUserSwitcher();
-      Pontinho.updateUnreadBadges();
-      setInterval(() => Pontinho.updateUnreadBadges(), 5000);
+      const user = await Pontinho.requireAuth();
+      if (!user) return;
+      await Pontinho.initNavbarUserSwitcher();
+      Pontinho.startBadgePolling();
 
       loadEvents();
     });
@@ -229,7 +229,7 @@
     async function loadEvents() {
       const grid = document.getElementById('events-grid');
       try {
-        const events = await Pontinho.request('/api/events');
+        const events = await Pontinho.apiFetch('/api/events');
         allEvents = events || [];
         renderEvents();
       } catch (err) {
@@ -288,8 +288,10 @@
         const month = isNaN(dateObj.getMonth()) ? 'MÊS' : monthNames[dateObj.getMonth()];
         const time = ev.event_date.split(' ')[1] || '22:00';
 
+        const coverUrl = Pontinho.resolveMediaUrl(ev.image_url) || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1000';
+
         const sampleAvatarsHtml = (ev.attendees_sample || []).map((s, idx) => `
-          <img src="${s.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
+          <img src="${Pontinho.resolveMediaUrl(s.avatar) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
                alt="${s.name}" title="${s.name} (${s.course})"
                class="w-7 h-7 rounded-full object-cover ring-2 ring-slate-900 -ml-2 first:ml-0 shadow-sm">
         `).join('');
@@ -301,7 +303,7 @@
             
             <!-- CAPA DA FESTA (IMAGEM OU GIF) -->
             <div class="relative h-48 sm:h-52 bg-slate-950 overflow-hidden group">
-              <img src="${ev.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1000'}" 
+              <img src="${coverUrl}" 
                    alt="${ev.title}"
                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
@@ -386,7 +388,7 @@
 
     async function toggleRsvp(eventId) {
       try {
-        const res = await Pontinho.request(`/api/events/${eventId}/rsvp`, {
+        const res = await Pontinho.apiFetch(`/api/events/${eventId}/rsvp`, {
           method: 'POST'
         });
 
@@ -416,7 +418,7 @@
       modal.classList.remove('hidden');
 
       try {
-        const details = await Pontinho.request(`/api/events/${eventId}`);
+        const details = await Pontinho.apiFetch(`/api/events/${eventId}`);
         const attendees = details.attendees || [];
         countElem.innerText = `${attendees.length} ${attendees.length === 1 ? 'estudante confirmado' : 'estudantes confirmados'}`;
 
@@ -429,10 +431,12 @@
           return;
         }
 
-        listElem.innerHTML = attendees.map(u => `
+        listElem.innerHTML = attendees.map(u => {
+          const avatarUrl = Pontinho.resolveMediaUrl(u.avatar) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200';
+          return `
           <div class="flex items-center justify-between gap-3 pt-3 first:pt-0">
             <div class="flex items-center gap-3 cursor-pointer" onclick="openUserPreview(${JSON.stringify(u).replace(/"/g, '&quot;')})">
-              <img src="${u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}"
+              <img src="${avatarUrl}"
                    alt="${u.name}"
                    class="w-12 h-12 rounded-2xl object-cover ring-2 ring-emerald-500/30 shadow-md">
               <div>
@@ -450,7 +454,8 @@
               Ver perfil
             </button>
           </div>
-        `).join('');
+        `;
+        }).join('');
 
       } catch (err) {
         listElem.innerHTML = `
@@ -467,7 +472,8 @@
 
     function openUserPreview(user) {
       const modal = document.getElementById('user-preview-modal');
-      document.getElementById('preview-photo').src = user.avatar || (user.photos && user.photos[0]) || '';
+      const rawPhoto = user.avatar || (user.photos && user.photos[0]) || '';
+      document.getElementById('preview-photo').src = Pontinho.resolveMediaUrl(rawPhoto);
       document.getElementById('preview-name').innerText = user.name || 'Estudante';
       document.getElementById('preview-age').innerText = user.age || '';
       document.getElementById('preview-course').innerText = `🎓 ${user.course} • ${user.campus}`;
