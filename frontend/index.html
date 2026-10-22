@@ -797,11 +797,84 @@
       document.getElementById('match-modal').classList.add('hidden');
     }
 
+    let modalCarouselItems = [];
+    let currentModalPhotoIndex = 0;
+
+    function prevModalPhoto(e) {
+      if (e) e.stopPropagation();
+      if (!modalCarouselItems || modalCarouselItems.length <= 1) return;
+      currentModalPhotoIndex = (currentModalPhotoIndex - 1 + modalCarouselItems.length) % modalCarouselItems.length;
+      updateModalPhotoView();
+    }
+
+    function nextModalPhoto(e) {
+      if (e) e.stopPropagation();
+      if (!modalCarouselItems || modalCarouselItems.length <= 1) return;
+      currentModalPhotoIndex = (currentModalPhotoIndex + 1) % modalCarouselItems.length;
+      updateModalPhotoView();
+    }
+
+    function updateModalPhotoView() {
+      if (!modalCarouselItems || !modalCarouselItems.length) return;
+      const currentItem = modalCarouselItems[currentModalPhotoIndex] || modalCarouselItems[0];
+      const img = document.getElementById('modal-carousel-photo');
+      const countLabel = document.getElementById('modal-photo-count-label');
+      const countBadge = document.getElementById('modal-photo-count-badge');
+      const secretOverlay = document.getElementById('modal-secret-overlay');
+
+      if (img) {
+        img.src = Pontinho.resolveMediaUrl(currentItem.url);
+        if (currentItem.is_secret) {
+          img.style.filter = 'blur(16px)';
+          img.style.transform = 'scale(1.1)';
+        } else {
+          img.style.filter = 'none';
+          img.style.transform = 'none';
+        }
+      }
+
+      if (secretOverlay) {
+        if (currentItem.is_secret) {
+          secretOverlay.classList.remove('hidden');
+        } else {
+          secretOverlay.classList.add('hidden');
+        }
+      }
+
+      if (countLabel) {
+        if (currentItem.is_secret) {
+          countLabel.innerHTML = `🔒 ${currentModalPhotoIndex + 1}/${modalCarouselItems.length} (Secreta)`;
+          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-30 bg-rose-950/80 border border-rose-500/50 text-rose-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full';
+        } else {
+          countLabel.innerText = `${currentModalPhotoIndex + 1}/${modalCarouselItems.length} fotos`;
+          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-30 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full';
+        }
+      }
+
+      document.querySelectorAll('.modal-photo-indicator').forEach((ind, i) => {
+        if (i === currentModalPhotoIndex) {
+          ind.classList.add('active');
+        } else {
+          ind.classList.remove('active');
+        }
+      });
+    }
+
     function openDetailsModal() {
       if (!activeCardData || activeCardData.is_ad) return;
 
       const u = activeCardData;
       const content = document.getElementById('details-content');
+
+      // Monta os itens do carrossel no modal (fotos normais + teaser do álbum secreto se houver)
+      modalCarouselItems = u._carouselItems || (u.photos || []).map(p => ({ url: p, is_secret: false }));
+      if (u.secret_teaser_photo && !modalCarouselItems.some(i => i.is_secret)) {
+        modalCarouselItems.push({
+          url: u.secret_teaser_photo,
+          is_secret: true
+        });
+      }
+      currentModalPhotoIndex = (typeof currentPhotoIndex === 'number' && currentPhotoIndex < modalCarouselItems.length) ? currentPhotoIndex : 0;
 
       // Processa lista de músicas
       currentProfileSongs = Array.isArray(u.songs) ? u.songs.filter(s => s && s.trim()) : [];
@@ -875,14 +948,64 @@
       ` : '';
 
       content.innerHTML = `
-        <!-- Galeria de Fotos -->
-        <div>
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Fotos</h4>
-          <div class="grid grid-cols-2 gap-2">
-            ${(u.photos || []).map(p => `
-              <img src="${Pontinho.resolveMediaUrl(p)}" class="w-full h-44 object-cover rounded-2xl shadow-sm">
-            `).join('')}
+        <!-- Carrossel de Fotos com Destaque -->
+        <div class="relative w-full h-80 sm:h-96 rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl group select-none">
+          <!-- Indicadores de fotos no topo -->
+          ${modalCarouselItems.length > 1 ? `
+            <div class="absolute top-3 inset-x-3 z-30 flex gap-1.5 pointer-events-none">
+              ${modalCarouselItems.map((item, idx) => `
+                <div class="flex-1 modal-photo-indicator ${idx === currentModalPhotoIndex ? 'active' : ''} ${item.is_secret ? 'secret' : ''}" data-modal-idx="${idx}"></div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <!-- Contador de Fotos no topo direito -->
+          <div id="modal-photo-count-badge" class="absolute top-6 right-3 z-30 ${modalCarouselItems[currentModalPhotoIndex].is_secret ? 'bg-rose-950/80 border border-rose-500/50 text-rose-200' : 'bg-black/50 backdrop-blur-md text-white'} text-[10px] font-bold px-2.5 py-0.5 rounded-full transition-all">
+            <span id="modal-photo-count-label">
+              ${modalCarouselItems[currentModalPhotoIndex].is_secret ? `🔒 ${currentModalPhotoIndex + 1}/${modalCarouselItems.length} (Secreta)` : `${currentModalPhotoIndex + 1}/${modalCarouselItems.length} fotos`}
+            </span>
           </div>
+
+          <!-- Imagem Principal com Destaque -->
+          <div class="w-full h-full relative overflow-hidden bg-slate-950">
+            <img id="modal-carousel-photo" 
+                 src="${Pontinho.resolveMediaUrl(modalCarouselItems[currentModalPhotoIndex].url)}" 
+                 alt="${u.name}" 
+                 style="${modalCarouselItems[currentModalPhotoIndex].is_secret ? 'filter: blur(16px); transform: scale(1.1);' : ''}"
+                 class="w-full h-full object-cover pointer-events-none transition-all duration-300">
+
+            <!-- Overlay Misterioso do Álbum Secreto no Modal -->
+            <div id="modal-secret-overlay" class="${modalCarouselItems[currentModalPhotoIndex].is_secret ? '' : 'hidden'} absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 pointer-events-none">
+              <div class="w-14 h-14 rounded-2xl bg-rose-950/90 border border-rose-500/60 shadow-xl shadow-rose-950 text-rose-300 text-2xl flex items-center justify-center mb-3 animate-pulse">
+                🔒
+              </div>
+              <span class="inline-block px-3 py-1 bg-gradient-to-r from-rose-600 to-red-600 text-white font-black text-[10px] rounded-full uppercase tracking-wider shadow-md mb-2">
+                Álbum Secreto 🔥
+              </span>
+              <p class="text-xs text-rose-100 font-medium max-w-xs leading-relaxed">
+                Foto protegida. Curta o perfil para ter a chance de desbloquear após o match!
+              </p>
+              ${u.private_photos_count ? `
+                <span class="text-[11px] text-rose-300 font-semibold mt-2">
+                  Total de ${u.private_photos_count} ${u.private_photos_count === 1 ? 'foto secreta' : 'fotos secretas'}
+                </span>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Áreas clicáveis para troca rápida (esquerda = anterior, direita = próxima) -->
+          <div class="absolute inset-y-0 left-0 w-1/3 z-25 cursor-pointer" onclick="prevModalPhoto(event)"></div>
+          <div class="absolute inset-y-0 right-0 w-1/3 z-25 cursor-pointer" onclick="nextModalPhoto(event)"></div>
+
+          <!-- Botões visíveis com setas para fácil navegação -->
+          ${modalCarouselItems.length > 1 ? `
+            <button type="button" onclick="prevModalPhoto(event)" class="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white text-xs flex items-center justify-center backdrop-blur-sm transition-all shadow-md opacity-70 hover:opacity-100 hover:scale-110 active:scale-95" title="Foto anterior">
+              ❮
+            </button>
+            <button type="button" onclick="nextModalPhoto(event)" class="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white text-xs flex items-center justify-center backdrop-blur-sm transition-all shadow-md opacity-70 hover:opacity-100 hover:scale-110 active:scale-95" title="Próxima foto">
+              ❯
+            </button>
+          ` : ''}
         </div>
 
         <!-- Músicas -->

@@ -97,24 +97,28 @@ body {
   box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
 }
 
-/* Indicadores de foto no topo do card */
-.photo-indicator {
+/* Indicadores de foto no topo do card e do modal */
+.photo-indicator,
+.modal-photo-indicator {
   height: 3.5px;
   background-color: rgba(255, 255, 255, 0.35);
   border-radius: 9999px;
   transition: background-color 0.2s ease;
 }
 
-.photo-indicator.active {
+.photo-indicator.active,
+.modal-photo-indicator.active {
   background-color: #10b981;
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
 }
 
-.photo-indicator.secret {
+.photo-indicator.secret,
+.modal-photo-indicator.secret {
   background-color: rgba(244, 63, 94, 0.45);
 }
 
-.photo-indicator.secret.active {
+.photo-indicator.secret.active,
+.modal-photo-indicator.secret.active {
   background-color: #f43f5e;
   box-shadow: 0 0 10px rgba(244, 63, 94, 0.95);
 }
