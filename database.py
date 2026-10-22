@@ -57,12 +57,14 @@ def init_db():
         prompt2_a TEXT,
         prompt3_q TEXT,
         prompt3_a TEXT,
+        gender TEXT NOT NULL DEFAULT 'Não informado', -- 'Mulher', 'Homem', 'Não-binário', 'Outro'
+        target_gender TEXT NOT NULL DEFAULT 'Todos', -- 'Mulheres', 'Homens', 'Não-binário', 'Todos'
         is_admin INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
 
-    # Migração automática caso o banco já existisse sem ra ou password_hash
+    # Migração automática caso o banco já existisse sem ra, password_hash, gender ou target_gender
     cursor.execute("PRAGMA table_info(users)")
     existing_cols = [row["name"] for row in cursor.fetchall()]
     if "ra" not in existing_cols:
@@ -70,6 +72,10 @@ def init_db():
         cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_ra ON users(ra)")
     if "password_hash" not in existing_cols:
         cursor.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
+    if "gender" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN gender TEXT DEFAULT 'Não informado'")
+    if "target_gender" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN target_gender TEXT DEFAULT 'Todos'")
 
     # Tabela de Cursos (Base e Específico) gerenciáveis pelo admin
     cursor.execute("""

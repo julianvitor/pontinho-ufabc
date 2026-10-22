@@ -55,6 +55,8 @@ class UserCreateOrUpdate(BaseModel):
     prompt2_a: Optional[str] = ""
     prompt3_q: Optional[str] = ""
     prompt3_a: Optional[str] = ""
+    gender: Optional[str] = "Não informado"  # 'Mulher', 'Homem', 'Não-binário', 'Outro'
+    target_gender: Optional[str] = "Todos"   # 'Mulheres', 'Homens', 'Não-binário', 'Todos'
 
 class CourseCreate(BaseModel):
     name: str
@@ -166,12 +168,14 @@ def register_user(data: RegisterRequest, response: Response):
         INSERT INTO users (
             ra, password_hash, email, name, age, campus, course, specific_course,
             entity, looking_for, bio, interests, photos,
-            prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a
+            prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
+            gender, target_gender
         ) VALUES (?, ?, ?, ?, 20, 'Santo André', 'BC&T - Bacharelado em Ciência e Tecnologia', 'Ciência da Computação',
                   'Nenhuma / Foco no CR', 'Amizade', 'Estudante da UFABC!', '["UFABC"]', ?,
                   'O melhor lugar para descansar na UFABC é...', 'Biblioteca',
                   'Minha opinião impopular sobre o RU...', 'Gosto da comida',
-                  'No intervalo entre as aulas você me encontra...', 'Bloco A')
+                  'No intervalo entre as aulas você me encontra...', 'Bloco A',
+                  'Não informado', 'Todos')
     """, (cleaned_ra, pw_hash, sanitized_email, cleaned_name, json.dumps(default_photos)))
 
     conn.commit()
@@ -341,16 +345,30 @@ def get_feed(request: Request):
     conn = get_db()
     cursor = conn.cursor()
 
+    # Buscar preferências do usuário atual
+    cursor.execute("SELECT target_gender FROM users WHERE id = ?", (current_id,))
+    curr_user = cursor.fetchone()
+    target_gender = curr_user["target_gender"] if curr_user and curr_user["target_gender"] else "Todos"
+
     # Buscar anúncios ativos
     cursor.execute("SELECT * FROM ads WHERE is_active = 1 ORDER BY id DESC")
     ads = [dict(r) for r in cursor.fetchall()]
 
-    # Buscar perfis ainda não avaliados
-    cursor.execute("""
+    # Filtrar por target_gender caso não seja 'Todos'
+    gender_filter_sql = ""
+    if target_gender == "Mulheres":
+        gender_filter_sql = " AND (LOWER(gender) = 'mulher' OR LOWER(gender) = 'mulheres')"
+    elif target_gender == "Homens":
+        gender_filter_sql = " AND (LOWER(gender) = 'homem' OR LOWER(gender) = 'homens')"
+    elif target_gender in ("Não-binário", "Nao-binario", "nao binario"):
+        gender_filter_sql = " AND LOWER(gender) IN ('não-binário', 'nao-binario', 'não binário', 'nao binario')"
+
+    # Buscar perfis ainda não avaliados respeitando o filtro de gênero
+    cursor.execute(f"""
         SELECT * FROM users
         WHERE id != ? AND id NOT IN (
             SELECT to_user_id FROM swipes WHERE from_user_id = ?
-        )
+        ) {gender_filter_sql}
         ORDER BY id ASC
     """, (current_id, current_id))
 
@@ -605,13 +623,16 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
             email = ?, name = ?, age = ?, campus = ?, course = ?, specific_course = ?,
             entity = ?, looking_for = ?, bio = ?, interests = ?, photos = ?,
             prompt1_q = ?, prompt1_a = ?, prompt2_q = ?, prompt2_a = ?,
-            prompt3_q = ?, prompt3_a = ?
+            prompt3_q = ?, prompt3_a = ?,
+            gender = ?, target_gender = ?
         WHERE id = ?
     """, (
         data.email, data.name, data.age, data.campus, data.course, data.specific_course,
         data.entity, data.looking_for, data.bio, json.dumps(data.interests), json.dumps(data.photos),
         data.prompt1_q, data.prompt1_a, data.prompt2_q, data.prompt2_a,
-        data.prompt3_q, data.prompt3_a, current_id
+        data.prompt3_q, data.prompt3_a,
+        data.gender or "Não informado", data.target_gender or "Todos",
+        current_id
     ))
 
     conn.commit()
@@ -632,12 +653,14 @@ def create_new_user(data: UserCreateOrUpdate):
             INSERT INTO users (
                 email, name, age, campus, course, specific_course,
                 entity, looking_for, bio, interests, photos,
-                prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
+                gender, target_gender
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data.email, data.name, data.age, data.campus, data.course, data.specific_course,
             data.entity, data.looking_for, data.bio, json.dumps(data.interests), json.dumps(data.photos),
-            data.prompt1_q, data.prompt1_a, data.prompt2_q, data.prompt2_a, data.prompt3_q, data.prompt3_a
+            data.prompt1_q, data.prompt1_a, data.prompt2_q, data.prompt2_a, data.prompt3_q, data.prompt3_a,
+            data.gender or "Não informado", data.target_gender or "Todos"
         ))
         conn.commit()
         new_id = cursor.lastrowid

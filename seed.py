@@ -129,6 +129,8 @@ def seed_database():
             "prompt2_a": "O suco de caju deles é injustiçado, eu acho ótimo.",
             "prompt3_q": "No intervalo entre as aulas você me encontra...",
             "prompt3_a": "Programando no laboratório ou caçando tomada no mezanino.",
+            "gender": "Outro",
+            "target_gender": "Todos",
             "is_admin": 1
         },
         {
@@ -155,6 +157,8 @@ def seed_database():
             "prompt2_a": "Abrir 4 navegadores 1 minuto antes e rezar para todos os deuses do quadrimestre.",
             "prompt3_q": "Um date ideal pelo ABC ou Santo André tem...",
             "prompt3_a": "Pastel na feira de Santo André e depois um café pra papear sem pressa.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
             "is_admin": 0
         },
         {
@@ -180,6 +184,8 @@ def seed_database():
             "prompt2_a": "Introdução às Humanidades com fichamento semanal de 20 páginas.",
             "prompt3_q": "No intervalo entre as aulas você me encontra...",
             "prompt3_a": "Na banquinha discutindo o último filme da A24.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
             "is_admin": 0
         },
         {
@@ -205,6 +211,8 @@ def seed_database():
             "prompt2_a": "Eu te explico como funciona a órbita de Hohmann sem complicar.",
             "prompt3_q": "Minha técnica infalível pra conseguir vaga no SIGAA...",
             "prompt3_a": "Fazer amizade com os veteranos pra saber quais professores não reprovam 80%.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
             "is_admin": 0
         },
         {
@@ -230,6 +238,8 @@ def seed_database():
             "prompt2_a": "Processamento da Informação com o temido C.",
             "prompt3_q": "Um date ideal pelo ABC ou Santo André tem...",
             "prompt3_a": "Hambúrguer artesanal no Bairro Jardim e muitas risadas.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
             "is_admin": 0
         },
         {
@@ -255,6 +265,8 @@ def seed_database():
             "prompt2_a": "Os bancos sob as árvores no pátio de São Bernardo.",
             "prompt3_q": "Se você me pagar um salgado na lanchonete do Bloco A...",
             "prompt3_a": "Eu te passo os melhores resumos de Economia Política.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
             "is_admin": 0
         }
     ]
@@ -265,16 +277,19 @@ def seed_database():
             INSERT INTO users (
                 ra, password_hash, email, name, age, campus, course, specific_course, entity,
                 looking_for, bio, interests, photos,
-                prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a, is_admin
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
+                gender, target_gender, is_admin
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(email) DO UPDATE SET
                 ra = excluded.ra,
-                password_hash = excluded.password_hash
+                password_hash = excluded.password_hash,
+                gender = excluded.gender,
+                target_gender = excluded.target_gender
         """, (
             u["ra"], u["password_hash"], u["email"], u["name"], u["age"], u["campus"], u["course"], u["specific_course"], u["entity"],
             u["looking_for"], u["bio"], u["interests"], u["photos"],
             u["prompt1_q"], u["prompt1_a"], u["prompt2_q"], u["prompt2_a"], u["prompt3_q"], u["prompt3_a"],
-            u["is_admin"]
+            u["gender"], u["target_gender"], u["is_admin"]
         ))
 
     # Criar um match inicial de exemplo entre Mariana (id=2) e Gabriel (id=5) para podermos testar o chat imediatamente

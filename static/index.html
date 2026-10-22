@@ -313,11 +313,16 @@
           <!-- Informações Principais do Estudante -->
           <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5 z-20 text-white flex flex-col justify-end pointer-events-auto">
             
-            <!-- Badges de Campus e Entidade -->
+            <!-- Badges de Campus, Gênero e Entidade -->
             <div class="flex flex-wrap items-center gap-1.5 mb-2">
               <span class="bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
                 📍 ${user.campus}
               </span>
+              ${user.gender && user.gender !== 'Não informado' ? `
+                <span class="bg-indigo-600/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
+                  ${user.gender === 'Mulher' ? '👩 Mulher' : user.gender === 'Homem' ? '👨 Homem' : user.gender === 'Não-binário' ? '🏳️‍⚧️ Não-binário' : user.gender}
+                </span>
+              ` : ''}
               <span class="bg-rose-500/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
                 ${user.looking_for}
               </span>
@@ -603,6 +608,11 @@
             <span class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-emerald-200/50">
               📍 Campus ${u.campus}
             </span>
+            ${u.gender && u.gender !== 'Não informado' ? `
+              <span class="bg-indigo-50 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-indigo-200/50">
+                ⚧️ ${u.gender}
+              </span>
+            ` : ''}
             <span class="bg-rose-50 text-rose-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-rose-200/50">
               ❤️ ${u.looking_for}
             </span>

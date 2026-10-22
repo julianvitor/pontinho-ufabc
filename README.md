@@ -27,6 +27,8 @@
   - Campus: Santo André ou São Bernardo do Campo.
   - Curso Base: BC&T, BC&H, LC&T, LCH.
   - Curso Específico: Ciência da Computação, Engenharia Aeroespacial, Neurociência, Relações Internacionais, Economia, etc.
+  - Gênero: *Mulher*, *Homem*, *Não-binário*, *Outro*.
+  - **Gênero que busca**: *Mulheres*, *Homens*, *Não-binário*, *Todos* (com filtragem dinâmica no feed de swipes).
   - Entidade que participa: Atlética Geral, Bateria UFABC, Caiás, Baja, Centro Acadêmico, etc.
   - O que procura: *Algo sério*, *Algo casual*, *Amizade*.
   - Tags de interesses.
