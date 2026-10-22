@@ -133,14 +133,32 @@ const Pontinho = {
     }
   },
 
+  // Obtém dados do usuário autenticado sem redirecionamento forçado
+  async getMe() {
+    const userId = this.getCurrentUserId();
+    if (!userId) return null;
+
+    try {
+      const data = await this.apiFetch('/api/auth/me');
+      if (data && data.authenticated && data.user) {
+        return data.user;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  },
+
   // Validação de autenticação
   async requireAuth() {
     const isLoginPage = window.location.pathname.includes('login.html');
     const isIndexPage = window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/') || window.location.pathname === '';
+    const isEventsPage = window.location.pathname.includes('events.html');
+    const isTermsPage = window.location.pathname.includes('terms.html');
 
     const userId = this.getCurrentUserId();
     if (!userId) {
-      if (!isLoginPage && !isIndexPage) {
+      if (!isLoginPage && !isIndexPage && !isEventsPage && !isTermsPage) {
         window.location.href = './login.html';
       }
       return null;
@@ -150,14 +168,14 @@ const Pontinho = {
       const data = await this.apiFetch('/api/auth/me');
       if (!data || !data.authenticated) {
         this.setCurrentUserId(null);
-        if (!isLoginPage && !isIndexPage) {
+        if (!isLoginPage && !isIndexPage && !isEventsPage && !isTermsPage) {
           window.location.href = './login.html';
         }
         return null;
       }
       return data.user;
     } catch (e) {
-      if (!isLoginPage && !isIndexPage) {
+      if (!isLoginPage && !isIndexPage && !isEventsPage && !isTermsPage) {
         window.location.href = './login.html';
       }
       return null;

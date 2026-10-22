@@ -219,18 +219,29 @@
     let currentFilter = 'all';
 
     document.addEventListener('DOMContentLoaded', async () => {
-      const user = await Pontinho.getMe();
-      if (user) {
-        await Pontinho.initNavbarUserSwitcher();
-        Pontinho.startBadgePolling();
-      } else {
-        const authBtn = document.getElementById('navbar-auth-btn');
-        if (authBtn) authBtn.classList.remove('hidden');
-        const userBox = document.getElementById('navbar-user-box');
-        if (userBox) userBox.classList.add('hidden');
-      }
+      try {
+        let user = null;
+        if (typeof Pontinho.getMe === 'function') {
+          user = await Pontinho.getMe();
+        } else if (Pontinho.getCurrentUserId()) {
+          const authData = await Pontinho.apiFetch('/api/auth/me').catch(() => null);
+          user = authData && authData.authenticated ? authData.user : null;
+        }
 
-      loadEvents();
+        if (user) {
+          await Pontinho.initNavbarUserSwitcher();
+          Pontinho.startBadgePolling();
+        } else {
+          const authBtn = document.getElementById('navbar-auth-btn');
+          if (authBtn) authBtn.classList.remove('hidden');
+          const userBox = document.getElementById('navbar-user-box');
+          if (userBox) userBox.classList.add('hidden');
+        }
+      } catch (e) {
+        console.warn('Erro ao verificar sessão do usuário:', e);
+      } finally {
+        loadEvents();
+      }
     });
 
     async function loadEvents() {
