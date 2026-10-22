@@ -19,6 +19,7 @@ from collections import defaultdict
 from fastapi import APIRouter, UploadFile, File, HTTPException, Request
 from PIL import Image, ImageOps
 from backend.auth import get_current_user_id
+from backend.moderation import check_image_safety
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
 
@@ -130,6 +131,16 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
         )
 
         final_size = destination_path.stat().st_size
+
+        # 3. Moderação Automática de Conteúdo (NudeNet + Detecção de Menores)
+        # Regras: Genitálias e menores são proibidos; seios são permitidos.
+        safety_check = check_image_safety(str(destination_path))
+        if not safety_check.get("allowed", True):
+            destination_path.unlink(missing_ok=True)
+            raise HTTPException(
+                status_code=400,
+                detail=safety_check.get("reason", "A imagem enviada não atende às diretrizes de conteúdo da comunidade.")
+            )
 
     except Image.DecompressionBombError:
         raise HTTPException(
