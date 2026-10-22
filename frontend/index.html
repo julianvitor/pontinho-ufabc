@@ -498,9 +498,6 @@
               🎓 ${user.specific_course || user.course}
             </p>
 
-            <!-- Bio resumida -->
-            ${user.bio ? `<p class="text-xs text-slate-200 mt-1 line-clamp-2">${user.bio}</p>` : ''}
-
             <!-- Indicador de Música -->
             ${(user.songs && user.songs.length) ? `
               <div class="mt-2 flex items-center gap-1.5 text-[11px] text-purple-200 bg-purple-950/70 backdrop-blur-md px-2.5 py-1 rounded-xl border border-purple-400/30 truncate">
