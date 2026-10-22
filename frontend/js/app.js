@@ -248,12 +248,12 @@ const Pontinho = {
 
 const PontinhoMock = {
   initStorage() {
-    if (!localStorage.getItem('pontinho_mock_initialized_v3')) {
+    if (!localStorage.getItem('pontinho_mock_initialized_v4')) {
       const defaultUsers = [
         {
           id: 1,
           ra: "admin",
-          email: "admin@ufabc.edu.br",
+          email: "admin@pontinho.app",
           name: "Administrador",
           age: 28,
           campus: "Santo André",
@@ -269,12 +269,12 @@ const PontinhoMock = {
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
           ],
-          prompt1_q: "O melhor lugar para descansar na UFABC é...",
-          prompt1_a: "Os puffs do piso vermelho no Bloco A.",
-          prompt2_q: "Minha opinião impopular sobre o RU...",
-          prompt2_a: "O suco de caju deles é injustiçado, eu acho ótimo.",
-          prompt3_q: "No intervalo entre as aulas você me encontra...",
-          prompt3_a: "Programando no laboratório ou caçando tomada no mezanino.",
+          prompt1_q: "O melhor lugar para relaxar e fugir da rotina é...",
+          prompt1_a: "No mezanino do Bloco A com um bom café e fone de ouvido.",
+          prompt2_q: "Minha opinião impopular sobre primeiro encontro...",
+          prompt2_a: "Conversa olho no olho supera qualquer restaurante sofisticado.",
+          prompt3_q: "No intervalo entre as obrigações você me encontra...",
+          prompt3_a: "Programando no laboratório ou testando novidades no Pontinho.",
           songs: ["Daft Punk - Harder Better Faster Stronger", "Kraftwerk - The Robots"],
           private_photos: [],
           private_bio: "",
@@ -283,41 +283,41 @@ const PontinhoMock = {
         {
           id: 2,
           ra: "11202021001",
-          email: "mariana.silva@aluno.ufabc.edu.br",
+          email: "mariana.silva@pontinho.app",
           name: "Mariana Silva",
           age: 21,
           campus: "Santo André",
           course: "BC&T - Bacharelado em Ciência e Tecnologia",
           specific_course: "Neurociência",
-          entity: "Atlética Geral UFABC",
+          entity: "Atlética Geral",
           looking_for: "Algo sério",
           gender: "Mulher",
           target_gender: "Todos",
-          bio: "Estudante do BC&T no 5º quadri. Amo o RU quando tem estrogonofe, viciada em café com leite do Bloco B e nos treinos de vôlei da Atlética.",
+          bio: "Pesquisadora de neurociência, vôlei de praia e viciada em café com leite. Amo dias de sol, papos profundos e boa música.",
           interests: ["Vôlei", "Neurociência", "Café", "Praia", "Música Indie"],
           photos: [
             "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
           ],
-          prompt1_q: "O melhor lugar para descansar na UFABC é...",
-          prompt1_a: "No gramado do Bloco A tomando sol nos dias sem prova de FUV.",
-          prompt2_q: "Minha técnica infalível pra conseguir vaga no SIGAA...",
-          prompt2_a: "Abrir 4 navegadores 1 minuto antes e rezar para todos os deuses do quadrimestre.",
-          prompt3_q: "Um date ideal pelo ABC ou Santo André tem...",
-          prompt3_a: "Pastel na feira de Santo André e depois um café pra papear sem pressa.",
+          prompt1_q: "O melhor lugar para relaxar e fugir da rotina é...",
+          prompt1_a: "No gramado tomando sol ouvindo uma playlist tranquila nos dias sem prova.",
+          prompt2_q: "Minha opinião impopular sobre primeiro encontro...",
+          prompt2_a: "Date em café descontraído ou pastel na feira supera qualquer lugar caro.",
+          prompt3_q: "Um date ideal no fim de noite tem...",
+          prompt3_a: "Vinho tinto, risada fácil e zero pressa pra ir embora.",
           songs: ["Chico Buarque - Construção", "Arctic Monkeys - 505", "Duda Beat - Bixinho"],
           private_photos: [
             "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80"
           ],
-          private_bio: "Na facul pareço tímida, mas adoro uma festa até o amanhecer e um date com vinho e conversa sem tabu. Quer descobrir mais? 🔥",
+          private_bio: "De dia pareço tímida e focada, mas adoro noites animadas, beijo demorado e química sem tabu. Quer descobrir mais? 🔥",
           is_admin: 0
         },
         {
           id: 3,
           ra: "11202021002",
-          email: "lucas.mendes@aluno.ufabc.edu.br",
+          email: "lucas.mendes@pontinho.app",
           name: "Lucas Mendes",
           age: 22,
           campus: "São Bernardo do Campo",
@@ -327,122 +327,221 @@ const PontinhoMock = {
           looking_for: "Algo casual",
           gender: "Homem",
           target_gender: "Mulheres",
-          bio: "RI em SBC. Me chama pra tomar uma cerveja depois das 21h ou debater geopolítica no pátio. Gosto de cinema cult e viajar de carona.",
+          bio: "Relações Internacionais. Me chama pra tomar uma cerveja depois das 21h ou debater geopolítica. Gosto de cinema cult e viajar na estrada.",
           interests: ["Cinema", "Geopolítica", "Cervejada", "Livros", "Rock"],
           photos: [
             "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80"
           ],
-          prompt1_q: "Minha opinião impopular sobre o RU...",
-          prompt1_a: "A fila de SBC anda bem mais rápido que a de Santo André, aceitem.",
-          prompt2_q: "A matéria que quase me fez trancar o curso foi...",
-          prompt2_a: "Introdução às Humanidades com fichamento semanal de 20 páginas.",
-          prompt3_q: "No intervalo entre as aulas você me encontra...",
-          prompt3_a: "Na banquinha discutindo o último filme da A24.",
+          prompt1_q: "Minha opinião impopular sobre primeiro encontro...",
+          prompt1_a: "Se o papo não fluir nos primeiros 15 minutos, pedir a saideira é sinal de maturidade.",
+          prompt2_q: "No intervalo entre as obrigações você me encontra...",
+          prompt2_a: "No pátio tomando uma com quem quiser trocar ideia boa.",
+          prompt3_q: "Um date ideal no fim de noite tem...",
+          prompt3_a: "Carona ouvindo indie rock pelas avenidas desertas da cidade.",
           songs: ["Tame Impala - The Less I Know The Better", "Tim Maia - Não Quero Dinheiro", "The Strokes - Someday"],
           private_photos: [
             "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80"
           ],
-          private_bio: "Gosto de olhares provocantes, carona noturna ouvindo indie e química que dispense apresentações formais. 😉",
+          private_bio: "Gosto de olhares provocantes, pele quente e química daquelas que não precisa de explicação formal. 😉",
           is_admin: 0
         },
         {
           id: 4,
           ra: "11202021003",
-          email: "beatriz.costa@aluno.ufabc.edu.br",
+          email: "beatriz.costa@pontinho.app",
           name: "Bia Costa",
           age: 20,
           campus: "Santo André",
           course: "BC&T - Bacharelado em Ciência e Tecnologia",
           specific_course: "Engenharia Aeroespacial",
-          entity: "UFABC Rocket Design",
+          entity: "Rocket Design",
           looking_for: "Amizade",
           gender: "Mulher",
           target_gender: "Todos",
-          bio: "Quero mandar foguetes pro espaço 🚀. Quando não estou no laboratório de propulsão, estou ouvindo Taylor Swift ou maratonando ficção científica.",
+          bio: "Quero mandar foguetes pro espaço 🚀. Quando não estou em projetos de propulsão, estou maratonando sci-fi ou ouvindo Taylor Swift.",
           interests: ["Astronomia", "Foguetes", "Taylor Swift", "Anime", "Jogos"],
           photos: [
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80"
           ],
-          prompt1_q: "O melhor lugar para descansar na UFABC é...",
-          prompt1_a: "A biblioteca do Bloco B, no silêncio absoluto do último andar.",
-          prompt2_q: "Se você me pagar um salgado na lanchonete do Bloco A...",
-          prompt2_a: "Eu te explico como funciona a órbita de Hohmann sem complicar.",
-          prompt3_q: "Minha técnica infalível pra conseguir vaga no SIGAA...",
-          prompt3_a: "Fazer amizade com os veteranos pra saber quais professores não reprovam 80%.",
+          prompt1_q: "O melhor lugar para relaxar e fugir da rotina é...",
+          prompt1_a: "O mezanino silencioso da biblioteca no final da tarde.",
+          prompt2_q: "Se você me chamar pra sair agora...",
+          prompt2_a: "Eu aceito se envolver açaí ou hambúrguer bem recheado.",
+          prompt3_q: "Minha técnica infalível pra quebrar o gelo...",
+          prompt3_a: "Perguntar qual teoria da conspiração você secretamente acredita.",
           songs: ["Taylor Swift - Cruel Summer", "Daft Punk - Instant Crush", "Coldplay - Yellow"],
           private_photos: [
             "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
           ],
-          private_bio: "Engenheira com lado secreto: fã de noites quentes, beijo roubado e dates despretensiosos que não têm hora pra acabar. 🚀✨",
+          private_bio: "Mente lógica com um lado nada comportado: beijo no pescoço, quarto escuro e conexões que pegam fogo. Me peça acesso. 🚀✨",
           is_admin: 0
         },
         {
           id: 5,
           ra: "11202021004",
-          email: "gabriel.santos@aluno.ufabc.edu.br",
+          email: "gabriel.santos@pontinho.app",
           name: "Gabriel Santos",
           age: 23,
           campus: "Santo André",
           course: "BC&T - Bacharelado em Ciência e Tecnologia",
           specific_course: "Ciência da Computação",
-          entity: "Bateria UFABC",
+          entity: "Bateria Universitária",
           looking_for: "Algo sério",
           gender: "Homem",
           target_gender: "Mulheres",
-          bio: "Dev full-stack de dia, ritmista da Bateria à noite. Se você curte maratona de séries, jogar videogame e rir de memes de programação, já temos match.",
+          bio: "Programador de dia, ritmista da bateria à noite. Curto maratona de séries, jogar videogame e rir de memes de tecnologia.",
           interests: ["Programação", "Samba", "Nintendo", "Gatos", "Pizza"],
           photos: [
             "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80"
           ],
-          prompt1_q: "No intervalo entre as aulas você me encontra...",
-          prompt1_a: "No ensaio da bateria tirando o estresse na caixa.",
-          prompt2_q: "A matéria que quase me fez trancar o curso foi...",
-          prompt2_a: "Processamento da Informação com o temido C.",
-          prompt3_q: "Um date ideal pelo ABC ou Santo André tem...",
-          prompt3_a: "Hambúrguer artesanal no Bairro Jardim e muitas risadas.",
+          prompt1_q: "No intervalo entre as obrigações você me encontra...",
+          prompt1_a: "No ensaio tirando o estresse na caixa ou jogando Smash.",
+          prompt2_q: "A matéria ou desafio que quase me enlouqueceu...",
+          prompt2_a: "Entender ponteiros em C na primeira semana do semestre.",
+          prompt3_q: "Um date ideal no fim de noite tem...",
+          prompt3_a: "Hambúrguer artesanal e aquela sintonia que não cansa.",
           songs: ["Criolo - Não Existe Amor em SP", "Kendrick Lamar - All The Stars", "Jorge Ben Jor - Taj Mahal"],
           private_photos: [
             "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80"
           ],
-          private_bio: "Pegada firme e ritmo dentro e fora dos palcos. Me conquista com atitude e bom humor. Se pedir com carinho, eu libero o álbum secreto. 🔥",
+          private_bio: "Pegada firme e ritmo intenso dentro e fora dos palcos. Me conquista com atitude e iniciativa. Se pedir com carinho, libero meu álbum secreto. 🔥",
           is_admin: 0
         },
         {
           id: 6,
           ra: "11202021005",
-          email: "camila.rocha@aluno.ufabc.edu.br",
+          email: "camila.rocha@pontinho.app",
           name: "Camila Rocha",
           age: 21,
           campus: "São Bernardo do Campo",
           course: "BC&H - Bacharelado em Ciências e Humanidades",
           specific_course: "Ciências Econômicas",
-          entity: "Enactus UFABC",
+          entity: "Enactus",
           looking_for: "Algo casual",
           gender: "Mulher",
           target_gender: "Todos",
-          bio: "Economia em SBC, foco em projetos sociais com a Enactus. Adoro trilhas, gatos e experimentar cafés diferentes pelo ABC.",
+          bio: "Economia e sustentabilidade. Adoro trilhas, gatos e descobrir cafeterias aconchegantes para ler ou prosear.",
           interests: ["Economia", "Sustentabilidade", "Trilhas", "Fotografia", "Yoga"],
           photos: [
             "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
           ],
-          prompt1_q: "Minha opinião impopular sobre o RU...",
-          prompt1_a: "A opção vegetariana muitas vezes é mais gostosa que a tradicional.",
-          prompt2_q: "O melhor lugar para descansar na UFABC é...",
-          prompt2_a: "Os bancos sob as árvores no pátio de São Bernardo.",
-          prompt3_q: "Se você me pagar um salgado na lanchonete do Bloco A...",
-          prompt3_a: "Eu te passo os melhores resumos de Economia Política.",
+          prompt1_q: "Minha opinião impopular sobre primeiro encontro...",
+          prompt1_a: "Quem escolhe o local primeiro tem direito a provar a sobremesa do outro.",
+          prompt2_q: "O melhor lugar para relaxar e fugir da rotina é...",
+          prompt2_a: "No meio da natureza respirando ar puro e sem sinal no celular.",
+          prompt3_q: "Se você me chamar pra sair agora...",
+          prompt3_a: "Coloco meu melhor look em 15 minutos e topo a aventura.",
           songs: ["Liniker - Baby 95", "Silva - A Cor É Rosa", "Caetano Veloso - Sozinho"],
           private_photos: [
             "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
           ],
-          private_bio: "Equilíbrio entre calmaria de dia e intensidade à noite. Se você for direto ao ponto, ganha pontos comigo. 💋",
+          private_bio: "Equilíbrio entre calmaria de dia e intensidade quente à noite. Se você for ousado e direto ao ponto, ganha pontos comigo. 💋",
+          is_admin: 0
+        },
+        {
+          id: 7,
+          ra: "11202021006",
+          email: "rodrigo.alves@pontinho.app",
+          name: "Rodrigo Alves",
+          age: 24,
+          campus: "Santo André",
+          course: "BC&T - Bacharelado em Ciência e Tecnologia",
+          specific_course: "Engenharia de Gestão",
+          entity: "Baja",
+          looking_for: "Algo sério",
+          gender: "Homem",
+          target_gender: "Mulheres",
+          bio: "Treino pesado, fã de eletrônica e viagens de última hora. Gosto de quem tem energia contagiante e não tem medo de viver momentos intensos.",
+          interests: ["Musculação", "Baja", "Eletrônica", "Viagens", "Churrasco"],
+          photos: [
+            "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=800&auto=format&fit=crop&q=80"
+          ],
+          prompt1_q: "Minha opinião impopular sobre primeiro encontro...",
+          prompt1_a: "Primeiro date tem que ter energia lá em cima, nada de sono ou lamentação.",
+          prompt2_q: "Se você me chamar pra sair agora...",
+          prompt2_a: "Passo aí em meia hora e a gente decide o destino na estrada.",
+          prompt3_q: "Um date ideal no fim de noite tem...",
+          prompt3_a: "Música alta, beijo que rouba o fôlego e vontade de não dormir.",
+          songs: ["The Weeknd - Blinding Lights", "Vintage Culture - In The Dark", "Alok - Hear Me Now"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Gosto de conduzir, abraço forte e uma boa dose de adrenalina a dois. Quer ver o que não mostro pra qualquer um? Clica em pedir acesso. 🔥",
+          is_admin: 0
+        },
+        {
+          id: 8,
+          ra: "11202021007",
+          email: "isabela.martins@pontinho.app",
+          name: "Isabela Martins",
+          age: 22,
+          campus: "Santo André",
+          course: "BC&T - Bacharelado em Ciência e Tecnologia",
+          specific_course: "Biotecnologia",
+          entity: "Centro Acadêmico BC&T",
+          looking_for: "Algo casual",
+          gender: "Mulher",
+          target_gender: "Todos",
+          bio: "Pesquisadora de bancada, fã de festivais e apaixonada por vinho tinto. Se você tiver papo interessante e me fizer rir, metade do caminho tá feito.",
+          interests: ["Biotecnologia", "Vinho", "Festivais", "Moda", "Fotografia"],
+          photos: [
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
+          ],
+          prompt1_q: "Minha técnica infalível pra quebrar o gelo...",
+          prompt1_a: "Olhar nos olhos, dar um sorriso de lado e dizer o que ninguém tem coragem de falar.",
+          prompt2_q: "O melhor lugar para relaxar e fugir da rotina é...",
+          prompt2_a: "Em um rooftop tomando um drink com boa vista.",
+          prompt3_q: "Um date ideal no fim de noite tem...",
+          prompt3_a: "Provocações sutis que viram algo muito mais quente.",
+          songs: ["Dua Lipa - Levitating", "Doja Cat - Kiss Me More", "Marina Sena - Por Supuesto"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Intensa, curiosa e sem tempo pra joguinhos mornos. Gosto de cumplicidade quente entre quatro paredes. Peça acesso se tiver atitude. 😉✨",
+          is_admin: 0
+        },
+        {
+          id: 9,
+          ra: "11202021008",
+          email: "felipe.ramos@pontinho.app",
+          name: "Felipe Ramos",
+          age: 23,
+          campus: "São Bernardo do Campo",
+          course: "BC&H - Bacharelado em Ciências e Humanidades",
+          specific_course: "Ciências Econômicas",
+          entity: "Caiás",
+          looking_for: "Algo casual",
+          gender: "Homem",
+          target_gender: "Mulheres",
+          bio: "Debates acalorados, hip-hop, basquete de rua e rolês espontâneos. Se o plano for bom e a companhia melhor ainda, tô dentro.",
+          interests: ["Hip-Hop", "Basquete", "Economia", "Streetwear", "Cinema"],
+          photos: [
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80"
+          ],
+          prompt1_q: "A matéria ou desafio que quase me enlouqueceu...",
+          prompt1_a: "Provas longas de cálculo emendadas com entrega de artigo no mesmo dia.",
+          prompt2_q: "Minha opinião impopular sobre primeiro encontro...",
+          prompt2_a: "Se não houver química no beijo, não adianta forçar segundo date.",
+          prompt3_q: "Um date ideal no fim de noite tem...",
+          prompt3_a: "Conversa sussurrada e zero vontade de ir embora.",
+          songs: ["Baco Exu do Blues - Me Desculpa Jay Z", "Djonga - Leal", "Matuê - Anos Luz"],
+          private_photos: [
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80"
+          ],
+          private_bio: "Voz firme, beijo com pegada e zero limites pra quem desperta meu lado mais quente. Vem conferir. 🔥",
           is_admin: 0
         }
       ];
@@ -450,21 +549,21 @@ const PontinhoMock = {
       const defaultAds = [
         {
           id: 1,
-          title: "🍻 Choppada da Federal 2026",
-          description: "A maior integração universitária do ABC! Open bar, 3 palcos e atrações imperdíveis no Espaço Modular.",
+          title: "🍻 Festa Integração 2026",
+          description: "A maior integração universitária! Open bar, 3 palcos e atrações imperdíveis. Lote 2 esgotando!",
           image_url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80",
           button_text: "Garantir Ingresso",
-          link_url: "https://ufabc.edu.br",
+          link_url: "https://pontinho.app",
           is_active: 1,
           frequency: 3
         },
         {
           id: 2,
-          title: "🖨️ Copiadora & Gráfica Bloco A",
-          description: "Imprima suas listas de Funções de Uma Variável, slides e relatórios com 20% de desconto.",
+          title: "🖨️ Gráfica & Coworking Universitário",
+          description: "Imprima suas apostilas, projetos e relatórios com desconto especial para membros do Pontinho.",
           image_url: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80",
           button_text: "Pegar Cupom",
-          link_url: "https://ufabc.edu.br",
+          link_url: "https://pontinho.app",
           is_active: 1,
           frequency: 4
         }
@@ -475,9 +574,9 @@ const PontinhoMock = {
       ];
 
       const defaultMessages = [
-        { id: 1, match_id: 1, sender_id: 5, text: "Oi Mariana! Tudo bem? Vi que você também é do BC&T!", created_at: new Date(Date.now() - 3000000).toISOString() },
-        { id: 2, match_id: 1, sender_id: 2, text: "Oie Gabriel! Tudo ótimo! Você toca na Bateria né? Sempre vejo os ensaios!", created_at: new Date(Date.now() - 1500000).toISOString() },
-        { id: 3, match_id: 1, sender_id: 5, text: "Toco sim! Na caixa! Bora tomar um café no Bloco A qualquer dia desses?", created_at: new Date(Date.now() - 500000).toISOString() }
+        { id: 1, match_id: 1, sender_id: 5, text: "Oi Mariana! Tudo bem? Vi que você também curte indie e vôlei!", created_at: new Date(Date.now() - 3000000).toISOString() },
+        { id: 2, match_id: 1, sender_id: 2, text: "Oie Gabriel! Tudo ótimo! Você toca na Bateria né? Curti muito sua vibe!", created_at: new Date(Date.now() - 1500000).toISOString() },
+        { id: 3, match_id: 1, sender_id: 5, text: "Toco sim! Na caixa! Bora tomar um drink ou café qualquer dia desses?", created_at: new Date(Date.now() - 500000).toISOString() }
       ];
 
       const defaultSwipes = [
@@ -493,7 +592,7 @@ const PontinhoMock = {
       localStorage.setItem('pontinho_mock_messages', JSON.stringify(defaultMessages));
       localStorage.setItem('pontinho_mock_swipes', JSON.stringify(defaultSwipes));
       localStorage.setItem('pontinho_mock_private_requests', JSON.stringify(defaultPrivateRequests));
-      localStorage.setItem('pontinho_mock_initialized_v3', 'true');
+      localStorage.setItem('pontinho_mock_initialized_v4', 'true');
     }
   },
 

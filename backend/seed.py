@@ -49,32 +49,32 @@ def seed_database():
     for sc in specific_courses:
         cursor.execute("INSERT OR IGNORE INTO courses (name, category) VALUES (?, 'especifico')", (sc,))
 
-    # 2. Entidades Estudantis UFABC
+    # 2. Entidades Estudantis
     entities = [
-        ("Atlética Geral UFABC", "Associação Atlética Acadêmica da UFABC"),
-        ("Bateria UFABC", "A bateria universitária mais ritmada do ABC"),
+        ("Atlética Geral", "Associação Atlética Acadêmica"),
+        ("Bateria Universitária", "A bateria mais ritmada e envolvente"),
         ("Caiás", "Torcida organizada e espírito universitário"),
-        ("Baja UFABC", "Equipe de competição automobilística off-road"),
+        ("Baja", "Equipe de competição automobilística off-road"),
         ("Centro Acadêmico BC&T", "Representação dos alunos de Ciência e Tecnologia"),
         ("Centro Acadêmico BC&H", "Representação dos alunos de Humanidades"),
-        ("Enactus UFABC", "Projetos de empreendedorismo social"),
+        ("Enactus", "Projetos de empreendedorismo social"),
         ("GPDA", "Grupo de Pesquisa e Desenvolvimento Aeroespacial"),
-        ("UFABC Rocket Design", "Engenharia de minifoguetes experimentais"),
+        ("Rocket Design", "Engenharia de minifoguetes experimentais"),
         ("IEEE Student Branch", "Inovação tecnológica e conferências de engenharia"),
-        ("Nenhuma / Foco no CR", "100% focado em sobreviver ao quadrimestre")
+        ("Nenhuma / Foco nos Estudos", "100% focado em sobreviver ao semestre")
     ]
     for name, desc in entities:
         cursor.execute("INSERT OR IGNORE INTO entities (name, description) VALUES (?, ?)", (name, desc))
 
     # 3. Perguntinhas de Perfil
     prompts = [
-        "O melhor lugar para descansar na UFABC é...",
-        "Minha técnica infalível pra conseguir vaga no SIGAA...",
-        "Minha opinião impopular sobre o RU...",
-        "No intervalo entre as aulas você me encontra...",
-        "A matéria que quase me fez trancar o curso foi...",
-        "Um date ideal pelo ABC ou Santo André tem...",
-        "Se você me pagar um salgado na lanchonete do Bloco A..."
+        "O melhor lugar para relaxar e fugir da rotina é...",
+        "Minha técnica infalível pra quebrar o gelo...",
+        "Minha opinião impopular sobre primeiro encontro...",
+        "No intervalo entre as obrigações você me encontra...",
+        "A matéria ou desafio que quase me enlouqueceu...",
+        "Um date ideal no fim de noite tem...",
+        "Se você me chamar pra sair agora..."
     ]
     for p in prompts:
         cursor.execute("INSERT OR IGNORE INTO prompts (question) VALUES (?)", (p,))
@@ -82,29 +82,29 @@ def seed_database():
     # 4. Publicidades (Ads intercalados no feed)
     ads = [
         (
-            "🍻 Choppada da Federal 2026",
-            "A maior integração universitária do ABC! Open bar, 3 palcos e atrações imperdíveis no Espaço Modular. Lote 2 esgotando!",
+            "🍻 Festa Integração 2026",
+            "A maior integração universitária! Open bar, 3 palcos e atrações imperdíveis. Lote 2 esgotando!",
             "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80",
             "Garantir Ingresso",
-            "https://ufabc.edu.br",
+            "https://pontinho.app",
             1,
             3
         ),
         (
-            "🖨️ Copiadora & Gráfica Bloco A",
-            "Imprima suas listas de Funções de Uma Variável, slides e relatórios de laboratório com 20% de desconto para alunos matriculados.",
+            "🖨️ Gráfica & Coworking Universitário",
+            "Imprima suas apostilas, projetos e relatórios com desconto especial para membros do Pontinho.",
             "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80",
             "Pegar Cupom",
-            "https://ufabc.edu.br",
+            "https://pontinho.app",
             1,
             4
         ),
         (
-            "🦊 Kit Bixo Oficial - Atlética",
-            "Caneca de tirante de alumínio 850ml, abadá e bandana exclusiva. Seja sócio-torcedor com mensalidade promocional de R$ 15.",
+            "🦊 Kit Exclusivo & Caneca Oficial",
+            "Caneca de tirante de alumínio 850ml, abadá e bandana exclusiva. Seja sócio-torcedor com valor promocional.",
             "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&auto=format&fit=crop&q=80",
             "Pedir Kit",
-            "https://ufabc.edu.br",
+            "https://pontinho.app",
             1,
             4
         )
@@ -115,12 +115,12 @@ def seed_database():
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (title, desc, img, btn, link, active, freq))
 
-    # 5. Usuários de Exemplo (com pelo menos 2 fotos cada, obrigatório por regra de negócio)
+    # 5. 8 Perfis de Exemplo (+ 1 Administrador)
     mock_users = [
         {
             "ra": "admin",
             "password_hash": hash_password("admin123"),
-            "email": "admin@ufabc.edu.br",
+            "email": "admin@pontinho.app",
             "name": "Administrador",
             "age": 28,
             "campus": "Santo André",
@@ -134,12 +134,12 @@ def seed_database():
                 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
             ]),
-            "prompt1_q": "O melhor lugar para descansar na UFABC é...",
-            "prompt1_a": "Os puffs do piso vermelho no Bloco A, se conseguir vaga antes do meio-dia.",
-            "prompt2_q": "Minha opinião impopular sobre o RU...",
-            "prompt2_a": "O suco de caju deles é injustiçado, eu acho ótimo.",
-            "prompt3_q": "No intervalo entre as aulas você me encontra...",
-            "prompt3_a": "Programando no laboratório ou caçando tomada no mezanino.",
+            "prompt1_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt1_a": "No mezanino do Bloco A com um bom café e fone de ouvido.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Conversa olho no olho supera qualquer restaurante sofisticado.",
+            "prompt3_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt3_a": "Programando no laboratório ou testando novas ideias no Pontinho.",
             "gender": "Outro",
             "target_gender": "Todos",
             "songs": json.dumps(["Daft Punk - Harder Better Faster Stronger", "Kraftwerk - The Robots"]),
@@ -147,30 +147,31 @@ def seed_database():
             "private_bio": "",
             "is_admin": 1
         },
+        # Perfil 1: Mariana Silva
         {
             "ra": "11202021001",
             "password_hash": hash_password("123456"),
-            "email": "mariana.silva@aluno.ufabc.edu.br",
+            "email": "mariana.silva@pontinho.app",
             "name": "Mariana Silva",
             "age": 21,
             "campus": "Santo André",
             "course": "BC&T - Bacharelado em Ciência e Tecnologia",
             "specific_course": "Neurociência",
-            "entity": "Atlética Geral UFABC",
+            "entity": "Atlética Geral",
             "looking_for": "Algo sério",
-            "bio": "Estudante do BC&T no 5º quadri. Amo o RU quando tem estrogonofe, viciada em café com leite do Bloco B e nos treinos de vôlei da Atlética.",
+            "bio": "Pesquisadora de neurociência, vôlei de praia e viciada em café com leite. Amo dias de sol, papos profundos e boa música.",
             "interests": json.dumps(["Vôlei", "Neurociência", "Café", "Praia", "Música Indie"]),
             "photos": json.dumps([
                 "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
             ]),
-            "prompt1_q": "O melhor lugar para descansar na UFABC é...",
-            "prompt1_a": "No gramado do Bloco A tomando sol nos dias sem prova de FUV.",
-            "prompt2_q": "Minha técnica infalível pra conseguir vaga no SIGAA...",
-            "prompt2_a": "Abrir 4 navegadores 1 minuto antes e rezar para todos os deuses do quadrimestre.",
-            "prompt3_q": "Um date ideal pelo ABC ou Santo André tem...",
-            "prompt3_a": "Pastel na feira de Santo André e depois um café pra papear sem pressa.",
+            "prompt1_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt1_a": "No gramado tomando sol ouvindo uma playlist tranquila nos dias sem prova.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Date em café descontraído ou pastel na feira supera qualquer lugar caro.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Vinho tinto, risada fácil e zero pressa pra ir embora.",
             "gender": "Mulher",
             "target_gender": "Todos",
             "songs": json.dumps(["Chico Buarque - Construção", "Arctic Monkeys - 505", "Duda Beat - Bixinho"]),
@@ -178,13 +179,14 @@ def seed_database():
                 "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80"
             ]),
-            "private_bio": "Na facul pareço tímida, mas adoro uma festa até o amanhecer e um date com vinho e conversa sem tabu. Quer descobrir mais? 🔥",
+            "private_bio": "De dia pareço tímida e focada, mas adoro noites animadas, beijo demorado e química sem tabu. Quer descobrir mais? 🔥",
             "is_admin": 0
         },
+        # Perfil 2: Lucas Mendes
         {
             "ra": "11202021002",
             "password_hash": hash_password("123456"),
-            "email": "lucas.mendes@aluno.ufabc.edu.br",
+            "email": "lucas.mendes@pontinho.app",
             "name": "Lucas Mendes",
             "age": 22,
             "campus": "São Bernardo do Campo",
@@ -192,18 +194,18 @@ def seed_database():
             "specific_course": "Relações Internacionais",
             "entity": "Caiás",
             "looking_for": "Algo casual",
-            "bio": "RI em SBC. Me chama pra tomar uma cerveja depois das 21h ou debater geopolítica no pátio. Gosto de cinema cult e viajar de carona.",
+            "bio": "Relações Internacionais. Me chama pra tomar uma cerveja depois das 21h ou debater geopolítica. Gosto de cinema cult e viajar na estrada.",
             "interests": json.dumps(["Cinema", "Geopolítica", "Cervejada", "Livros", "Rock"]),
             "photos": json.dumps([
                 "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80"
             ]),
-            "prompt1_q": "Minha opinião impopular sobre o RU...",
-            "prompt1_a": "A fila de SBC anda bem mais rápido que a de Santo André, aceitem.",
-            "prompt2_q": "A matéria que quase me fez trancar o curso foi...",
-            "prompt2_a": "Introdução às Humanidades com fichamento semanal de 20 páginas.",
-            "prompt3_q": "No intervalo entre as aulas você me encontra...",
-            "prompt3_a": "Na banquinha discutindo o último filme da A24.",
+            "prompt1_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt1_a": "Se o papo não fluir nos primeiros 15 minutos, pedir a saideira é sinal de maturidade.",
+            "prompt2_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt2_a": "No pátio tomando uma com quem quiser trocar ideia boa.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Carona ouvindo indie rock pelas avenidas desertas da cidade.",
             "gender": "Homem",
             "target_gender": "Mulheres",
             "songs": json.dumps(["Tame Impala - The Less I Know The Better", "Tim Maia - Não Quero Dinheiro", "The Strokes - Someday"]),
@@ -211,32 +213,33 @@ def seed_database():
                 "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80"
             ]),
-            "private_bio": "Gosto de olhares provocantes, carona noturna ouvindo indie e química que dispense apresentações formais. 😉",
+            "private_bio": "Gosto de olhares provocantes, pele quente e química daquelas que não precisa de explicação formal. 😉",
             "is_admin": 0
         },
+        # Perfil 3: Bia Costa
         {
             "ra": "11202021003",
             "password_hash": hash_password("123456"),
-            "email": "beatriz.costa@aluno.ufabc.edu.br",
+            "email": "beatriz.costa@pontinho.app",
             "name": "Bia Costa",
             "age": 20,
             "campus": "Santo André",
             "course": "BC&T - Bacharelado em Ciência e Tecnologia",
             "specific_course": "Engenharia Aeroespacial",
-            "entity": "UFABC Rocket Design",
+            "entity": "Rocket Design",
             "looking_for": "Amizade",
-            "bio": "Quero mandar foguetes pro espaço 🚀. Quando não estou no laboratório de propulsão, estou ouvindo Taylor Swift ou maratonando ficção científica.",
+            "bio": "Quero mandar foguetes pro espaço 🚀. Quando não estou em projetos de propulsão, estou maratonando sci-fi ou ouvindo Taylor Swift.",
             "interests": json.dumps(["Astronomia", "Foguetes", "Taylor Swift", "Anime", "Jogos"]),
             "photos": json.dumps([
                 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80"
             ]),
-            "prompt1_q": "O melhor lugar para descansar na UFABC é...",
-            "prompt1_a": "A biblioteca do Bloco B, no silêncio absoluto do último andar.",
-            "prompt2_q": "Se você me pagar um salgado na lanchonete do Bloco A...",
-            "prompt2_a": "Eu te explico como funciona a órbita de Hohmann sem complicar.",
-            "prompt3_q": "Minha técnica infalível pra conseguir vaga no SIGAA...",
-            "prompt3_a": "Fazer amizade com os veteranos pra saber quais professores não reprovam 80%.",
+            "prompt1_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt1_a": "O mezanino silencioso da biblioteca no final da tarde.",
+            "prompt2_q": "Se você me chamar pra sair agora...",
+            "prompt2_a": "Eu aceito se envolver açaí ou hambúrguer bem recheado.",
+            "prompt3_q": "Minha técnica infalível pra quebrar o gelo...",
+            "prompt3_a": "Perguntar qual teoria da conspiração você secretamente acredita.",
             "gender": "Mulher",
             "target_gender": "Todos",
             "songs": json.dumps(["Taylor Swift - Cruel Summer", "Daft Punk - Instant Crush", "Coldplay - Yellow"]),
@@ -244,32 +247,33 @@ def seed_database():
                 "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
             ]),
-            "private_bio": "Engenheira com lado secreto: fã de noites quentes, beijo roubado e dates despretensiosos que não têm hora pra acabar. 🚀✨",
+            "private_bio": "Mente lógica com um lado nada comportado: beijo no pescoço, quarto escuro e conexões que pegam fogo. Me peça acesso. 🚀✨",
             "is_admin": 0
         },
+        # Perfil 4: Gabriel Santos
         {
             "ra": "11202021004",
             "password_hash": hash_password("123456"),
-            "email": "gabriel.santos@aluno.ufabc.edu.br",
+            "email": "gabriel.santos@pontinho.app",
             "name": "Gabriel Santos",
             "age": 23,
             "campus": "Santo André",
             "course": "BC&T - Bacharelado em Ciência e Tecnologia",
             "specific_course": "Ciência da Computação",
-            "entity": "Bateria UFABC",
+            "entity": "Bateria Universitária",
             "looking_for": "Algo sério",
-            "bio": "Dev full-stack de dia, ritmista da Bateria à noite. Se você curte maratona de séries, jogar videogame e rir de memes de programação, já temos match.",
+            "bio": "Programador de dia, ritmista da bateria à noite. Curto maratona de séries, jogar videogame e rir de memes de tecnologia.",
             "interests": json.dumps(["Programação", "Samba", "Nintendo", "Gatos", "Pizza"]),
             "photos": json.dumps([
                 "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80"
             ]),
-            "prompt1_q": "No intervalo entre as aulas você me encontra...",
-            "prompt1_a": "No ensaio da bateria tirando o estresse na caixa.",
-            "prompt2_q": "A matéria que quase me fez trancar o curso foi...",
-            "prompt2_a": "Processamento da Informação com o temido C.",
-            "prompt3_q": "Um date ideal pelo ABC ou Santo André tem...",
-            "prompt3_a": "Hambúrguer artesanal no Bairro Jardim e muitas risadas.",
+            "prompt1_q": "No intervalo entre as obrigações você me encontra...",
+            "prompt1_a": "No ensaio tirando o estresse na caixa ou jogando Smash.",
+            "prompt2_q": "A matéria ou desafio que quase me enlouqueceu...",
+            "prompt2_a": "Entender ponteiros em C na primeira semana do semestre.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Hambúrguer artesanal e aquela sintonia que não cansa.",
             "gender": "Homem",
             "target_gender": "Mulheres",
             "songs": json.dumps(["Criolo - Não Existe Amor em SP", "Kendrick Lamar - All The Stars", "Jorge Ben Jor - Taj Mahal"]),
@@ -277,45 +281,147 @@ def seed_database():
                 "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80"
             ]),
-            "private_bio": "Pegada firme e ritmo dentro e fora dos palcos. Me conquista com atitude e bom humor. Se pedir com carinho, eu libero o álbum secreto. 🔥",
+            "private_bio": "Pegada firme e ritmo intenso dentro e fora dos palcos. Me conquista com atitude e iniciativa. Se pedir com carinho, libero meu álbum secreto. 🔥",
             "is_admin": 0
         },
+        # Perfil 5: Camila Rocha
         {
             "ra": "11202021005",
             "password_hash": hash_password("123456"),
-            "email": "camila.rocha@aluno.ufabc.edu.br",
+            "email": "camila.rocha@pontinho.app",
             "name": "Camila Rocha",
             "age": 21,
             "campus": "São Bernardo do Campo",
             "course": "BC&H - Bacharelado em Ciências e Humanidades",
             "specific_course": "Ciências Econômicas",
-            "entity": "Enactus UFABC",
+            "entity": "Enactus",
             "looking_for": "Algo casual",
-            "bio": "Economia em SBC, foco em projetos sociais com a Enactus. Adoro trilhas, gatos e experimentar cafés diferentes pelo ABC.",
+            "bio": "Economia e sustentabilidade. Adoro trilhas, gatos e descobrir cafeterias aconchegantes para ler ou prosear.",
             "interests": json.dumps(["Economia", "Sustentabilidade", "Trilhas", "Fotografia", "Yoga"]),
             "photos": json.dumps([
                 "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
             ]),
-            "prompt1_q": "Minha opinião impopular sobre o RU...",
-            "prompt1_a": "A opção vegetariana muitas vezes é mais gostosa que a tradicional.",
-            "prompt2_q": "O melhor lugar para descansar na UFABC é...",
-            "prompt2_a": "Os bancos sob as árvores no pátio de São Bernardo.",
-            "prompt3_q": "Se você me pagar um salgado na lanchonete do Bloco A...",
-            "prompt3_a": "Eu te passo os melhores resumos de Economia Política.",
+            "prompt1_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt1_a": "Quem escolhe o local primeiro tem direito a provar a sobremesa do outro.",
+            "prompt2_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt2_a": "No meio da natureza respirando ar puro e sem sinal no celular.",
+            "prompt3_q": "Se você me chamar pra sair agora...",
+            "prompt3_a": "Coloco meu melhor look em 15 minutos e topo a aventura.",
             "gender": "Mulher",
             "target_gender": "Todos",
             "songs": json.dumps(["Liniker - Baby 95", "Silva - A Cor É Rosa", "Caetano Veloso - Sozinho"]),
             "private_photos": json.dumps([
                 "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
             ]),
-            "private_bio": "Equilíbrio entre calmaria de dia e intensidade à noite. Se você for direto ao ponto, ganha pontos comigo. 💋",
+            "private_bio": "Equilíbrio entre calmaria de dia e intensidade quente à noite. Se você for ousado e direto ao ponto, ganha pontos comigo. 💋",
+            "is_admin": 0
+        },
+        # Perfil 6: Rodrigo Alves
+        {
+            "ra": "11202021006",
+            "password_hash": hash_password("123456"),
+            "email": "rodrigo.alves@pontinho.app",
+            "name": "Rodrigo Alves",
+            "age": 24,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Engenharia de Gestão",
+            "entity": "Baja",
+            "looking_for": "Algo sério",
+            "bio": "Treino pesado, fã de eletrônica e viagens de última hora. Gosto de quem tem energia contagiante e não tem medo de viver momentos intensos.",
+            "interests": json.dumps(["Musculação", "Baja", "Eletrônica", "Viagens", "Churrasco"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt1_a": "Primeiro date tem que ter energia lá em cima, nada de sono ou lamentação.",
+            "prompt2_q": "Se você me chamar pra sair agora...",
+            "prompt2_a": "Passo aí em meia hora e a gente decide o destino na estrada.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Música alta, beijo que rouba o fôlego e vontade de não dormir.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
+            "songs": json.dumps(["The Weeknd - Blinding Lights", "Vintage Culture - In The Dark", "Alok - Hear Me Now"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Gosto de conduzir, abraço forte e uma boa dose de adrenalina a dois. Quer ver o que não mostro pra qualquer um? Clica em pedir acesso. 🔥",
+            "is_admin": 0
+        },
+        # Perfil 7: Isabela Martins
+        {
+            "ra": "11202021007",
+            "password_hash": hash_password("123456"),
+            "email": "isabela.martins@pontinho.app",
+            "name": "Isabela Martins",
+            "age": 22,
+            "campus": "Santo André",
+            "course": "BC&T - Bacharelado em Ciência e Tecnologia",
+            "specific_course": "Biotecnologia",
+            "entity": "Centro Acadêmico BC&T",
+            "looking_for": "Algo casual",
+            "bio": "Pesquisadora de bancada, fã de festivais e apaixonada por vinho tinto. Se você tiver papo interessante e me fizer rir, metade do caminho tá feito.",
+            "interests": json.dumps(["Biotecnologia", "Vinho", "Festivais", "Moda", "Fotografia"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "Minha técnica infalível pra quebrar o gelo...",
+            "prompt1_a": "Olhar nos olhos, dar um sorriso de lado e dizer o que ninguém tem coragem de falar.",
+            "prompt2_q": "O melhor lugar para relaxar e fugir da rotina é...",
+            "prompt2_a": "Em um rooftop tomando um drink com boa vista.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Provocações sutis que viram algo muito mais quente.",
+            "gender": "Mulher",
+            "target_gender": "Todos",
+            "songs": json.dumps(["Dua Lipa - Levitating", "Doja Cat - Kiss Me More", "Marina Sena - Por Supuesto"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Intensa, curiosa e sem tempo pra joguinhos mornos. Gosto de cumplicidade quente entre quatro paredes. Peça acesso se tiver atitude. 😉✨",
+            "is_admin": 0
+        },
+        # Perfil 8: Felipe Ramos
+        {
+            "ra": "11202021008",
+            "password_hash": hash_password("123456"),
+            "email": "felipe.ramos@pontinho.app",
+            "name": "Felipe Ramos",
+            "age": 23,
+            "campus": "São Bernardo do Campo",
+            "course": "BC&H - Bacharelado em Ciências e Humanidades",
+            "specific_course": "Ciências Econômicas",
+            "entity": "Caiás",
+            "looking_for": "Algo casual",
+            "bio": "Debates acalorados, hip-hop, basquete de rua e rolês espontâneos. Se o plano for bom e a companhia melhor ainda, tô dentro.",
+            "interests": json.dumps(["Hip-Hop", "Basquete", "Economia", "Streetwear", "Cinema"]),
+            "photos": json.dumps([
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "prompt1_q": "A matéria ou desafio que quase me enlouqueceu...",
+            "prompt1_a": "Provas longas de cálculo emendadas com entrega de artigo no mesmo dia.",
+            "prompt2_q": "Minha opinião impopular sobre primeiro encontro...",
+            "prompt2_a": "Se não houver química no beijo, não adianta forçar segundo date.",
+            "prompt3_q": "Um date ideal no fim de noite tem...",
+            "prompt3_a": "Conversa sussurrada e zero vontade de ir embora.",
+            "gender": "Homem",
+            "target_gender": "Mulheres",
+            "songs": json.dumps(["Baco Exu do Blues - Me Desculpa Jay Z", "Djonga - Leal", "Matuê - Anos Luz"]),
+            "private_photos": json.dumps([
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80"
+            ]),
+            "private_bio": "Voz firme, beijo com pegada e zero limites pra quem desperta meu lado mais quente. Vem conferir. 🔥",
             "is_admin": 0
         }
     ]
 
     for u in mock_users:
-        # Insere ou atualiza os dados com RA e senha
         cursor.execute("""
             INSERT INTO users (
                 ra, password_hash, email, name, age, campus, course, specific_course, entity,
@@ -326,11 +432,28 @@ def seed_database():
             ON CONFLICT(email) DO UPDATE SET
                 ra = excluded.ra,
                 password_hash = excluded.password_hash,
+                name = excluded.name,
+                age = excluded.age,
+                campus = excluded.campus,
+                course = excluded.course,
+                specific_course = excluded.specific_course,
+                entity = excluded.entity,
+                looking_for = excluded.looking_for,
+                bio = excluded.bio,
+                interests = excluded.interests,
+                photos = excluded.photos,
+                prompt1_q = excluded.prompt1_q,
+                prompt1_a = excluded.prompt1_a,
+                prompt2_q = excluded.prompt2_q,
+                prompt2_a = excluded.prompt2_a,
+                prompt3_q = excluded.prompt3_q,
+                prompt3_a = excluded.prompt3_a,
                 gender = excluded.gender,
                 target_gender = excluded.target_gender,
                 songs = excluded.songs,
                 private_photos = excluded.private_photos,
-                private_bio = excluded.private_bio
+                private_bio = excluded.private_bio,
+                is_admin = excluded.is_admin
         """, (
             u["ra"], u["password_hash"], u["email"], u["name"], u["age"], u["campus"], u["course"], u["specific_course"], u["entity"],
             u["looking_for"], u["bio"], u["interests"], u["photos"],
@@ -338,11 +461,10 @@ def seed_database():
             u["gender"], u["target_gender"], u["songs"], u.get("private_photos", "[]"), u.get("private_bio", ""), u["is_admin"]
         ))
 
-    # Criar um match inicial de exemplo entre Mariana (id=2) e Gabriel (id=5) para podermos testar o chat imediatamente
-    # Buscar ids
-    cursor.execute("SELECT id FROM users WHERE email = 'mariana.silva@aluno.ufabc.edu.br'")
+    # Match de exemplo entre Mariana (id=2) e Gabriel (id=5) para podermos testar o chat e pedidos privados imediatamente
+    cursor.execute("SELECT id FROM users WHERE email = 'mariana.silva@pontinho.app'")
     row_mariana = cursor.fetchone()
-    cursor.execute("SELECT id FROM users WHERE email = 'gabriel.santos@aluno.ufabc.edu.br'")
+    cursor.execute("SELECT id FROM users WHERE email = 'gabriel.santos@pontinho.app'")
     row_gabriel = cursor.fetchone()
 
     if row_mariana and row_gabriel:
@@ -362,20 +484,20 @@ def seed_database():
             # Mensagens de exemplo no chat
             cursor.execute("""
                 INSERT OR IGNORE INTO messages (match_id, sender_id, text, created_at)
-                VALUES (?, ?, 'Oi Mariana! Tudo bem? Vi que você também é do BC&T!', datetime('now', '-2 hours'))
+                VALUES (?, ?, 'Oi Mariana! Tudo bem? Vi que você também curte indie e vôlei!', datetime('now', '-2 hours'))
             """, (match_id, g_id))
             cursor.execute("""
                 INSERT OR IGNORE INTO messages (match_id, sender_id, text, created_at)
-                VALUES (?, ?, 'Oie Gabriel! Tudo ótimo por aqui! Você toca na Bateria né? Sempre vejo os ensaios!', datetime('now', '-1 hour'))
+                VALUES (?, ?, 'Oie Gabriel! Tudo ótimo! Você toca na Bateria né? Curti muito sua vibe!', datetime('now', '-1 hour'))
             """, (match_id, m_id))
             cursor.execute("""
                 INSERT OR IGNORE INTO messages (match_id, sender_id, text, created_at)
-                VALUES (?, ?, 'Toco sim! Na caixa! Bora tomar um café no Bloco A qualquer dia desses?', datetime('now', '-30 minutes'))
+                VALUES (?, ?, 'Toco sim! Na caixa! Bora tomar um drink ou café qualquer dia desses?', datetime('now', '-30 minutes'))
             """, (match_id, g_id))
 
     conn.commit()
     conn.close()
-    print("Dados iniciais semeados com sucesso!")
+    print("Base recriada com sucesso com 8 perfis de exemplo + Administrador!")
 
 if __name__ == "__main__":
     seed_database()

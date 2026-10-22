@@ -1,5 +1,5 @@
 """
-Rotas de autenticação (Login, Cadastro e Sessão) do Pontinho UFABC
+Rotas de autenticação (Login, Cadastro e Sessão) do Pontinho
 """
 import json
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -12,8 +12,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 @router.post("/register")
 def register_user(data: RegisterRequest, response: Response):
     """
-    Cadastro de estudante com E-mail Acadêmico UFABC, Nome e Senha.
-    Sanitiza e restringe para e-mails institucionais (@aluno.ufabc.edu.br).
+    Cadastro de estudante com E-mail, Nome e Senha.
     """
     sanitized_email = sanitize_and_validate_ufabc_email(data.email)
     cleaned_name = data.name.strip()
@@ -30,14 +29,14 @@ def register_user(data: RegisterRequest, response: Response):
     cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (sanitized_email,))
     if cursor.fetchone():
         conn.close()
-        raise HTTPException(status_code=400, detail="Este e-mail acadêmico já está cadastrado no Pontinho.")
+        raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado no Pontinho.")
 
     # Se informou RA, verifica se não está duplicado
     if cleaned_ra:
         cursor.execute("SELECT id FROM users WHERE ra = ?", (cleaned_ra,))
         if cursor.fetchone():
             conn.close()
-            raise HTTPException(status_code=400, detail="Este RA já está cadastrado no Pontinho.")
+            raise HTTPException(status_code=400, detail="Este identificador já está cadastrado no Pontinho.")
     else:
         # Se não informou RA, usa o prefixo do e-mail
         cleaned_ra = sanitized_email.split("@")[0]
@@ -56,11 +55,11 @@ def register_user(data: RegisterRequest, response: Response):
             entity, looking_for, bio, interests, photos,
             prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
             gender, target_gender
-        ) VALUES (?, ?, ?, ?, 20, 'Santo André', 'BC&T - Bacharelado em Ciência e Tecnologia', 'Ciência da Computação',
-                  'Nenhuma / Foco no CR', 'Amizade', 'Estudante da UFABC!', '["UFABC"]', ?,
-                  'O melhor lugar para descansar na UFABC é...', 'Biblioteca',
-                  'Minha opinião impopular sobre o RU...', 'Gosto da comida',
-                  'No intervalo entre as aulas você me encontra...', 'Bloco A',
+        ) VALUES (?, ?, ?, ?, 20, 'Santo André', 'Ciência e Tecnologia', 'Ciência da Computação',
+                  'Geral', 'Amizade', 'Olá, estou no Pontinho!', '["Música", "Tecnologia"]', ?,
+                  'O melhor lugar para relaxar é...', 'Ouvindo música boa',
+                  'Minha opinião impopular...', 'Conversa olho no olho supera qualquer mensagem',
+                  'No intervalo você me encontra...', 'Tomando um café',
                   'Não informado', 'Todos')
     """, (cleaned_ra, pw_hash, sanitized_email, cleaned_name, json.dumps(default_photos)))
 

@@ -40,9 +40,9 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        ra TEXT UNIQUE, -- Registro Acadêmico UFABC (ex: 11202021001)
-        password_hash TEXT, -- Hash da senha do estudante
-        email TEXT,
+        ra TEXT UNIQUE,
+        password_hash TEXT,
+        email TEXT UNIQUE,
         name TEXT NOT NULL,
         age INTEGER NOT NULL DEFAULT 20,
         campus TEXT NOT NULL DEFAULT 'Santo André',
