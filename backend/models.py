@@ -73,3 +73,15 @@ class AdCreateOrUpdate(BaseModel):
     link_url: str
     is_active: Optional[int] = 1
     frequency: Optional[int] = 4
+
+class EventCreateOrUpdate(BaseModel):
+    title: str = Field(..., min_length=2, description="Nome da festa ou evento")
+    description: Optional[str] = Field(default="", description="Descrição completa da festa")
+    event_date: str = Field(..., description="Data e horário do evento (ex: 2026-11-14 22:00)")
+    location: str = Field(..., min_length=2, description="Local ou Campus do evento")
+    image_url: Optional[str] = Field(default="", description="Link ou caminho da imagem ou GIF animado do evento")
+    ticket_url: Optional[str] = Field(default="", description="Link externo para compra de ingresso ou lote")
+
+class EventRsvpRequest(BaseModel):
+    status: Optional[str] = Field(default="going", description="Status de presença: 'going' ou 'not_going'")
+

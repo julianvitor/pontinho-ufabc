@@ -868,9 +868,77 @@ def seed_database():
                 VALUES (?, ?, 'Oie Thiago! Obrigada! E você em Filosofia, adoro conversar sobre esses temas.', datetime('now', '-2 hours'))
             """, (m2_id, l_id))
 
+    # 8. Festas e Eventos Universitários da UFABC
+    cursor.execute("SELECT id FROM users WHERE is_admin = 1 LIMIT 1")
+    admin_row = cursor.fetchone()
+    admin_id = admin_row["id"] if admin_row else 1
+
+    sample_events = [
+        {
+            "title": "Cervejada da Geral - Open Bar UFABC",
+            "description": "A maior cervejada universitária do Grande ABC com 6h de open bar com cerveja trincando, gummy e beats. Pista com DJ residente, funk universitário, eletrônica e a Bateria Universitária ao vivo!",
+            "event_date": "2026-11-14 22:00",
+            "location": "Espaço Modular - Santo André (Av. dos Estados)",
+            "image_url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1000&auto=format&fit=crop&q=80",
+            "ticket_url": "https://blacktag.com.br",
+            "created_by": admin_id
+        },
+        {
+            "title": "Bixolândia & Integração BC&T / BC&H",
+            "description": "Tradicional integração entre calouros e veteranos da UFABC. Apresentação da Bateria Universitária, roda de samba, chopp em dobro e ativações especiais do Pontinho!",
+            "event_date": "2026-11-21 18:00",
+            "location": "Galpão Universitário - São Bernardo do Campo",
+            "image_url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1000&auto=format&fit=crop&q=80",
+            "ticket_url": "https://byinti.com",
+            "created_by": admin_id
+        },
+        {
+            "title": "Noite do Branco - Baile de Gala da Atlética",
+            "description": "O encerramento do quadrimestre com estilo! Traje branco obrigatório. Pista principal com música ao vivo, lounge eletrônico e open bar premium com drinks especiais.",
+            "event_date": "2026-12-05 23:00",
+            "location": "Mansão Santo André - Grand Eventos",
+            "image_url": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1000&auto=format&fit=crop&q=80",
+            "ticket_url": "https://blacktag.com.br",
+            "created_by": admin_id
+        }
+    ]
+
+    for ev in sample_events:
+        cursor.execute("SELECT id FROM events WHERE title = ?", (ev["title"],))
+        existing_ev = cursor.fetchone()
+        if not existing_ev:
+            cursor.execute("""
+                INSERT INTO events (title, description, event_date, location, image_url, ticket_url, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (ev["title"], ev["description"], ev["event_date"], ev["location"], ev["image_url"], ev["ticket_url"], ev["created_by"]))
+
+    # Presenças confirmadas de exemplo com usuários reais da base
+    cursor.execute("SELECT id FROM users WHERE is_admin = 0 LIMIT 10")
+    active_user_ids = [r["id"] for r in cursor.fetchall()]
+
+    cursor.execute("SELECT id FROM events WHERE title LIKE 'Cervejada%'")
+    ev1 = cursor.fetchone()
+    if ev1 and active_user_ids:
+        ev1_id = ev1["id"]
+        for uid in active_user_ids[:6]:
+            cursor.execute("""
+                INSERT OR IGNORE INTO event_attendees (event_id, user_id, status)
+                VALUES (?, ?, 'going')
+            """, (ev1_id, uid))
+
+    cursor.execute("SELECT id FROM events WHERE title LIKE 'Bixolândia%'")
+    ev2 = cursor.fetchone()
+    if ev2 and active_user_ids:
+        ev2_id = ev2["id"]
+        for uid in active_user_ids[2:8]:
+            cursor.execute("""
+                INSERT OR IGNORE INTO event_attendees (event_id, user_id, status)
+                VALUES (?, ?, 'going')
+            """, (ev2_id, uid))
+
     conn.commit()
     conn.close()
-    print("Base recriada com sucesso com 18 perfis de exemplo + Administrador!")
+    print("Base recriada com sucesso com perfis, festas/eventos e presenças confirmadas!")
 
 if __name__ == "__main__":
     seed_database()

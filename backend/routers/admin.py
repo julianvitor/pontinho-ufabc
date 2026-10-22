@@ -61,13 +61,21 @@ def get_admin_overview(request: Request):
     cursor.execute("SELECT COUNT(*) AS count FROM reports WHERE status = 'pending'")
     pending_reports = cursor.fetchone()["count"]
 
+    cursor.execute("SELECT COUNT(*) AS count FROM events")
+    total_events = cursor.fetchone()["count"]
+
+    cursor.execute("SELECT COUNT(*) AS count FROM event_attendees WHERE status = 'going'")
+    total_event_rsvps = cursor.fetchone()["count"]
+
     conn.close()
     return {
         "total_users": total_users,
         "total_matches": total_matches,
         "total_messages": total_messages,
         "total_ads": total_ads,
-        "pending_reports": pending_reports
+        "pending_reports": pending_reports,
+        "total_events": total_events,
+        "total_event_rsvps": total_event_rsvps
     }
 
 @router.get("/api/admin/reports")

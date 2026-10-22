@@ -44,6 +44,9 @@
         <a href="./index.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
           <span>🔥</span> <span class="hidden sm:inline">Swipes</span>
         </a>
+        <a href="./events.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
+          <span>🎉</span> <span class="hidden sm:inline">Festas</span>
+        </a>
         <a href="./matches.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-900/60 font-medium text-sm transition">
           <span>💬</span> <span class="hidden sm:inline">Conversas</span>
         </a>
@@ -94,7 +97,7 @@
   <main id="admin-main" class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-6 pb-24 md:pb-6 space-y-6">
     
     <!-- RESUMO / STATS CARDS -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
       <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-3 sm:gap-4">
         <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xl sm:text-2xl flex items-center justify-center font-bold">
           👥
@@ -105,9 +108,19 @@
         </div>
       </div>
 
+      <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-purple-500/30 shadow-xl flex items-center gap-3 sm:gap-4">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-purple-950/60 border border-purple-500/40 text-purple-300 text-xl sm:text-2xl flex items-center justify-center font-bold">
+          🎉
+        </div>
+        <div>
+          <span class="text-[11px] text-purple-400 font-bold uppercase tracking-wider block">Festas</span>
+          <span id="stat-events" class="text-xl sm:text-2xl font-black text-white">0</span>
+        </div>
+      </div>
+
       <div class="bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-800/90 shadow-xl flex items-center gap-3 sm:gap-4">
         <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-rose-950/60 border border-rose-500/30 text-rose-400 text-xl sm:text-2xl flex items-center justify-center font-bold">
-          🎉
+          🔥
         </div>
         <div>
           <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Matches</span>
@@ -151,6 +164,9 @@
       <button onclick="switchTab('reports')" id="tab-btn-reports" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm transition flex items-center gap-1.5">
         <span>⚠️</span> <span>Denúncias & Moderação</span>
         <span id="tab-badge-reports" class="hidden bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">0</span>
+      </button>
+      <button onclick="switchTab('events')" id="tab-btn-events" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition flex items-center gap-1.5">
+        <span>🎉</span> <span>Festas & Eventos</span>
       </button>
       <button onclick="switchTab('users')" id="tab-btn-users" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 transition">
         👥 Usuários & Perfis
@@ -362,7 +378,120 @@
       </div>
     </section>
 
+    <!-- ABA 6: GERENCIAR FESTAS & EVENTOS -->
+    <section id="tab-content-events" class="tab-content hidden space-y-6">
+      
+      <!-- Formulário de Criação / Edição de Festa -->
+      <div class="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl p-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div>
+            <h2 id="event-form-title" class="text-xl font-black text-white flex items-center gap-2">
+              <span>🎉</span> Cadastrar Nova Festa ou Evento
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">As festas aparecem na nova aba da comunidade onde os alunos marcam presença e veem quem vai.</p>
+          </div>
+          <button id="cancel-event-edit-btn" onclick="resetEventForm()" class="hidden px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700 transition">
+            ✕ Cancelar Edição
+          </button>
+        </div>
+
+        <form id="event-form" onsubmit="saveEvent(event)" class="space-y-4 pt-4">
+          <input type="hidden" id="event-edit-id" value="">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Nome da Festa / Evento *</label>
+              <input id="event-title" type="text" required placeholder="Ex: Cervejada da Geral 2026" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Data e Hora *</label>
+              <input id="event-date" type="text" required placeholder="Ex: 2026-11-14 22:00" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+              <span class="text-[10px] text-slate-500 mt-0.5 block">Formato: AAAA-MM-DD HH:MM (ex: 2026-11-14 22:00)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Local / Campus *</label>
+              <input id="event-location" type="text" required placeholder="Ex: Espaço Modular - Santo André" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Link para Ingressos / Lotes (Opcional)</label>
+              <input id="event-ticket-url" type="url" placeholder="https://blacktag.com.br/..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+            </div>
+          </div>
+
+          <!-- Imagem / GIF do Evento -->
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-slate-300">Capa do Evento (Imagem ou GIF Animado)</label>
+            <div class="flex flex-col sm:flex-row gap-3 items-center">
+              <input id="event-image-url" type="text" placeholder="Cole a URL ou envie um arquivo abaixo..." class="flex-1 w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+              <label class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold cursor-pointer transition active:scale-95">
+                <span>📁</span>
+                <span id="event-upload-label">Upload Imagem ou GIF</span>
+                <input id="event-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" onchange="handleEventImageUpload(event)">
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Descrição do Evento *</label>
+            <textarea id="event-desc" rows="3" required placeholder="Atrações, estilo musical, open bar, apresentação de bateria, valores de lote..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"></textarea>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button id="event-submit-btn" type="submit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-950/60 transition hover:scale-105 active:scale-95">
+              + Cadastrar Festa
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de Festas Cadastradas -->
+      <div class="bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-black text-white flex items-center gap-2">
+            <span>📅</span> Festas Cadastradas
+          </h3>
+          <button onclick="loadEventsAdmin()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 transition flex items-center gap-1">
+            <span>🔄</span> Atualizar
+          </button>
+        </div>
+
+        <div id="admin-events-list" class="space-y-4">
+          <div class="p-8 text-center text-slate-400 text-xs">Carregando festas cadastradas...</div>
+        </div>
+      </div>
+
+    </section>
+
   </main>
+
+  <!-- MODAL ADMIN: VER PARTICIPANTES CONFIRMADOS -->
+  <div id="admin-attendees-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400 block">Lista de Presença</span>
+          <h3 id="admin-attendees-event-title" class="text-lg font-black text-white truncate max-w-md">Nome do Evento</h3>
+        </div>
+        <button onclick="closeAdminAttendeesModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold">
+          ✕
+        </button>
+      </div>
+
+      <div class="px-5 py-3 bg-slate-950/50 border-b border-slate-800 text-xs font-bold text-slate-300 flex items-center justify-between">
+        <span id="admin-attendees-count-header">0 confirmados</span>
+        <span class="text-slate-500 text-[11px]">Dados auditáveis pela administração</span>
+      </div>
+
+      <div id="admin-attendees-list-body" class="p-4 overflow-y-auto space-y-2 flex-1">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </div>
+  </div>
 
   <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE -->
   <nav class="md:hidden fixed bottom-0 inset-x-0 bg-slate-950/90 backdrop-blur-md border-t border-slate-800/80 z-40 mobile-bottom-nav flex items-center justify-around py-2.5 shadow-lg">
@@ -400,6 +529,7 @@
       await Pontinho.initNavbarUserSwitcher();
       loadStats();
       loadReportsData();
+      loadEventsAdmin();
       loadUsersTable();
       loadAds();
       loadCourses();
@@ -433,6 +563,8 @@
         document.getElementById('stat-matches').innerText = stats.total_matches;
         document.getElementById('stat-messages').innerText = stats.total_messages;
         document.getElementById('stat-ads').innerText = stats.total_ads;
+        const statEvents = document.getElementById('stat-events');
+        if (statEvents) statEvents.innerText = stats.total_events || 0;
         const statReports = document.getElementById('stat-reports');
         if (statReports) statReports.innerText = stats.pending_reports || 0;
       } catch (err) {
@@ -868,6 +1000,229 @@
 
     function escapeQuote(str) {
       return (str || '').replace(/'/g, "\\'");
+    }
+
+    // --- GERENCIAMENTO DE FESTAS & EVENTOS ---
+    let adminEventsCache = [];
+
+    async function loadEventsAdmin() {
+      const container = document.getElementById('admin-events-list');
+      try {
+        const events = await Pontinho.apiFetch('/api/events');
+        adminEventsCache = events || [];
+
+        if (!adminEventsCache.length) {
+          container.innerHTML = `
+            <div class="p-8 text-center text-slate-400 text-xs bg-slate-950/60 rounded-2xl border border-slate-800">
+              Nenhuma festa cadastrada no momento. Crie uma acima!
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = adminEventsCache.map(ev => `
+          <div class="p-4 bg-slate-950/70 border border-slate-800 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <img src="${ev.image_url || 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=300'}" 
+                   alt="${ev.title}" 
+                   class="w-20 h-20 rounded-2xl object-cover border border-slate-800 shadow-md flex-shrink-0">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="font-black text-white text-base">${ev.title}</h4>
+                  <span class="bg-purple-950/70 text-purple-300 border border-purple-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    🎟️ ${ev.attendees_count} confirmado(s)
+                  </span>
+                </div>
+                <div class="text-xs text-emerald-400 font-semibold mt-1">
+                  📅 ${ev.event_date} • 📍 ${ev.location}
+                </div>
+                <p class="text-xs text-slate-400 mt-1 line-clamp-2 max-w-xl">
+                  ${ev.description || 'Sem descrição.'}
+                </p>
+                ${ev.ticket_url ? `
+                  <a href="${ev.ticket_url}" target="_blank" class="text-[11px] text-amber-400 hover:underline mt-1 inline-block">
+                    🔗 Ingressos: ${ev.ticket_url}
+                  </a>
+                ` : ''}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end md:self-center flex-wrap">
+              <button onclick="openAdminAttendeesModal(${ev.id}, '${escapeQuote(ev.title)}')" 
+                      class="px-3.5 py-2 bg-purple-950/60 hover:bg-purple-900/70 text-purple-200 border border-purple-500/40 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95">
+                <span>👥</span> <span>Ver Confirmados</span>
+              </button>
+              <button onclick="editEvent(${ev.id})" 
+                      class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95">
+                <span>✏️</span> <span>Editar</span>
+              </button>
+              <button onclick="deleteEvent(${ev.id}, '${escapeQuote(ev.title)}')" 
+                      class="px-3 py-2 bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95">
+                <span>🗑️</span>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        container.innerHTML = `<div class="p-4 text-xs text-rose-500">${err.message}</div>`;
+      }
+    }
+
+    async function handleEventImageUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const label = document.getElementById('event-upload-label');
+      const originalText = label ? label.innerText : '';
+
+      try {
+        if (label) label.innerText = 'Enviando...';
+        Pontinho.showToast('Sanitizando e enviando imagem ou GIF...', 'info');
+
+        const result = await Pontinho.uploadPhoto(file);
+        document.getElementById('event-image-url').value = result.url;
+        Pontinho.showToast('Capa do evento carregada com sucesso!', 'success');
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      } finally {
+        if (label) label.innerText = originalText;
+        event.target.value = '';
+      }
+    }
+
+    async function saveEvent(event) {
+      event.preventDefault();
+      const editId = document.getElementById('event-edit-id').value;
+      const title = document.getElementById('event-title').value.trim();
+      const event_date = document.getElementById('event-date').value.trim();
+      const location = document.getElementById('event-location').value.trim();
+      const image_url = document.getElementById('event-image-url').value.trim();
+      const ticket_url = document.getElementById('event-ticket-url').value.trim();
+      const description = document.getElementById('event-desc').value.trim();
+
+      const payload = {
+        title,
+        event_date,
+        location,
+        image_url,
+        ticket_url,
+        description
+      };
+
+      try {
+        if (editId) {
+          await Pontinho.apiFetch(`/api/events/${editId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          Pontinho.showToast('Festa atualizada com sucesso!', 'success');
+        } else {
+          await Pontinho.apiFetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          Pontinho.showToast('Festa cadastrada com sucesso!', 'success');
+        }
+
+        resetEventForm();
+        loadEventsAdmin();
+        loadStats();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    function editEvent(id) {
+      const ev = adminEventsCache.find(e => e.id === id);
+      if (!ev) return;
+
+      document.getElementById('event-edit-id').value = ev.id;
+      document.getElementById('event-title').value = ev.title;
+      document.getElementById('event-date').value = ev.event_date;
+      document.getElementById('event-location').value = ev.location;
+      document.getElementById('event-image-url').value = ev.image_url || '';
+      document.getElementById('event-ticket-url').value = ev.ticket_url || '';
+      document.getElementById('event-desc').value = ev.description || '';
+
+      document.getElementById('event-form-title').innerHTML = `<span>✏️</span> Editando: ${ev.title}`;
+      document.getElementById('event-submit-btn').innerText = 'Salvar Alterações';
+      document.getElementById('cancel-event-edit-btn').classList.remove('hidden');
+
+      window.scrollTo({ top: document.getElementById('event-form').offsetTop - 100, behavior: 'smooth' });
+    }
+
+    function resetEventForm() {
+      document.getElementById('event-edit-id').value = '';
+      document.getElementById('event-form').reset();
+      document.getElementById('event-form-title').innerHTML = `<span>🎉</span> Cadastrar Nova Festa ou Evento`;
+      document.getElementById('event-submit-btn').innerText = '+ Cadastrar Festa';
+      document.getElementById('cancel-event-edit-btn').classList.add('hidden');
+    }
+
+    async function deleteEvent(id, title) {
+      if (!confirm(`Tem certeza que deseja excluir a festa "${title}"? Todos os registros de presença serão removidos.`)) return;
+      try {
+        await Pontinho.apiFetch(`/api/events/${id}`, { method: 'DELETE' });
+        Pontinho.showToast('Festa removida com sucesso!');
+        loadEventsAdmin();
+        loadStats();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
+      }
+    }
+
+    async function openAdminAttendeesModal(eventId, eventTitle) {
+      const modal = document.getElementById('admin-attendees-modal');
+      const titleElem = document.getElementById('admin-attendees-event-title');
+      const countHeader = document.getElementById('admin-attendees-count-header');
+      const listBody = document.getElementById('admin-attendees-list-body');
+
+      titleElem.innerText = eventTitle;
+      countHeader.innerText = 'Carregando confirmados...';
+      listBody.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">Carregando lista de presença...</div>';
+      modal.classList.remove('hidden');
+
+      try {
+        const details = await Pontinho.apiFetch(`/api/events/${eventId}`);
+        const attendees = details.attendees || [];
+        countHeader.innerText = `${attendees.length} estudante(s) confirmado(s)`;
+
+        if (!attendees.length) {
+          listBody.innerHTML = `
+            <div class="p-8 text-center text-slate-400 text-xs">
+              Nenhum estudante confirmou presença nesta festa ainda.
+            </div>
+          `;
+          return;
+        }
+
+        listBody.innerHTML = attendees.map((u, i) => `
+          <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-mono text-slate-500 w-5 text-right">${i + 1}.</span>
+              <img src="${u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}" 
+                   class="w-10 h-10 rounded-xl object-cover ring-1 ring-purple-500/40">
+              <div>
+                <h5 class="text-sm font-bold text-white">${u.name} <span class="text-xs font-normal text-slate-400">(${u.age} anos)</span></h5>
+                <p class="text-xs text-purple-300">🎓 ${u.course} • 📍 ${u.campus}</p>
+              </div>
+            </div>
+            <span class="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+              Confirmado ✅
+            </span>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        listBody.innerHTML = `<div class="p-4 text-xs text-rose-500">${err.message}</div>`;
+      }
+    }
+
+    function closeAdminAttendeesModal() {
+      document.getElementById('admin-attendees-modal').classList.add('hidden');
     }
   </script>
 </body>

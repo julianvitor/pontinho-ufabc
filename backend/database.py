@@ -222,6 +222,36 @@ def init_db():
     );
     """)
 
+    # Tabela de Eventos e Festas Universitárias
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        event_date TEXT NOT NULL,
+        location TEXT NOT NULL,
+        image_url TEXT DEFAULT '',
+        ticket_url TEXT DEFAULT '',
+        created_by INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(created_by) REFERENCES users(id) ON DELETE SET NULL
+    );
+    """)
+
+    # Tabela de Presenças Confirmadas em Eventos (RSVP)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS event_attendees (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'going',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(event_id, user_id),
+        FOREIGN KEY(event_id) REFERENCES events(id) ON DELETE CASCADE,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    """)
+
     conn.commit()
     conn.close()
 

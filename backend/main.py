@@ -21,7 +21,8 @@ from backend.routers import (
     matches_router,
     users_router,
     admin_router,
-    upload_router
+    upload_router,
+    events_router
 )
 
 app = FastAPI(
@@ -56,6 +57,7 @@ app.include_router(matches_router)
 app.include_router(users_router)
 app.include_router(admin_router)
 app.include_router(upload_router)
+app.include_router(events_router)
 
 @app.get("/")
 def api_root():
