@@ -95,6 +95,14 @@ class ImageContentModerator:
         if age_session and face_boxes:
             try:
                 img_cv = cv2.imread(str(path_obj))
+                if img_cv is None:
+                    try:
+                        from PIL import Image
+                        pil_img = Image.open(str(path_obj)).convert("RGB")
+                        img_cv = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+                    except Exception:
+                        pass
+
                 if img_cv is not None:
                     img_h, img_w = img_cv.shape[:2]
                     for box in face_boxes:

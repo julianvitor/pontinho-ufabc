@@ -17,7 +17,7 @@ import uuid
 from pathlib import Path
 from collections import defaultdict
 from fastapi import APIRouter, UploadFile, File, HTTPException, Request
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageSequence
 from backend.auth import get_current_user_id
 from backend.moderation import check_image_safety
 
@@ -101,34 +101,67 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
                 detail="Formato de imagem não suportado. Por favor envie JPG, PNG, WEBP ou GIF."
             )
 
-        # Corrige orientação física de fotos tiradas em celulares verticais
-        img = ImageOps.exif_transpose(img)
+        is_animated = (raw_format == "GIF" or getattr(img, "is_animated", False)) and getattr(img, "n_frames", 1) > 1
 
-        # Redimensionamento proporcional (Downscale seguro com filtro Lanczos de alta nitidez)
-        if img.width > MAX_DIMENSION or img.height > MAX_DIMENSION:
-            img.thumbnail((MAX_DIMENSION, MAX_DIMENSION), Image.Resampling.LANCZOS)
+        if is_animated:
+            # Limite máximo de segurança de frames para evitar DoS por exaustão de memória
+            max_frames = 120
+            frames = []
+            durations = []
+            loop = img.info.get("loop", 0)
 
-        # Normalização de canais de cor
-        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
-            # Mantém canal alfa em WebP se a imagem possuir transparência
-            processed_img = img.convert("RGBA")
-        elif img.mode != "RGB":
-            processed_img = img.convert("RGB")
+            for i, frame in enumerate(ImageSequence.Iterator(img)):
+                if i >= max_frames:
+                    break
+                f = frame.copy()
+                if f.width > MAX_DIMENSION or f.height > MAX_DIMENSION:
+                    f.thumbnail((MAX_DIMENSION, MAX_DIMENSION), Image.Resampling.LANCZOS)
+                durations.append(frame.info.get("duration", 100))
+                frames.append(f)
+
+            if not frames:
+                raise HTTPException(status_code=400, detail="Arquivo GIF inválido.")
+
+            safe_filename = f"{uuid.uuid4().hex}.gif"
+            destination_path = UPLOAD_DIR / safe_filename
+
+            # Salva o GIF animado preservando todos os frames e timings
+            frames[0].save(
+                destination_path,
+                save_all=True,
+                append_images=frames[1:],
+                format="GIF",
+                duration=durations,
+                loop=loop,
+                optimize=True
+            )
         else:
-            processed_img = img
+            # Corrige orientação física de fotos tiradas em celulares verticais
+            img = ImageOps.exif_transpose(img)
 
-        # Gera nome único com UUID criptográfico (descarta totalmente o nome original para segurança)
-        safe_filename = f"{uuid.uuid4().hex}.webp"
-        destination_path = UPLOAD_DIR / safe_filename
+            # Redimensionamento proporcional (Downscale seguro com filtro Lanczos de alta nitidez)
+            if img.width > MAX_DIMENSION or img.height > MAX_DIMENSION:
+                img.thumbnail((MAX_DIMENSION, MAX_DIMENSION), Image.Resampling.LANCZOS)
 
-        # Salva em WebP comprimido e otimizado (sem EXIF / metadados por padrão)
-        processed_img.save(
-            destination_path,
-            format="WEBP",
-            quality=WEBP_QUALITY,
-            optimize=True,
-            method=4
-        )
+            # Normalização de canais de cor
+            if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+                processed_img = img.convert("RGBA")
+            elif img.mode != "RGB":
+                processed_img = img.convert("RGB")
+            else:
+                processed_img = img
+
+            safe_filename = f"{uuid.uuid4().hex}.webp"
+            destination_path = UPLOAD_DIR / safe_filename
+
+            # Salva em WebP comprimido e otimizado (sem EXIF / metadados por padrão)
+            processed_img.save(
+                destination_path,
+                format="WEBP",
+                quality=WEBP_QUALITY,
+                optimize=True,
+                method=4
+            )
 
         final_size = destination_path.stat().st_size
 
@@ -139,7 +172,7 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
             destination_path.unlink(missing_ok=True)
             raise HTTPException(
                 status_code=400,
-                detail=safety_check.get("reason", "A imagem enviada não atende às diretrizes de conteúdo da comunidade.")
+                detail=safety_check.get("reason", "A imagem ou GIF enviado não atende às diretrizes de conteúdo da comunidade.")
             )
 
     except Image.DecompressionBombError:

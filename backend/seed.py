@@ -14,6 +14,20 @@ except ImportError:
 
 def seed_database():
     init_db()
+    
+    # Garante que os assets de GIF de exemplo estejam presentes em UPLOAD_DIR
+    import os
+    import shutil
+    data_dir = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent
+    upload_dir = data_dir / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    seed_assets_dir = BACKEND_DIR / "seed_assets"
+    if seed_assets_dir.exists():
+        for asset in seed_assets_dir.glob("*.gif"):
+            target = upload_dir / asset.name
+            if not target.exists():
+                shutil.copy2(asset, target)
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -162,9 +176,9 @@ def seed_database():
             "bio": "Pesquisadora de neurociência, vôlei de praia e viciada em café com leite. Amo dias de sol, papos profundos e boa música.",
             "interests": json.dumps(["Vôlei", "Neurociência", "Café", "Praia", "Música Indie"]),
             "photos": json.dumps([
+                "/uploads/gif_mariana.gif",
                 "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&auto=format&fit=crop&q=80",
-                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80",
-                "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80"
             ]),
             "prompt1_q": "O melhor lugar para relaxar e fugir da rotina é...",
             "prompt1_a": "No gramado tomando sol ouvindo uma playlist tranquila nos dias sem prova.",
@@ -197,6 +211,7 @@ def seed_database():
             "bio": "Relações Internacionais. Me chama pra tomar uma cerveja depois das 21h ou debater geopolítica. Gosto de cinema cult e viajar na estrada.",
             "interests": json.dumps(["Cinema", "Geopolítica", "Cervejada", "Livros", "Rock"]),
             "photos": json.dumps([
+                "/uploads/gif_lucas.gif",
                 "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80"
             ]),
@@ -231,6 +246,7 @@ def seed_database():
             "bio": "Quero mandar foguetes pro espaço 🚀. Quando não estou em projetos de propulsão, estou maratonando sci-fi ou ouvindo Taylor Swift.",
             "interests": json.dumps(["Astronomia", "Foguetes", "Taylor Swift", "Anime", "Jogos"]),
             "photos": json.dumps([
+                "/uploads/gif_bia.gif",
                 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&auto=format&fit=crop&q=80"
             ]),
@@ -299,6 +315,7 @@ def seed_database():
             "bio": "Economia e sustentabilidade. Adoro trilhas, gatos e descobrir cafeterias aconchegantes para ler ou prosear.",
             "interests": json.dumps(["Economia", "Sustentabilidade", "Trilhas", "Fotografia", "Yoga"]),
             "photos": json.dumps([
+                "/uploads/gif_camila.gif",
                 "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
             ]),
@@ -332,6 +349,7 @@ def seed_database():
             "bio": "Treino pesado, fã de eletrônica e viagens de última hora. Gosto de quem tem energia contagiante e não tem medo de viver momentos intensos.",
             "interests": json.dumps(["Musculação", "Baja", "Eletrônica", "Viagens", "Churrasco"]),
             "photos": json.dumps([
+                "/uploads/gif_rodrigo.gif",
                 "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80",
                 "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=800&auto=format&fit=crop&q=80"
             ]),
