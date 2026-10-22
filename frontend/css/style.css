@@ -110,6 +110,15 @@ body {
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
 }
 
+.photo-indicator.secret {
+  background-color: rgba(244, 63, 94, 0.45);
+}
+
+.photo-indicator.secret.active {
+  background-color: #f43f5e;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.95);
+}
+
 /* Barra de navegação inferior mobile (Bottom Bar) */
 .mobile-bottom-nav {
   padding-bottom: max(12px, env(safe-area-inset-bottom));
