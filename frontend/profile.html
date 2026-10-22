@@ -98,10 +98,6 @@
           <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Preencha seus dados para começar a receber likes.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="showNewUserModal()"
-            class="px-4 py-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition">
-            + Criar Novo Aluno
-          </button>
           <button type="submit" form="profile-form"
             class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/60 hover:scale-105 active:scale-95 transition">
             Salvar Perfil
@@ -770,48 +766,6 @@
       } catch (err) {
         Pontinho.showToast(err.message, 'error');
       }
-    }
-
-    function showNewUserModal() {
-      const email = prompt('Digite o e-mail do novo estudante (ex: novo.aluno@aluno.ufabc.edu.br):');
-      if (!email) return;
-
-      const name = prompt('Nome do novo estudante:');
-      if (!name) return;
-
-      const payload = {
-        name: name,
-        age: 20,
-        email: email,
-        campus: 'Santo André',
-        course: 'BC&T - Bacharelado em Ciência e Tecnologia',
-        specific_course: 'Ciência da Computação',
-        entity: 'Nenhuma / Foco no CR',
-        looking_for: 'Amizade',
-        bio: 'Novo estudante no Pontinho!',
-        interests: ['UFABC', 'Estudos'],
-        photos: [
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800',
-          'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800'
-        ],
-        prompt1_q: 'O melhor lugar para descansar na UFABC é...',
-        prompt1_a: 'Biblioteca',
-        prompt2_q: 'Minha opinião impopular sobre o RU...',
-        prompt2_a: 'Gosto do cardápio',
-        prompt3_q: 'No intervalo entre as aulas você me encontra...',
-        prompt3_a: 'No Bloco A'
-      };
-
-      Pontinho.apiFetch('/api/users', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      }).then(res => {
-        Pontinho.showToast('Novo usuário criado com ID ' + res.user_id + '! Trocando para ele...', 'success');
-        Pontinho.setCurrentUserId(res.user_id);
-        setTimeout(() => window.location.reload(), 600);
-      }).catch(err => {
-        Pontinho.showToast(err.message, 'error');
-      });
     }
 
     // --- LGPD: DIREITOS DO TITULAR ---
