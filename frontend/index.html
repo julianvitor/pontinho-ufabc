@@ -826,7 +826,7 @@
         img.src = Pontinho.resolveMediaUrl(currentItem.url);
         if (currentItem.is_secret) {
           img.style.filter = 'blur(16px)';
-          img.style.transform = 'scale(1.1)';
+          img.style.transform = 'scale(1.05)';
         } else {
           img.style.filter = 'none';
           img.style.transform = 'none';
@@ -844,10 +844,10 @@
       if (countLabel) {
         if (currentItem.is_secret) {
           countLabel.innerHTML = `🔒 ${currentModalPhotoIndex + 1}/${modalCarouselItems.length} (Secreta)`;
-          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-30 bg-rose-950/80 border border-rose-500/50 text-rose-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full';
+          if (countBadge) countBadge.className = 'text-[11px] font-bold text-rose-400 shrink-0';
         } else {
           countLabel.innerText = `${currentModalPhotoIndex + 1}/${modalCarouselItems.length} fotos`;
-          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-30 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full';
+          if (countBadge) countBadge.className = 'text-[11px] font-semibold text-slate-400 shrink-0';
         }
       }
 
@@ -948,33 +948,17 @@
       ` : '';
 
       content.innerHTML = `
-        <!-- Carrossel de Fotos com Destaque -->
-        <div class="relative w-full h-80 sm:h-96 rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl group select-none">
-          <!-- Indicadores de fotos no topo -->
-          ${modalCarouselItems.length > 1 ? `
-            <div class="absolute top-3 inset-x-3 z-30 flex gap-1.5 pointer-events-none">
-              ${modalCarouselItems.map((item, idx) => `
-                <div class="flex-1 modal-photo-indicator ${idx === currentModalPhotoIndex ? 'active' : ''} ${item.is_secret ? 'secret' : ''}" data-modal-idx="${idx}"></div>
-              `).join('')}
-            </div>
-          ` : ''}
-
-          <!-- Contador de Fotos no topo direito -->
-          <div id="modal-photo-count-badge" class="absolute top-6 right-3 z-30 ${modalCarouselItems[currentModalPhotoIndex].is_secret ? 'bg-rose-950/80 border border-rose-500/50 text-rose-200' : 'bg-black/50 backdrop-blur-md text-white'} text-[10px] font-bold px-2.5 py-0.5 rounded-full transition-all">
-            <span id="modal-photo-count-label">
-              ${modalCarouselItems[currentModalPhotoIndex].is_secret ? `🔒 ${currentModalPhotoIndex + 1}/${modalCarouselItems.length} (Secreta)` : `${currentModalPhotoIndex + 1}/${modalCarouselItems.length} fotos`}
-            </span>
-          </div>
-
-          <!-- Imagem Principal com Destaque -->
-          <div class="w-full h-full relative overflow-hidden bg-slate-950">
+        <!-- Carrossel de Fotos com Destaque (Foto Completa, 100% Desobstruída) -->
+        <div class="space-y-2">
+          <div class="relative w-full h-80 sm:h-96 md:h-[420px] rounded-3xl overflow-hidden bg-black/95 border border-slate-800 shadow-2xl flex items-center justify-center select-none group">
+            <!-- Imagem Principal com Destaque: Exibida Completa (object-contain) -->
             <img id="modal-carousel-photo" 
                  src="${Pontinho.resolveMediaUrl(modalCarouselItems[currentModalPhotoIndex].url)}" 
                  alt="${u.name}" 
-                 style="${modalCarouselItems[currentModalPhotoIndex].is_secret ? 'filter: blur(16px); transform: scale(1.1);' : ''}"
-                 class="w-full h-full object-cover pointer-events-none transition-all duration-300">
+                 style="${modalCarouselItems[currentModalPhotoIndex].is_secret ? 'filter: blur(16px); transform: scale(1.05);' : ''}"
+                 class="max-w-full max-h-full w-auto h-auto object-contain pointer-events-none transition-all duration-300">
 
-            <!-- Overlay Misterioso do Álbum Secreto no Modal -->
+            <!-- Overlay Misterioso do Álbum Secreto no Modal (Apenas para foto secreta) -->
             <div id="modal-secret-overlay" class="${modalCarouselItems[currentModalPhotoIndex].is_secret ? '' : 'hidden'} absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 pointer-events-none">
               <div class="w-14 h-14 rounded-2xl bg-rose-950/90 border border-rose-500/60 shadow-xl shadow-rose-950 text-rose-300 text-2xl flex items-center justify-center mb-3 animate-pulse">
                 🔒
@@ -991,20 +975,40 @@
                 </span>
               ` : ''}
             </div>
+
+            <!-- Áreas invisíveis para toque/clique para avançar ou voltar (sem nada visual na frente da foto) -->
+            <div class="absolute inset-y-0 left-0 w-1/2 z-10 cursor-pointer" onclick="prevModalPhoto(event)" title="Foto anterior"></div>
+            <div class="absolute inset-y-0 right-0 w-1/2 z-10 cursor-pointer" onclick="nextModalPhoto(event)" title="Próxima foto"></div>
           </div>
 
-          <!-- Áreas clicáveis para troca rápida (esquerda = anterior, direita = próxima) -->
-          <div class="absolute inset-y-0 left-0 w-1/3 z-25 cursor-pointer" onclick="prevModalPhoto(event)"></div>
-          <div class="absolute inset-y-0 right-0 w-1/3 z-25 cursor-pointer" onclick="nextModalPhoto(event)"></div>
-
-          <!-- Botões visíveis com setas para fácil navegação -->
+          <!-- Controles do Carrossel FORA da foto (nenhum elemento na frente da imagem) -->
           ${modalCarouselItems.length > 1 ? `
-            <button type="button" onclick="prevModalPhoto(event)" class="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white text-xs flex items-center justify-center backdrop-blur-sm transition-all shadow-md opacity-70 hover:opacity-100 hover:scale-110 active:scale-95" title="Foto anterior">
-              ❮
-            </button>
-            <button type="button" onclick="nextModalPhoto(event)" class="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white text-xs flex items-center justify-center backdrop-blur-sm transition-all shadow-md opacity-70 hover:opacity-100 hover:scale-110 active:scale-95" title="Próxima foto">
-              ❯
-            </button>
+            <div class="flex items-center justify-between px-3 py-2 bg-slate-950/80 rounded-2xl border border-slate-800/80">
+              <div class="flex items-center gap-3 flex-1 min-w-0 mr-2">
+                <!-- Indicadores de fotos em barras -->
+                <div class="flex gap-1.5 flex-1 max-w-[160px] sm:max-w-[220px]">
+                  ${modalCarouselItems.map((item, idx) => `
+                    <div class="flex-1 modal-photo-indicator ${idx === currentModalPhotoIndex ? 'active' : ''} ${item.is_secret ? 'secret' : ''}" data-modal-idx="${idx}"></div>
+                  `).join('')}
+                </div>
+                <!-- Contador de Fotos -->
+                <span id="modal-photo-count-badge" class="text-[11px] font-semibold ${modalCarouselItems[currentModalPhotoIndex].is_secret ? 'text-rose-400 font-bold' : 'text-slate-400'} shrink-0">
+                  <span id="modal-photo-count-label">
+                    ${modalCarouselItems[currentModalPhotoIndex].is_secret ? `🔒 ${currentModalPhotoIndex + 1}/${modalCarouselItems.length} (Secreta)` : `${currentModalPhotoIndex + 1}/${modalCarouselItems.length} fotos`}
+                  </span>
+                </span>
+              </div>
+
+              <!-- Botões de navegação fora da foto -->
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="prevModalPhoto(event)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center transition active:scale-95 border border-slate-700/60" title="Foto anterior">
+                  ❮
+                </button>
+                <button type="button" onclick="nextModalPhoto(event)" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center transition active:scale-95 border border-slate-700/60" title="Próxima foto">
+                  ❯
+                </button>
+              </div>
+            </div>
           ` : ''}
         </div>
 
