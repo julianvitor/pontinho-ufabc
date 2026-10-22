@@ -1,5 +1,5 @@
 """
-Rotas de Feed e Swipes do Pontinho UFABC
+Rotas de Feed e Swipes do Pontinho
 """
 import json
 import re

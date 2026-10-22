@@ -1,5 +1,5 @@
 """
-Módulos de rotas do Pontinho UFABC
+Módulos de rotas do Pontinho
 """
 from backend.routers.auth import router as auth_router
 from backend.routers.feed import router as feed_router

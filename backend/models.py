@@ -1,18 +1,18 @@
 """
-Modelos de validação de dados Pydantic do Pontinho UFABC
+Modelos de validação de dados Pydantic do Pontinho
 """
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
 class RegisterRequest(BaseModel):
-    email: str = Field(..., description="E-mail acadêmico da UFABC (@aluno.ufabc.edu.br)")
+    email: str = Field(..., description="E-mail de acesso")
     name: str = Field(..., min_length=2, description="Nome completo")
     password: str = Field(..., min_length=4, description="Senha de acesso")
     ra: Optional[str] = Field(default="", description="RA (Registro Acadêmico) opcional")
 
 class LoginRequest(BaseModel):
-    email: str = Field(..., description="E-mail acadêmico da UFABC (ex: aluno@aluno.ufabc.edu.br)")
-    password: str = Field(..., description="Senha do estudante")
+    email: str = Field(..., description="E-mail de acesso")
+    password: str = Field(..., description="Senha do usuário")
 
 class SwipeRequest(BaseModel):
     target_user_id: int

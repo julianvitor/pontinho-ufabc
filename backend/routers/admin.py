@@ -1,5 +1,5 @@
 """
-Rotas Administrativas e Metadados do Pontinho UFABC
+Rotas Administrativas e Metadados do Pontinho
 """
 import json
 import sqlite3

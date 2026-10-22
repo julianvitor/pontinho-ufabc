@@ -1,3 +1,3 @@
 """
-Pontinho UFABC - Pacote Backend
+Pontinho - Pacote Backend
 """
