@@ -15,6 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.database import init_db
+from backend.teaser import pregenerate_all_teasers
 from backend.routers import (
     auth_router,
     feed_router,
@@ -43,6 +44,7 @@ app.add_middleware(
 
 # Inicializa banco de dados SQLite e migrações automáticas
 init_db()
+pregenerate_all_teasers()
 
 # Cria e monta o diretório de uploads estáticos
 DATA_DIR = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent

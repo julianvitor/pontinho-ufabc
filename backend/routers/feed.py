@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Request
 from backend.database import get_db
 from backend.models import SwipeRequest
 from backend.auth import get_current_user_id
+from backend.teaser import get_or_create_server_blurred_teaser
 
 router = APIRouter(prefix="/api", tags=["feed"])
 
@@ -151,11 +152,14 @@ def get_feed(request: Request):
         d["photos"] = json.loads(d["photos"]) if d["photos"] else []
         d["songs"] = json.loads(d["songs"]) if d.get("songs") else []
         
-        # Conteúdo Privado: expõe apenas a 1ª foto como teaser borrado no carrossel do feed
+        # Conteúdo Privado: entrega apenas a 1ª foto já irreversivelmente borrada no servidor
         private_photos = json.loads(d["private_photos"]) if d.get("private_photos") else []
         d["has_private_content"] = bool(private_photos or d.get("private_bio"))
         d["private_photos_count"] = len(private_photos)
-        d["secret_teaser_photo"] = private_photos[0] if private_photos else None
+        d["secret_teaser_photo"] = (
+            get_or_create_server_blurred_teaser(private_photos[0], d["id"])
+            if private_photos else None
+        )
         d.pop("private_photos", None)
         d.pop("private_bio", None)
         d.pop("password_hash", None)

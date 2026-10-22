@@ -42,7 +42,7 @@ const Pontinho = {
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
       return url;
     }
-    if (url.startsWith('/uploads/')) {
+    if (url.startsWith('/uploads/') || url.startsWith('/api/')) {
       const base = this.getApiBase();
       return base ? `${base}${url}` : url;
     }

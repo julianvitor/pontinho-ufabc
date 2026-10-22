@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db
 from backend.models import UserCreateOrUpdate, ReportCreate
 from backend.auth import get_current_user_id, clear_auth_session
+from backend.teaser import get_or_create_server_blurred_teaser
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -78,6 +79,14 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
 
     conn.commit()
     conn.close()
+
+    # Gera/atualiza teaser borrado da 1ª foto privada se houver
+    if data.private_photos and len(data.private_photos) > 0:
+        try:
+            get_or_create_server_blurred_teaser(data.private_photos[0], current_id)
+        except Exception:
+            pass
+
     return {"success": True, "message": "Perfil atualizado com sucesso!"}
 
 @router.post("")
