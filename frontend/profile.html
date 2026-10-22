@@ -123,26 +123,16 @@
             <!-- Fotos inseridas dinamicamente -->
           </div>
 
-          <!-- Ações de Adicionar Foto Pública (Upload Direto ou Link) -->
-          <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <label for="public-file-input"
-                class="inline-flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 rounded-xl text-xs font-black transition shadow-sm cursor-pointer active:scale-95">
-                <span>📁</span>
-                <span id="public-upload-label">Enviar Imagem ou GIF</span>
-                <input id="public-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-                  class="hidden" onchange="handleImageUpload(event, 'public')">
-              </label>
-            </div>
-
-            <div class="flex gap-2 pt-2 border-t border-slate-800">
-              <input id="new-photo-input" type="url" placeholder="Ou cole o link de uma imagem ou GIF da web..."
-                class="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-              <button type="button" onclick="addPhotoUrl()"
-                class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition">
-                Adicionar Link
-              </button>
-            </div>
+          <!-- Ações de Adicionar Foto Pública (Upload Direto do Dispositivo) -->
+          <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+            <label for="public-file-input"
+              class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 rounded-xl text-xs font-black transition shadow-sm cursor-pointer active:scale-95">
+              <span>📁</span>
+              <span id="public-upload-label">Enviar Foto ou GIF</span>
+              <input id="public-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+                class="hidden" onchange="handleImageUpload(event, 'public')">
+            </label>
+            <span class="text-xs text-slate-400">Envie imagens JPG, PNG, WebP ou GIFs animados (máx 10 MB)</span>
           </div>
         </div>
 
@@ -296,27 +286,16 @@
               <!-- Fotos privadas renderizadas dinamicamente -->
             </div>
 
-            <!-- Ações de Adicionar Foto Privada (Upload Direto ou Link) -->
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-3 space-y-2">
-              <div class="flex items-center justify-between flex-wrap gap-2">
-                <label for="private-file-input"
-                  class="inline-flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95">
-                  <span>🔒</span>
-                  <span id="private-upload-label">Enviar Imagem ou GIF Secreto</span>
-                  <input id="private-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif"
-                    class="hidden" onchange="handleImageUpload(event, 'private')">
-                </label>
-                <span class="text-[11px] text-rose-200/60">Privacidade garantida (sem metadados)</span>
-              </div>
-
-              <div class="flex gap-2 pt-1 border-t border-white/10">
-                <input id="new-private-photo-input" type="url" placeholder="Ou cole a URL da imagem ou GIF secreto..."
-                  class="flex-1 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-rose-200/40 focus:outline-none focus:ring-2 focus:ring-rose-500/60">
-                <button type="button" onclick="addPrivatePhotoUrl()"
-                  class="px-3.5 py-2 bg-white/15 hover:bg-white/25 text-rose-100 rounded-xl text-xs font-bold transition shadow-sm">
-                  Adicionar Link
-                </button>
-              </div>
+            <!-- Ações de Adicionar Foto Privada (Upload Direto do Dispositivo) -->
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+              <label for="private-file-input"
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95">
+                <span>🔒</span>
+                <span id="private-upload-label">Enviar Foto ou GIF Secreto</span>
+                <input id="private-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+                  class="hidden" onchange="handleImageUpload(event, 'private')">
+              </label>
+              <span class="text-xs text-rose-200/70">Privacidade garantida (sem metadados EXIF)</span>
             </div>
           </div>
 
@@ -640,20 +619,6 @@
       `).join('');
     }
 
-    function addPhotoUrl() {
-      const input = document.getElementById('new-photo-input');
-      const url = input.value.trim();
-
-      if (!url) {
-        Pontinho.showToast('Digite uma URL válida para a foto.', 'error');
-        return;
-      }
-
-      currentPhotos.push(url);
-      input.value = '';
-      renderPhotosGrid();
-    }
-
     function removePhoto(index) {
       currentPhotos.splice(index, 1);
       renderPhotosGrid();
@@ -691,20 +656,6 @@
           </span>
         </div>
       `).join('');
-    }
-
-    function addPrivatePhotoUrl() {
-      const input = document.getElementById('new-private-photo-input');
-      const url = input.value.trim();
-
-      if (!url) {
-        Pontinho.showToast('Digite uma URL válida para a foto privada.', 'error');
-        return;
-      }
-
-      currentPrivatePhotos.push(url);
-      input.value = '';
-      renderPrivatePhotosGrid();
     }
 
     function removePrivatePhoto(index) {
