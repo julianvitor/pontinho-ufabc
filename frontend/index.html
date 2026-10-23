@@ -469,16 +469,16 @@
       let indicatorsHtml = '';
       if (carouselItems.length > 1) {
         indicatorsHtml = `
-          <div class="absolute top-3 inset-x-3 z-20 flex gap-1.5">
+          <div class="absolute top-3 inset-x-3 z-30 flex gap-1.5 pointer-events-auto">
             ${carouselItems.map((item, i) => `
-              <div class="flex-1 photo-indicator ${i === 0 ? 'active' : ''} ${item.is_secret ? 'secret' : ''}" data-index="${i}"></div>
+              <div class="flex-1 photo-indicator ${i === 0 ? 'active' : ''} ${item.is_secret ? 'secret' : ''}" data-index="${i}" onclick="goToPhoto(${i}, event)" title="Ver foto ${i + 1}"></div>
             `).join('')}
           </div>
         `;
       }
 
       cardWrapper.innerHTML = `
-        <div id="active-card" class="tinder-card w-full h-full relative cursor-grab active:cursor-grabbing select-none overflow-hidden">
+        <div id="active-card" class="group tinder-card w-full h-full relative cursor-grab active:cursor-grabbing select-none overflow-hidden">
           <!-- Carimbos de Arraste (CURTI / PASSO) -->
           <div id="stamp-like" class="swipe-stamp like">CURTI</div>
           <div id="stamp-nope" class="swipe-stamp nope">PASSO</div>
@@ -506,14 +506,24 @@
             </div>
           </div>
 
-          <!-- Áreas clicáveis para trocar de foto (esquerda = anterior, direita = próxima) -->
-          <div class="absolute inset-y-0 left-0 w-1/3 z-15 cursor-pointer" onclick="prevPhoto(event)"></div>
-          <div class="absolute inset-y-0 right-0 w-1/3 z-15 cursor-pointer" onclick="nextPhoto(event)"></div>
+          <!-- Áreas clicáveis para trocar de foto (metade esquerda = anterior, metade direita = próxima) -->
+          <div class="absolute inset-y-0 left-0 w-1/2 z-20 cursor-pointer select-none" onclick="prevPhoto(event)" title="Foto anterior (←)"></div>
+          <div class="absolute inset-y-0 right-0 w-1/2 z-20 cursor-pointer select-none" onclick="nextPhoto(event)" title="Próxima foto (→)"></div>
+
+          ${carouselItems.length > 1 ? `
+            <!-- Botões visuais de navegação no Desktop -->
+            <button type="button" onclick="prevPhoto(event)" class="carousel-arrow-btn absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-slate-900 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 sm:opacity-85 hover:sm:opacity-100 shadow-xl border border-white/20 active:scale-95 cursor-pointer backdrop-blur-md" title="Foto anterior (←)">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button type="button" onclick="nextPhoto(event)" class="carousel-arrow-btn absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-slate-900 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 sm:opacity-85 hover:sm:opacity-100 shadow-xl border border-white/20 active:scale-95 cursor-pointer backdrop-blur-md" title="Próxima foto (→)">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          ` : ''}
 
           ${indicatorsHtml}
 
           <!-- Contador de Fotos -->
-          <div id="photo-count-badge" class="absolute top-6 right-3 z-20 bg-black/40 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full transition-all">
+          <div id="photo-count-badge" class="absolute top-6 right-3 z-30 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full transition-all border border-white/10 pointer-events-none">
             <span id="photo-count-label">1/${carouselItems.length} fotos</span>
           </div>
 
@@ -521,7 +531,8 @@
           <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none z-10"></div>
 
           <!-- Informações Principais do Estudante -->
-          <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5 z-20 text-white flex flex-col justify-end pointer-events-auto">
+          <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5 z-20 text-white flex flex-col justify-end pointer-events-none">
+            <div class="pointer-events-auto">
             
             <!-- Badges de Campus, Gênero e Entidade -->
             <div class="flex flex-wrap items-center gap-1.5 mb-2">
@@ -565,7 +576,7 @@
               </div>
             ` : ''}
 
-
+            </div>
           </div>
         </div>
       `;
@@ -614,8 +625,10 @@
     function setupCardDrag(card) {
       if (!card) return;
       let isDragging = false;
+      let hasMoved = false;
       let startX = 0;
       let startY = 0;
+      let startTime = 0;
       let currentX = 0;
       let currentY = 0;
 
@@ -623,14 +636,18 @@
       const stampNope = card.querySelector('#stamp-nope');
 
       function onPointerDown(e) {
-        if (e.target.closest('button') || e.target.closest('a')) return;
+        // Ignora se clicou em botões, links ou indicadores interativos
+        if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.photo-indicator') || e.target.closest('.carousel-arrow-btn')) {
+          return;
+        }
         isDragging = true;
+        hasMoved = false;
         startX = e.clientX;
         startY = e.clientY;
+        startTime = Date.now();
         currentX = startX;
         currentY = startY;
         card.classList.remove('animating');
-        try { card.setPointerCapture(e.pointerId); } catch (_) {}
       }
 
       function onPointerMove(e) {
@@ -639,6 +656,17 @@
         currentY = e.clientY;
         const dx = currentX - startX;
         const dy = currentY - startY;
+        const dist = Math.hypot(dx, dy);
+
+        // Limiar de arraste: só captura o ponteiro e inicia o drag se o usuário mover mais de 8px
+        if (!hasMoved) {
+          if (dist > 8) {
+            hasMoved = true;
+            try { card.setPointerCapture(e.pointerId); } catch (_) {}
+          } else {
+            return;
+          }
+        }
 
         const rot = dx * 0.06;
         card.style.transform = `translate(${dx}px, ${dy * 0.3}px) rotate(${rot}deg)`;
@@ -660,11 +688,37 @@
       function onPointerUp(e) {
         if (!isDragging) return;
         isDragging = false;
+        try { card.releasePointerCapture(e.pointerId); } catch (_) {}
+
         const dx = currentX - startX;
+        const dy = currentY - startY;
+        const dist = Math.hypot(dx, dy);
 
         if (stampLike) stampLike.style.opacity = '0';
         if (stampNope) stampNope.style.opacity = '0';
 
+        // Caso 1: Foi um clique rápido no card (não moveu mais de 10px)
+        if (!hasMoved || dist < 10) {
+          card.classList.remove('animating');
+          card.style.transform = '';
+
+          // Se clicou em botão, link ou indicador, o próprio evento cuidará
+          if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.photo-indicator') || e.target.closest('.carousel-arrow-btn')) {
+            return;
+          }
+
+          // Se clicou no corpo do card, avança ou retrocede foto conforme o lado
+          const rect = card.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          if (clickX < rect.width / 2) {
+            prevPhoto(e);
+          } else {
+            nextPhoto(e);
+          }
+          return;
+        }
+
+        // Caso 2: Foi um gesto de arrastar (swipe)
         if (dx > 85) {
           card.style.transform = '';
           handleSwipe('like');
@@ -689,7 +743,7 @@
     }
 
     function prevPhoto(e) {
-      if (e) e.stopPropagation();
+      if (e && e.stopPropagation) e.stopPropagation();
       if (!activeCardData || activeCardData.is_ad) return;
       const items = activeCardData._carouselItems || (activeCardData.photos || []).map(p => ({ url: p, is_secret: false }));
       if (items.length <= 1) return;
@@ -699,7 +753,7 @@
     }
 
     function nextPhoto(e) {
-      if (e) e.stopPropagation();
+      if (e && e.stopPropagation) e.stopPropagation();
       if (!activeCardData || activeCardData.is_ad) return;
       const items = activeCardData._carouselItems || (activeCardData.photos || []).map(p => ({ url: p, is_secret: false }));
       if (items.length <= 1) return;
@@ -707,6 +761,41 @@
       currentPhotoIndex = (currentPhotoIndex + 1) % items.length;
       updatePhotoView();
     }
+
+    function goToPhoto(index, e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (!activeCardData || activeCardData.is_ad) return;
+      const items = activeCardData._carouselItems || (activeCardData.photos || []).map(p => ({ url: p, is_secret: false }));
+      if (!items.length || index < 0 || index >= items.length) return;
+
+      currentPhotoIndex = index;
+      updatePhotoView();
+    }
+
+    // Navegação por teclado no Desktop (Setas Esquerda / Direita)
+    window.addEventListener('keydown', (e) => {
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+      const detailsModal = document.getElementById('details-modal');
+      const isModalOpen = detailsModal && !detailsModal.classList.contains('hidden');
+
+      if (e.key === 'ArrowLeft') {
+        if (isModalOpen) {
+          prevModalPhoto(e);
+        } else {
+          prevPhoto(e);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (isModalOpen) {
+          nextModalPhoto(e);
+        } else {
+          nextPhoto(e);
+        }
+      } else if (e.key === 'Escape' && isModalOpen) {
+        closeDetailsModal();
+      }
+    });
 
     function updatePhotoView() {
       if (!activeCardData || activeCardData.is_ad) return;
@@ -741,10 +830,10 @@
       if (countLabel) {
         if (currentItem.is_secret) {
           countLabel.innerHTML = `🔒 ${currentPhotoIndex + 1}/${items.length} (Secreta)`;
-          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-20 bg-rose-950/80 border border-rose-500/50 text-rose-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full';
+          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-30 bg-rose-950/80 border border-rose-500/50 text-rose-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full pointer-events-none';
         } else {
           countLabel.innerText = `${currentPhotoIndex + 1}/${items.length} fotos`;
-          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-20 bg-black/40 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full';
+          if (countBadge) countBadge.className = 'absolute top-6 right-3 z-30 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/10 pointer-events-none';
         }
       }
 
@@ -834,9 +923,16 @@
     }
 
     function nextModalPhoto(e) {
-      if (e) e.stopPropagation();
+      if (e && e.stopPropagation) e.stopPropagation();
       if (!modalCarouselItems || modalCarouselItems.length <= 1) return;
       currentModalPhotoIndex = (currentModalPhotoIndex + 1) % modalCarouselItems.length;
+      updateModalPhotoView();
+    }
+
+    function goToModalPhoto(idx, e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (!modalCarouselItems || !modalCarouselItems.length || idx < 0 || idx >= modalCarouselItems.length) return;
+      currentModalPhotoIndex = idx;
       updateModalPhotoView();
     }
 
@@ -1014,7 +1110,7 @@
                 <!-- Indicadores de fotos em barras -->
                 <div class="flex gap-1.5 flex-1 max-w-[160px] sm:max-w-[220px]">
                   ${modalCarouselItems.map((item, idx) => `
-                    <div class="flex-1 modal-photo-indicator ${idx === currentModalPhotoIndex ? 'active' : ''} ${item.is_secret ? 'secret' : ''}" data-modal-idx="${idx}"></div>
+                    <div class="flex-1 modal-photo-indicator ${idx === currentModalPhotoIndex ? 'active' : ''} ${item.is_secret ? 'secret' : ''}" data-modal-idx="${idx}" onclick="goToModalPhoto(${idx}, event)" title="Ver foto ${idx + 1}"></div>
                   `).join('')}
                 </div>
                 <!-- Contador de Fotos -->
