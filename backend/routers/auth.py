@@ -3,6 +3,8 @@ Rotas de autenticação (Login, Cadastro e Sessão) do Pontinho
 """
 import os
 import json
+import time
+from collections import defaultdict
 from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db, hash_password, verify_password, needs_rehash
 from backend.models import RegisterRequest, LoginRequest
@@ -92,11 +94,32 @@ def register_user(data: RegisterRequest, response: Response):
         "message": "Cadastro realizado com sucesso!"
     }
 
+# Proteção anti-brute force / Rate Limiting para login (máximo 5 tentativas por minuto por IP)
+LOGIN_RATE_LIMIT_WINDOW = 60
+MAX_LOGIN_ATTEMPTS = 5
+_LOGIN_TRACKER = defaultdict(list)
+
+def _check_login_rate_limit(client_ip: str):
+    now = time.time()
+    recent = [t for t in _LOGIN_TRACKER[client_ip] if now - t < LOGIN_RATE_LIMIT_WINDOW]
+    if len(recent) >= MAX_LOGIN_ATTEMPTS:
+        remaining = int(LOGIN_RATE_LIMIT_WINDOW - (now - recent[0]))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Muitas tentativas de login consecutivas. Por segurança, aguarde {max(1, remaining)} segundos para tentar novamente."
+        )
+    recent.append(now)
+    _LOGIN_TRACKER[client_ip] = recent
+
 @router.post("/login")
-def login_user(data: LoginRequest, response: Response):
+def login_user(data: LoginRequest, request: Request, response: Response):
     """
     Login de estudante por E-mail Acadêmico e Senha (ou RA).
+    Protegido por rate limiting e resposta genérica anti-enumeração de usuários.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    _check_login_rate_limit(client_ip)
+
     login_input = data.email.strip().lower()
     cleaned_pw = data.password.strip()
 
@@ -113,8 +136,10 @@ def login_user(data: LoginRequest, response: Response):
     user = cursor.fetchone()
     conn.close()
 
+    GENERIC_LOGIN_ERROR = "E-mail acadêmico ou senha incorretos."
+
     if not user:
-        raise HTTPException(status_code=401, detail="E-mail acadêmico não encontrado no sistema.")
+        raise HTTPException(status_code=401, detail=GENERIC_LOGIN_ERROR)
 
     stored_hash = user["password_hash"]
     # Se o usuário não tiver senha cadastrada ainda (ex: seeds antigos), permite senha padrão '123456'
@@ -124,7 +149,10 @@ def login_user(data: LoginRequest, response: Response):
         valid = verify_password(cleaned_pw, stored_hash)
 
     if not valid:
-        raise HTTPException(status_code=401, detail="Senha incorreta.")
+        raise HTTPException(status_code=401, detail=GENERIC_LOGIN_ERROR)
+
+    # Login bem-sucedido: limpa o histórico de tentativas do IP
+    _LOGIN_TRACKER.pop(client_ip, None)
 
     # Migração automática transparente para Argon2id se o hash for legado (SHA-256)
     if needs_rehash(stored_hash):
