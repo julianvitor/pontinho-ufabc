@@ -278,38 +278,6 @@ const Pontinho = {
     }, 3500);
   },
 
-  async initNavbarUserSwitcher(selector = '#user-switcher-select') {
-    const select = document.querySelector(selector);
-    if (!select) return;
-
-    try {
-      const users = await this.apiFetch('/api/users/list');
-      const currentId = this.getCurrentUserId();
-
-      select.innerHTML = users.map(u => `
-        <option value="${u.id}" class="bg-slate-900 text-slate-100" ${u.id === currentId ? 'selected' : ''}>
-          ${u.name} (${u.ra || u.email})
-        </option>
-      `).join('');
-
-      select.addEventListener('change', async (e) => {
-        const targetId = parseInt(e.target.value, 10);
-        try {
-          const res = await this.apiFetch(`/api/auth/switch-user/${targetId}`, { method: 'POST' });
-          if (res && res.token) {
-            this.setCurrentUserId(res.user_id, res.token);
-          }
-          this.showToast(`Perfil alternado para ${select.options[select.selectedIndex].text}`);
-          setTimeout(() => window.location.reload(), 400);
-        } catch (err) {
-          this.showToast('Erro ao alternar usuário: ' + err.message, 'error');
-        }
-      });
-    } catch (e) {
-      console.error('Falha ao carregar lista de usuários:', e);
-    }
-  },
-
   async updateUnreadBadges() {
     const userId = this.getCurrentUserId();
     if (!userId) return;

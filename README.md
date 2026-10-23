@@ -151,7 +151,6 @@ O manual completo com exemplos de payloads pode ser consultado em [docs/API.md](
 |---|---|---|---|
 | `GET` | `/api/users/me` | Sim | Perfil completo do próprio estudante logado |
 | `PUT` | `/api/users/me` | Sim | Atualiza dados cadastrais, fotos e músicas (gera teaser borrado da foto secreta) |
-| `GET` | `/api/users/list` | Sim | Lista rápida de estudantes para o seletor demo no cabeçalho |
 | `GET` | `/api/users/{id}` | Sim | Visualiza perfil de outro estudante (oculta álbum secreto se não autorizado) |
 | `POST` | `/api/users/report` | Sim | Denuncia perfil por comportamento impróprio (`{"reported_id": int, "reason": str, "details": str}`) |
 | `POST` | `/api/users/block` | Sim | Bloqueia usuário permanentemente (exclusão mútua do feed e conversas) |

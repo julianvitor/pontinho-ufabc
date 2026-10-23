@@ -62,14 +62,8 @@
           <span>🛡️</span> <span class="hidden sm:inline">Ajuda</span>
         </button>
 
-        <!-- Seletor Rápido de Usuário e Botão Sair (quando logado) -->
+        <!-- Botão Sair (quando logado) -->
         <div id="navbar-user-box" class="flex items-center gap-2">
-          <div class="hidden md:flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-1 rounded-xl border border-slate-800 text-xs">
-            <span class="text-slate-400 font-medium">RA:</span>
-            <select id="user-switcher-select" class="bg-transparent font-semibold text-slate-200 focus:outline-none cursor-pointer">
-              <option>Carregando...</option>
-            </select>
-          </div>
           <button onclick="Pontinho.logout()" class="px-2.5 py-1 text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-950/50 hover:bg-rose-900/60 rounded-xl border border-rose-500/30 transition" title="Sair da conta">
             Sair
           </button>
@@ -229,7 +223,6 @@
         }
 
         if (user) {
-          await Pontinho.initNavbarUserSwitcher();
           Pontinho.startBadgePolling();
         } else {
           const authBtn = document.getElementById('navbar-auth-btn');

@@ -11,22 +11,6 @@ from backend.teaser import get_or_create_server_blurred_teaser
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
-@router.get("/list")
-def list_users_for_switch(request: Request):
-    """Lista usuários para facilitar a troca no cabeçalho. Exige autenticação."""
-    get_current_user_id(request)
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, ra, name, email, age, campus, course, specific_course, photos, is_admin FROM users ORDER BY id ASC")
-    rows = cursor.fetchall()
-    conn.close()
-    users = []
-    for r in rows:
-        d = dict(r)
-        d["photos"] = json.loads(d["photos"]) if d["photos"] else []
-        users.append(d)
-    return users
-
 @router.get("/me")
 def get_my_profile(request: Request):
     """Retorna o perfil completo do usuário atualmente conectado."""

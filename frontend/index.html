@@ -68,14 +68,8 @@
           <span>🛡️</span> <span class="hidden sm:inline">Ajuda</span>
         </button>
 
-        <!-- Seletor Rápido de Usuário (Para Testes) e Botão Sair -->
+        <!-- Ações do Usuário Conectado -->
         <div id="navbar-user-box" class="flex items-center gap-2">
-          <div class="hidden md:flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-1 rounded-xl border border-slate-800 text-xs">
-            <span class="text-slate-500 font-medium">RA:</span>
-            <select id="user-switcher-select" class="bg-transparent font-semibold text-slate-200 focus:outline-none cursor-pointer">
-              <option>Carregando...</option>
-            </select>
-          </div>
           <button onclick="Pontinho.logout()" class="px-2.5 py-1 text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-950/40 hover:bg-rose-900/50 rounded-xl border border-rose-800/40 transition" title="Sair da conta">
             Sair
           </button>
@@ -344,7 +338,6 @@
         loadLandingEvents();
         return;
       }
-      await Pontinho.initNavbarUserSwitcher();
       Pontinho.startBadgePolling();
       loadFeed();
     }
