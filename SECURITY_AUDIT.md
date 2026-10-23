@@ -20,19 +20,19 @@ Durante o checkup de segurança no backend do **Pontinho**, foram mapeadas **11 
 
 ### Matriz Geral de Risco
 
-| ID | Vulnerabilidade | Severidade | Categoria OWASP | Arquivo Afetado |
-|:---|:---|:---:|:---|:---|
-| **VULN-01** | Bypass de Autenticação / Account Takeover via Headers & Cookies Legados | 🔴 **CRÍTICA** | A07:2021 – Identification and Auth Failures | `backend/auth.py` |
-| **VULN-02** | Chave Secreta de Assinatura de Sessão (HMAC) Hardcoded no Código | 🔴 **CRÍTICA** | A02:2021 – Cryptographic Failures | `backend/auth.py` |
-| **VULN-03** | Algoritmo Criptográfico de Hash de Senhas Rápido (SHA-256 com Salt Estático) | 🟠 **ALTA** | A02:2021 – Cryptographic Failures | `backend/database.py` |
-| **VULN-04** | Exposição Pública de Contas, Privilégios e Senhas Padrão em `/demo-accounts` | 🟠 **ALTA** | A01:2021 – Broken Access Control | `backend/routers/auth.py` |
-| **VULN-05** | Vazamento Massivo de PII (RA e E-mail Institucional) no Feed de Swipes | 🟠 **ALTA** | A01:2021 – Security Misconfiguration / LGPD | `backend/routers/feed.py` |
-| **VULN-06** | Blind Server-Side Request Forgery (SSRF) no Gerador de Teasers Borrados | 🟠 **ALTA** | A10:2021 – Server-Side Request Forgery | `backend/teaser.py` |
-| **VULN-07** | Endpoint Não Autenticado de Injeção de Contas Arbitrárias (`POST /api/users`) | 🟠 **ALTA** | A04:2021 – Insecure Design | `backend/routers/users.py` |
-| **VULN-08** | Ausência de Rate Limiting no Login & Enumeração de E-mails Cadastrados | 🟡 **MÉDIA** | A07:2021 – Identification and Auth Failures | `backend/routers/auth.py` |
-| **VULN-09** | Armazenamento Estático de Imagens Privadas Sem Controle de Acesso (`/uploads`) | 🟡 **MÉDIA** | A01:2021 – Broken Access Control (BOLA) | `backend/main.py` |
-| **VULN-10** | Cookies de Sessão Autenticada sem Flags de Proteção `HttpOnly` e `Secure` | 🟡 **MÉDIA** | A05:2021 – Security Misconfiguration | `backend/auth.py` |
-| **VULN-11** | Política de Senhas com Comprimento Mínimo Muito Curto (4 caracteres) | 🔵 **BAIXA** | A07:2021 – Identification and Auth Failures | `backend/models.py` |
+| ID | Vulnerabilidade | Severidade | Categoria OWASP | Arquivo Afetado | Status |
+|:---|:---|:---:|:---|:---|:---:|
+| **VULN-01** | Bypass de Autenticação / Account Takeover via Headers & Cookies Legados | 🔴 **CRÍTICA** | A07:2021 – Identification and Auth Failures | `backend/auth.py` | ✅ **Corrigido** (`530a0d1`) |
+| **VULN-02** | Chave Secreta de Assinatura de Sessão (HMAC) Hardcoded no Código | 🔴 **CRÍTICA** | A02:2021 – Cryptographic Failures | `backend/auth.py` | ✅ **Corrigido** (`9e06712`) |
+| **VULN-03** | Algoritmo Criptográfico de Hash de Senhas Rápido (SHA-256 com Salt Estático) | 🟠 **ALTA** | A02:2021 – Cryptographic Failures | `backend/database.py` | ✅ **Corrigido** (`ce7e312`) |
+| **VULN-04** | Exposição Pública de Contas, Privilégios e Senhas Padrão em `/demo-accounts` | 🟠 **ALTA** | A01:2021 – Broken Access Control | `backend/routers/auth.py` | ✅ **Corrigido** (`4369f5d`) |
+| **VULN-05** | Vazamento Massivo de PII (RA e E-mail Institucional) no Feed de Swipes | 🟠 **ALTA** | A01:2021 – Security Misconfiguration / LGPD | `backend/routers/feed.py` | ✅ **Corrigido** (`16e8149`) |
+| **VULN-06** | Blind Server-Side Request Forgery (SSRF) no Gerador de Teasers Borrados | 🟠 **ALTA** | A10:2021 – Server-Side Request Forgery | `backend/teaser.py` | ✅ **Corrigido** (`5849ddd`) |
+| **VULN-07** | Endpoint Não Autenticado de Injeção de Contas Arbitrárias (`POST /api/users`) | 🟠 **ALTA** | A04:2021 – Insecure Design | `backend/routers/users.py` | ✅ **Corrigido** (`e1098ec`) |
+| **VULN-08** | Ausência de Rate Limiting no Login & Enumeração de E-mails Cadastrados | 🟡 **MÉDIA** | A07:2021 – Identification and Auth Failures | `backend/routers/auth.py` | ✅ **Corrigido** (`2c2b583`) |
+| **VULN-09** | Armazenamento Estático de Imagens Privadas Sem Controle de Acesso (`/uploads`) | 🟡 **MÉDIA** | A01:2021 – Broken Access Control (BOLA) | `backend/main.py` | ✅ **Corrigido** (`96c290f`) |
+| **VULN-10** | Cookies de Sessão Autenticada sem Flags de Proteção `HttpOnly` e `Secure` | 🟡 **MÉDIA** | A05:2021 – Security Misconfiguration | `backend/auth.py` | ✅ **Corrigido** (`e6c3626`) |
+| **VULN-11** | Política de Senhas com Comprimento Mínimo Muito Curto (4 caracteres) | 🔵 **BAIXA** | A07:2021 – Identification and Auth Failures | `backend/models.py` | ✅ **Corrigido** (`7998bd2`) |
 
 ---
 
@@ -234,20 +234,21 @@ Durante o checkup de segurança no backend do **Pontinho**, foram mapeadas **11 
 
 ---
 
-## 📋 3. Plano de Ação Recomendado (Roadmap de Hardening)
+## 📋 3. Plano de Ação & Roadmap de Hardening (Concluído)
 
 ### Fase 1: Correções Críticas Imediatas
-1. **Fechar o bypass de autenticação** em `backend/auth.py` removendo a aceitação de IDs numéricos simples sem validação de assinatura.
-2. **Eliminar a chave de sessão hardcoded**, exigindo variável de ambiente em produção.
-3. **Bloquear vazamento de PII no feed** em `backend/routers/feed.py` retirando `ra` e `email` do payload.
+1. ✅ **[VULN-01] Fechado o bypass de autenticação** em `backend/auth.py` removendo a aceitação de IDs numéricos simples sem validação de assinatura (`530a0d1`).
+2. ✅ **[VULN-02] Eliminada a chave de sessão hardcoded**, exigindo variável de ambiente estrita `PONTINHO_SECRET_KEY` no `.env` com aborto em tempo de inicialização (`9e06712`).
+3. ✅ **[VULN-05] Bloqueado vazamento de PII no feed** em `backend/routers/feed.py` retirando `ra` e `email` via projeção em Allowlist estrita (`16e8149`).
 
 ### Fase 2: Fortalecimento de Acesso e Controles
-4. **Desativar `/api/auth/demo-accounts`** ou restringi-lo a modo estrito de desenvolvimento.
-5. **Proteger `POST /api/users`** com autenticação de administrador (`require_admin`).
-6. **Bloquear SSRF em `backend/teaser.py`** rejeitando URLs externas para fotos privadas.
-7. **Marcar cookies de sessão com `httponly=True`**.
+4. ✅ **[VULN-04] Restrito `/api/auth/demo-accounts`** a `DEV_MODE=true`, ocultando administradores e removendo o campo `password` (`4369f5d`).
+5. ✅ **[VULN-07] Eliminado endpoint não autenticado `POST /api/users`** em `backend/routers/users.py` (`e1098ec`).
+6. ✅ **[VULN-06] Bloqueado SSRF em `backend/teaser.py`** rejeitando URLs externas para fotos privadas e aplicando confinamento de Path Traversal (`5849ddd`).
+7. ✅ **[VULN-10] Marcados cookies de sessão com `HttpOnly=True`** e atributo `Secure` dinâmico para HTTPS em `backend/auth.py` (`e6c3626`).
 
 ### Fase 3: Modernização Criptográfica & Resiliência
-8. **Substituir o hash SHA-256 por Argon2id ou Bcrypt** em `backend/database.py`.
-9. **Implementar Rate Limiting** em rotas de login e cadastro.
-10. **Aumentar requisito mínimo de senha** para 8 caracteres em `backend/models.py`.
+8. ✅ **[VULN-03] Substituído o hash SHA-256 por Argon2id** (OWASP) com salt individual e migração transparente em `backend/database.py` e `backend/routers/auth.py` (`ce7e312`).
+9. ✅ **[VULN-08] Implementado Rate Limiting (5 req/min)** e mensagem de erro genérica unificada no login (`2c2b583`).
+10. ✅ **[VULN-09] Segregadas fotos privadas do Álbum Secreto** em `private_uploads` servidas unicamente pelo endpoint autenticado `GET /api/media/private/{filename}` com checagem de autorização/match (`96c290f`).
+11. ✅ **[VULN-11] Aumentado requisito mínimo de senha para 8 caracteres** em `backend/models.py`, `backend/routers/auth.py` e `frontend/login.html` conforme NIST SP 800-63B (`7998bd2`).
