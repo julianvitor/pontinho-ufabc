@@ -127,8 +127,12 @@ def get_feed(request: Request):
         gender_filter_sql = " AND LOWER(gender) IN ('não-binário', 'nao-binario', 'não binário', 'nao binario')"
 
     # Buscar perfis ainda não avaliados respeitando o filtro de gênero e exclusão de bloqueios mútuos
+    # Projeção com Allowlist Estrita: NUNCA seleciona 'ra', 'email', 'password_hash' ou 'is_admin'
     cursor.execute(f"""
-        SELECT * FROM users
+        SELECT id, name, age, campus, course, specific_course, entity, looking_for,
+               bio, interests, photos, songs, prompt1_q, prompt1_a, prompt2_q, prompt2_a,
+               prompt3_q, prompt3_a, gender, private_photos, private_bio
+        FROM users
         WHERE id != ?
           AND id NOT IN (
               SELECT to_user_id FROM swipes WHERE from_user_id = ?
@@ -148,24 +152,40 @@ def get_feed(request: Request):
     profiles = []
     for r in rows:
         d = dict(r)
-        d["interests"] = json.loads(d["interests"]) if d["interests"] else []
-        d["photos"] = json.loads(d["photos"]) if d["photos"] else []
-        d["songs"] = json.loads(d["songs"]) if d.get("songs") else []
-        
-        # Conteúdo Privado: entrega apenas a 1ª foto já irreversivelmente borrada no servidor
+        # Conteúdo Privado: gera apenas o teaser irreversivelmente borrado no servidor
         private_photos = json.loads(d["private_photos"]) if d.get("private_photos") else []
-        d["has_private_content"] = bool(private_photos or d.get("private_bio"))
-        d["private_photos_count"] = len(private_photos)
-        d["secret_teaser_photo"] = (
+        has_private = bool(private_photos or d.get("private_bio"))
+        teaser_photo = (
             get_or_create_server_blurred_teaser(private_photos[0], d["id"])
             if private_photos else None
         )
-        d.pop("private_photos", None)
-        d.pop("private_bio", None)
-        d.pop("password_hash", None)
-        
-        d["is_ad"] = False
-        profiles.append(d)
+
+        clean_profile = {
+            "id": d["id"],
+            "name": d["name"],
+            "age": d["age"],
+            "campus": d["campus"],
+            "course": d["course"],
+            "specific_course": d["specific_course"],
+            "entity": d["entity"],
+            "looking_for": d["looking_for"],
+            "bio": d["bio"] or "",
+            "interests": json.loads(d["interests"]) if d.get("interests") else [],
+            "photos": json.loads(d["photos"]) if d.get("photos") else [],
+            "songs": json.loads(d["songs"]) if d.get("songs") else [],
+            "prompt1_q": d.get("prompt1_q") or "",
+            "prompt1_a": d.get("prompt1_a") or "",
+            "prompt2_q": d.get("prompt2_q") or "",
+            "prompt2_a": d.get("prompt2_a") or "",
+            "prompt3_q": d.get("prompt3_q") or "",
+            "prompt3_a": d.get("prompt3_a") or "",
+            "gender": d.get("gender") or "Não informado",
+            "has_private_content": has_private,
+            "private_photos_count": len(private_photos),
+            "secret_teaser_photo": teaser_photo,
+            "is_ad": False
+        }
+        profiles.append(clean_profile)
 
     # Intercalar anúncios conforme a frequência definida
     feed_cards = []
