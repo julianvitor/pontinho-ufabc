@@ -205,17 +205,10 @@
         }
 
         container.innerHTML = accounts.map(acc => {
-          const isAdmin = acc.is_admin;
-          const btnClass = isAdmin 
-            ? "px-2.5 py-1 bg-amber-950/50 hover:bg-amber-900/60 text-amber-300 rounded-lg text-[11px] font-bold border border-amber-600/40 transition"
-            : "px-2.5 py-1 bg-slate-800/80 hover:bg-emerald-950/70 hover:text-emerald-300 hover:border-emerald-500/40 text-slate-300 rounded-lg text-[11px] font-medium border border-slate-700/60 transition";
-          
-          const shortName = (acc.name || 'Usuário').split(' ')[0];
-          const displayName = isAdmin ? `${shortName} (Admin)` : shortName;
+          const btnClass = "px-2.5 py-1 bg-slate-800/80 hover:bg-emerald-950/70 hover:text-emerald-300 hover:border-emerald-500/40 text-slate-300 rounded-lg text-[11px] font-medium border border-slate-700/60 transition";
+          const shortName = (acc.name || 'Estudante').split(' ')[0];
           const escapedEmail = (acc.email || '').replace(/'/g, "\\'");
-          const escapedPass = (acc.password || '123456').replace(/'/g, "\\'");
-          
-          return `<button type="button" onclick="fillDemo('${escapedEmail}', '${escapedPass}')" class="${btnClass}">${displayName}</button>`;
+          return `<button type="button" onclick="fillDemo('${escapedEmail}', '123456')" class="${btnClass}">${shortName}</button>`;
         }).join('');
       } catch (err) {
         console.warn('Não foi possível carregar contas demo:', err);

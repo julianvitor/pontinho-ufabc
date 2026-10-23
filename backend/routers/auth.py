@@ -1,6 +1,7 @@
 """
 Rotas de autenticação (Login, Cadastro e Sessão) do Pontinho
 """
+import os
 import json
 from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db, hash_password, verify_password, needs_rehash
@@ -203,17 +204,27 @@ def get_auth_me(request: Request):
     d["photos"] = json.loads(d["photos"]) if d["photos"] else []
     return {"authenticated": True, "user": d}
 
+def _is_dev_mode() -> bool:
+    return os.getenv("DEV_MODE", "false").strip().lower() in ("true", "1", "yes") or \
+           os.getenv("DEBUG", "false").strip().lower() in ("true", "1", "yes")
+
 @router.get("/demo-accounts")
 def get_demo_accounts():
     """
-    Retorna as contas cadastradas no banco para geração dinâmica
-    dos botões de acesso demo na interface (sem nada hardcoded no frontend).
+    Retorna contas de demonstração exclusivamente em ambiente de desenvolvimento (DEV_MODE=true).
+    Oculta contas de administradores e nunca expõe senhas no payload.
     """
+    if not _is_dev_mode():
+        return []
+
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, name, email, age, specific_course, course, campus, photos, is_admin
-        FROM users ORDER BY id ASC
+        SELECT id, name, email, age, specific_course, course, campus, photos
+        FROM users
+        WHERE is_admin = 0
+        ORDER BY id ASC
+        LIMIT 10
     """)
     rows = cursor.fetchall()
     conn.close()
@@ -221,7 +232,7 @@ def get_demo_accounts():
     for r in rows:
         d = dict(r)
         d["photos"] = json.loads(d["photos"]) if d["photos"] else []
-        d["password"] = "admin123" if d["is_admin"] else "123456"
+        d["is_admin"] = 0
         result.append(d)
     return result
 
