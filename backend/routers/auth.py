@@ -146,6 +146,30 @@ def logout_user(response: Response):
     clear_auth_session(response)
     return {"success": True, "message": "Desconectado com sucesso."}
 
+@router.post("/switch-user/{target_user_id}")
+def switch_user(target_user_id: int, request: Request, response: Response):
+    """
+    Alterna com segurança o usuário ativo autenticado, emitindo novo token HMAC assinado.
+    Exige que o solicitante já possua uma sessão autenticada ativa.
+    """
+    get_current_user_id(request)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, is_admin FROM users WHERE id = ?", (target_user_id,))
+    target = cursor.fetchone()
+    conn.close()
+    if not target:
+        raise HTTPException(status_code=404, detail="Usuário alvo não encontrado.")
+
+    token = set_auth_session(response, target["id"])
+    return {
+        "success": True,
+        "token": token,
+        "user_id": target["id"],
+        "name": target["name"],
+        "is_admin": bool(target["is_admin"])
+    }
+
 @router.get("/me")
 def get_auth_me(request: Request):
     """Retorna os dados do usuário autenticado no momento."""

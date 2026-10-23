@@ -278,10 +278,18 @@ const Pontinho = {
         </option>
       `).join('');
 
-      select.addEventListener('change', (e) => {
-        this.setCurrentUserId(parseInt(e.target.value, 10));
-        this.showToast(`Perfil alternado para ${select.options[select.selectedIndex].text}`);
-        setTimeout(() => window.location.reload(), 400);
+      select.addEventListener('change', async (e) => {
+        const targetId = parseInt(e.target.value, 10);
+        try {
+          const res = await this.apiFetch(`/api/auth/switch-user/${targetId}`, { method: 'POST' });
+          if (res && res.token) {
+            this.setCurrentUserId(res.user_id, res.token);
+          }
+          this.showToast(`Perfil alternado para ${select.options[select.selectedIndex].text}`);
+          setTimeout(() => window.location.reload(), 400);
+        } catch (err) {
+          this.showToast('Erro ao alternar usuário: ' + err.message, 'error');
+        }
       });
     } catch (e) {
       console.error('Falha ao carregar lista de usuários:', e);

@@ -103,23 +103,7 @@ def get_current_user_id(request: Request) -> int:
         if uid:
             return uid
 
-    # 4. Compatibilidade controlada para testes/seletor rápido local
-    legacy_header = request.headers.get("x-user-id")
-    if legacy_header:
-        uid = verify_session_token(legacy_header.strip())
-        if uid:
-            return uid
-        if legacy_header.isdigit():
-            return int(legacy_header)
-
-    legacy_cookie = request.cookies.get("pontinho_user_id")
-    if legacy_cookie:
-        uid = verify_session_token(legacy_cookie.strip())
-        if uid:
-            return uid
-        if legacy_cookie.isdigit():
-            return int(legacy_cookie)
-
+    # Rejeita qualquer outro formato ou identificador não assinado
     raise HTTPException(status_code=401, detail="Você precisa estar autenticado com uma sessão válida.")
 
 def get_current_user(request: Request) -> dict:
