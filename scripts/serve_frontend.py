@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 # Configuração de paths
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = ROOT_DIR / "frontend"
 
 def main():

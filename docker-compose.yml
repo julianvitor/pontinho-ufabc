@@ -12,6 +12,7 @@ services:
       - ./data:/app/data
       - ./backend:/app/backend
       - ./frontend:/app/frontend
+      - ./scripts:/app/scripts
     env_file:
       - .env
     environment:

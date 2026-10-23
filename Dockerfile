@@ -18,13 +18,13 @@ RUN pip install --no-cache-dir poetry && \
 COPY pyproject.toml poetry.lock* ./
 RUN poetry install --no-root --no-interaction --no-ansi
 
-# Copia pastas do backend, frontend e script de inicialização
+# Copia pastas do backend, frontend e scripts
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
-COPY entrypoint.sh .
+COPY scripts/ ./scripts/
 
-# Cria o diretório para persistência do SQLite via volume
-RUN mkdir -p /app/data && chmod +x /app/entrypoint.sh
+# Cria o diretório para persistência do SQLite via volume e dá permissão ao entrypoint
+RUN mkdir -p /app/data && chmod +x /app/scripts/entrypoint.sh
 
 # Porta exposta pelo FastAPI
 EXPOSE 8000
@@ -34,4 +34,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/metadata')" || exit 1
 
 # Ponto de entrada que inicializa o banco e sobe o servidor
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]

@@ -60,16 +60,18 @@
 
 ```text
 pontinho-ufabc/
-├── API.md                    # Manual completo e detalhado da API REST
 ├── README.md                 # Documentação oficial do projeto
-├── SECURITY_AUDIT.md         # Relatório completo de auditoria de segurança e pentest
-├── docker-compose.yml        # Configuração de containers Docker
-├── Dockerfile                # Imagem Docker otimizada (Python slim)
-├── entrypoint.sh             # Script de inicialização do container
 ├── pyproject.toml            # Configuração de dependências e metadados do Poetry
 ├── poetry.lock               # Lockfile determinístico de dependências do Poetry
-├── serve_frontend.py         # Servidor frontend desacoplado com Live Reload (porta 3000)
-├── backend/                  # Aplicação Python / FastAPI modular
+├── docker-compose.yml        # Configuração de containers Docker
+├── Dockerfile                # Imagem Docker otimizada com Poetry (Python slim)
+├── docs/                     # 📁 Documentação técnica e auditorias
+│   ├── API.md                # Manual completo e detalhado da API REST
+│   └── SECURITY_AUDIT.md     # Relatório completo de auditoria de segurança e pentest
+├── scripts/                  # 📁 Scripts de automação e inicialização
+│   ├── entrypoint.sh         # Script de inicialização do container
+│   └── serve_frontend.py     # Servidor frontend desacoplado com Live Reload (porta 3000)
+├── backend/                  # 📁 Aplicação Python / FastAPI modular
 │   ├── __init__.py
 │   ├── auth.py               # Utilitários de sessão HMAC-SHA256 e validação de e-mail UFABC
 │   ├── database.py           # Conexão SQLite3, esquemas e migrações automáticas
@@ -85,10 +87,11 @@ pontinho-ufabc/
 │       ├── events.py         # Mural de festas, RSVP e gerenciamento de eventos
 │       ├── feed.py           # Feed de descoberta, swipes e teaser do álbum secreto
 │       ├── matches.py        # Matches, mensagens e fluxo de autorização do álbum secreto
+│       ├── media.py          # Entrega protegida e autenticada de fotos do Álbum Secreto
 │       ├── upload.py         # Upload seguro de fotos e GIFs animados com compressão
 │       ├── users.py          # Perfil próprio, denúncias e bloqueios
 │       └── help.py           # Central de ajuda, segurança e ouvidoria pública
-└── frontend/                 # Interface estática mobile-first com Tailwind CSS
+└── frontend/                 # 📁 Interface estática mobile-first com Tailwind CSS
     ├── css/
     │   └── style.css         # Estilização visual, animações e responsividade
     ├── js/
@@ -106,7 +109,7 @@ pontinho-ufabc/
 ## 📡 Documentação dos Endpoints da API Backend (REST)
 
 A documentação interativa Swagger está disponível em `http://localhost:8000/docs`.  
-O manual completo com exemplos de payloads pode ser consultado em [API.md](file:///Users/julian/Dev/pontinho-ufabc/API.md).
+O manual completo com exemplos de payloads pode ser consultado em [docs/API.md](file:///Users/julian/Dev/pontinho-ufabc/docs/API.md) e o relatório de pentest em [docs/SECURITY_AUDIT.md](file:///Users/julian/Dev/pontinho-ufabc/docs/SECURITY_AUDIT.md).
 
 ### 1. Autenticação & Sessão (`/api/auth`)
 | Método | Endpoint | Autenticado? | Descrição |
@@ -218,7 +221,7 @@ Para editar HTML, CSS e JavaScript e ver o navegador recarregar automaticamente 
 
 1. **Subir o servidor frontend com Live Reload**:
    ```bash
-   python3 serve_frontend.py --port 3000
+   python3 scripts/serve_frontend.py --port 3000
    ```
 
 2. **Acessar**:
