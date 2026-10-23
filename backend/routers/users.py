@@ -102,39 +102,6 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
 
     return {"success": True, "message": "Perfil atualizado com sucesso!"}
 
-@router.post("")
-def create_new_user(data: UserCreateOrUpdate):
-    """Cria um novo usuário. Exige ao menos duas fotos."""
-    if len(data.photos) < 2:
-        raise HTTPException(status_code=400, detail="O perfil deve ter obrigatoriamente ao menos duas fotos.")
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("""
-            INSERT INTO users (
-                email, name, age, campus, course, specific_course,
-                entity, looking_for, bio, interests, photos,
-                prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
-                gender, target_gender, songs, private_photos, private_bio
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.email, data.name, data.age, data.campus, data.course, data.specific_course,
-            data.entity, data.looking_for, data.bio, json.dumps(data.interests), json.dumps(data.photos),
-            data.prompt1_q, data.prompt1_a, data.prompt2_q, data.prompt2_a, data.prompt3_q, data.prompt3_a,
-            data.gender or "Não informado", data.target_gender or "Todos",
-            json.dumps(data.songs or []),
-            json.dumps(data.private_photos or []),
-            data.private_bio or ""
-        ))
-        conn.commit()
-        new_id = cursor.lastrowid
-        conn.close()
-        return {"success": True, "user_id": new_id}
-    except sqlite3.IntegrityError:
-        conn.close()
-        raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado.")
 
 @router.get("/me/export")
 def export_my_data_lgpd(request: Request):
