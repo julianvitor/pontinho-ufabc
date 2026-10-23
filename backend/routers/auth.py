@@ -18,7 +18,7 @@ from backend.auth import (
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register")
-def register_user(data: RegisterRequest, response: Response):
+def register_user(data: RegisterRequest, response: Response, request: Request = None):
     """
     Cadastro de estudante com E-mail, Nome e Senha.
     """
@@ -82,7 +82,7 @@ def register_user(data: RegisterRequest, response: Response):
     conn.close()
 
     # Define a sessão criptograficamente assinada
-    session_token = set_auth_session(response, new_user_id)
+    session_token = set_auth_session(response, new_user_id, request)
 
     return {
         "success": True,
@@ -167,7 +167,7 @@ def login_user(data: LoginRequest, request: Request, response: Response):
             print(f"[Auth] Erro ao migrar hash para Argon2id: {e}")
 
     # Define a sessão criptograficamente assinada
-    session_token = set_auth_session(response, user["id"])
+    session_token = set_auth_session(response, user["id"], request)
 
     return {
         "success": True,
@@ -182,9 +182,9 @@ def login_user(data: LoginRequest, request: Request, response: Response):
     }
 
 @router.post("/logout")
-def logout_user(response: Response):
+def logout_user(response: Response, request: Request = None):
     """Encerra a sessão removendo os cookies criptografados."""
-    clear_auth_session(response)
+    clear_auth_session(response, request)
     return {"success": True, "message": "Desconectado com sucesso."}
 
 @router.post("/switch-user/{target_user_id}")
@@ -202,7 +202,7 @@ def switch_user(target_user_id: int, request: Request, response: Response):
     if not target:
         raise HTTPException(status_code=404, detail="Usuário alvo não encontrado.")
 
-    token = set_auth_session(response, target["id"])
+    token = set_auth_session(response, target["id"], request)
     return {
         "success": True,
         "token": token,

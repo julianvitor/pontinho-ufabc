@@ -79,32 +79,60 @@ def verify_session_token(token: str) -> int:
     except Exception:
         return None
 
-def set_auth_session(response: Response, user_id: int) -> str:
-    """Gera o token assinado e injeta no cookie da resposta."""
+def is_cookie_secure(request: Request = None) -> bool:
+    """
+    Determina se o atributo 'Secure' deve ser ativado no cookie:
+    1. Se SECURE_COOKIES=true no .env, força Secure=True (produção estrita).
+    2. Se SECURE_COOKIES=false no .env, desativa Secure (desenvolvimento local HTTP).
+    3. Se não definido, auto-detecta via cabeçalho HTTPS (X-Forwarded-Proto) ou scheme da requisição.
+    """
+    env_val = os.getenv("SECURE_COOKIES", "").strip().lower()
+    if env_val in ("true", "1", "yes"):
+        return True
+    if env_val in ("false", "0", "no"):
+        return False
+    if request:
+        proto = request.headers.get("x-forwarded-proto", "").lower()
+        if proto == "https" or request.url.scheme == "https":
+            return True
+    return False
+
+def set_auth_session(response: Response, user_id: int, request: Request = None) -> str:
+    """
+    Gera o token assinado e injeta no cookie da resposta.
+    O cookie de sessão 'pontinho_session' é marcado como HttpOnly=True (VULN-10),
+    impedindo furto de credenciais via ataques de XSS.
+    O atributo Secure é ativado dinamicamente quando a conexão for HTTPS.
+    """
     token = create_session_token(user_id)
+    secure_flag = is_cookie_secure(request)
+
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=token,
         max_age=SESSION_MAX_AGE,
         path="/",
-        httponly=False,
+        httponly=True,
+        secure=secure_flag,
         samesite="lax"
     )
-    # Mantém pontinho_user_id compatível
+    # Mantém pontinho_user_id para sincronização de UI local no frontend
     response.set_cookie(
         key="pontinho_user_id",
         value=str(user_id),
         max_age=SESSION_MAX_AGE,
         path="/",
         httponly=False,
+        secure=secure_flag,
         samesite="lax"
     )
     return token
 
-def clear_auth_session(response: Response):
+def clear_auth_session(response: Response, request: Request = None):
     """Limpa os cookies de sessão autenticada."""
-    response.delete_cookie(key=SESSION_COOKIE_NAME, path="/")
-    response.delete_cookie(key="pontinho_user_id", path="/")
+    secure_flag = is_cookie_secure(request)
+    response.delete_cookie(key=SESSION_COOKIE_NAME, path="/", httponly=True, secure=secure_flag, samesite="lax")
+    response.delete_cookie(key="pontinho_user_id", path="/", httponly=False, secure=secure_flag, samesite="lax")
 
 def get_current_user_id(request: Request) -> int:
     """

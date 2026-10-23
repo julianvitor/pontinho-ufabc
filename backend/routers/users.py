@@ -210,8 +210,7 @@ def delete_my_account_lgpd(request: Request, response: Response):
     conn.close()
 
     # Remove o cookie de sessão e limpa autenticação assinada
-    response.delete_cookie(key="pontinho_user_id", path="/")
-    clear_auth_session(response)
+    clear_auth_session(response, request)
 
     return {
         "success": True,
