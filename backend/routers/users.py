@@ -53,6 +53,19 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
     if len(data.photos) < 2:
         raise HTTPException(status_code=400, detail="O perfil deve ter obrigatoriamente ao menos duas fotos públicas.")
 
+    # Validação de segurança: fotos de perfil devem ser uploads locais na plataforma
+    for p in (data.photos or []) + (data.private_photos or []):
+        if not p or not isinstance(p, str):
+            continue
+        p_clean = p.strip().lower()
+        if p_clean.startswith(("http://", "https://", "ftp://", "//")) and not p.startswith("https://images.unsplash.com"):
+            raise HTTPException(
+                status_code=400,
+                detail="Fotos de perfil devem ser enviadas exclusivamente através do upload de arquivos do Pontinho."
+            )
+        if ".." in p:
+            raise HTTPException(status_code=400, detail="Caminho de imagem inválido.")
+
     conn = get_db()
     cursor = conn.cursor()
 

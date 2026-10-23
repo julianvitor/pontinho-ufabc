@@ -8,7 +8,6 @@ import os
 import io
 import hashlib
 import logging
-import urllib.request
 from pathlib import Path
 from PIL import Image, ImageFilter
 
@@ -24,7 +23,7 @@ MAX_TEASER_DIMENSION = 600
 
 def get_or_create_server_blurred_teaser(photo_source: str, user_id: int) -> str | None:
     """
-    Recebe o caminho ou URL da primeira foto privada do usuário.
+    Recebe o caminho local da primeira foto privada do usuário (confinada a /uploads).
     Gera de forma permanente e irreversível uma versão borrada em WebP.
     Retorna a URL pública segura do arquivo (ex: /uploads/teasers/teaser_2_ab12cd34.webp).
     """
@@ -41,33 +40,26 @@ def get_or_create_server_blurred_teaser(photo_source: str, user_id: int) -> str 
     if target_path.exists() and target_path.stat().st_size > 0:
         return f"/uploads/teasers/{safe_filename}"
 
+    # Prevenção estrita de SSRF: bloqueia qualquer protocolo externo
+    if source_clean.lower().startswith(("http://", "https://", "ftp://", "//")):
+        logger.warning(f"[Security SSRF Blocked] Requisição externa para foto de teaser rejeitada: {source_clean}")
+        return None
+
+    # Sanitização estrita contra Path Traversal (confinamento em UPLOAD_DIR)
+    local_rel = source_clean
+    if local_rel.startswith("/uploads/"):
+        local_rel = local_rel[len("/uploads/"):]
+    elif local_rel.startswith("uploads/"):
+        local_rel = local_rel[len("uploads/"):]
+    elif local_rel.startswith("/"):
+        local_rel = local_rel.lstrip("/")
+
     try:
-        img = None
-        # Caso 1: Imagem externa (ex: Unsplash nos dados de seed)
-        if source_clean.startswith("http://") or source_clean.startswith("https://"):
-            req = urllib.request.Request(
-                source_clean,
-                headers={"User-Agent": "PontinhoSecurityBot/1.0 (UFABC Student Network)"}
-            )
-            with urllib.request.urlopen(req, timeout=6) as response:
-                img_bytes = response.read()
-            img = Image.open(io.BytesIO(img_bytes))
-
-        # Caso 2: Arquivo local em /uploads
-        else:
-            local_rel = source_clean
-            if local_rel.startswith("/uploads/"):
-                local_rel = local_rel[len("/uploads/"):]
-            elif local_rel.startswith("uploads/"):
-                local_rel = local_rel[len("uploads/"):]
-            elif local_rel.startswith("/"):
-                local_rel = local_rel.lstrip("/")
-
-            local_file = UPLOAD_DIR / local_rel
-            if not local_file.exists():
-                logger.warning(f"Arquivo local não encontrado para teaser: {local_file}")
-                return None
-            img = Image.open(local_file)
+        local_file = (UPLOAD_DIR / local_rel).resolve()
+        if not local_file.is_relative_to(UPLOAD_DIR.resolve()) or not local_file.is_file():
+            logger.warning(f"[Security Path Traversal Blocked] Caminho fora de UPLOAD_DIR: {photo_source}")
+            return None
+        img = Image.open(local_file)
 
         # Se for animação (GIF animado), extrai apenas o primeiro frame estático
         if getattr(img, "is_animated", False):
