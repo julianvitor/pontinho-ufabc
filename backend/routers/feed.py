@@ -5,6 +5,8 @@ import json
 import re
 import urllib.request
 import urllib.parse
+import time
+from collections import defaultdict
 from fastapi import APIRouter, HTTPException, Request
 from backend.database import get_db
 from backend.models import SwipeRequest
@@ -12,6 +14,22 @@ from backend.auth import get_current_user_id
 from backend.teaser import get_or_create_server_blurred_teaser
 
 router = APIRouter(prefix="/api", tags=["feed"])
+
+# Anti-flood / Rate limiting em memória para busca de músicas (15 requisições por minuto por usuário autenticado)
+RATE_LIMIT_YT_WINDOW = 60
+MAX_YT_REQUESTS_PER_WINDOW = 15
+_YOUTUBE_TRACKER = defaultdict(list)
+
+def _check_youtube_rate_limit(user_id: int):
+    now = time.time()
+    recent = [t for t in _YOUTUBE_TRACKER[user_id] if now - t < RATE_LIMIT_YT_WINDOW]
+    if len(recent) >= MAX_YT_REQUESTS_PER_WINDOW:
+        raise HTTPException(
+            status_code=429,
+            detail="Limite de buscas de músicas excedido. Por favor, aguarde um minuto."
+        )
+    recent.append(now)
+    _YOUTUBE_TRACKER[user_id] = recent
 
 YOUTUBE_CACHE = {
     "chico buarque - construção": "suia_i5dEZc",
@@ -53,11 +71,15 @@ YOUTUBE_CACHE = {
 }
 
 @router.get("/youtube/search")
-def search_youtube(q: str):
+def search_youtube(q: str, request: Request):
     """
-    Resolve uma busca de música para um ID de vídeo do YouTube sem depender de chaves de API.
+    Resolve uma busca de música para um ID de vídeo do YouTube.
+    Exige autenticação de sessão e rate limiting para evitar abuso como open proxy.
     Possui cache em memória para respostas instantâneas.
     """
+    user_id = get_current_user_id(request)
+    _check_youtube_rate_limit(user_id)
+
     query = (q or "").strip()
     if not query:
         raise HTTPException(status_code=400, detail="Termo de busca vazio.")
@@ -95,6 +117,21 @@ def search_youtube(q: str):
 
     # Fallback
     return {"videoId": "suia_i5dEZc", "query": query, "fallback": True}
+
+
+@router.post("/feed/reset")
+@router.post("/admin/reset-swipes")
+def reset_feed_swipes(request: Request):
+    """
+    Reseta o histórico de swipes do próprio usuário autenticado para que ele possa rever os perfis no feed.
+    """
+    current_id = get_current_user_id(request)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM swipes WHERE from_user_id = ?", (current_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Histórico de swipes resetado! Agora você pode ver todos os perfis novamente."}
 
 
 @router.get("/feed")

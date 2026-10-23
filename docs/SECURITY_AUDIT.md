@@ -276,28 +276,28 @@ Após a eliminação das vulnerabilidades críticas e dos backdoors prévios (`G
 
 ---
 
-### 🚨 Endpoints Vulneráveis, Inconsistentes ou Redundantes Identificados
+### 🚨 Endpoints Auditados & Remediações Aplicadas
 
-A auditoria identificou **4 pontos de atenção** que representam superfícies de ataque desnecessárias ou inconsistências arquiteturais e que podem ser **apagados ou refatorados imediatamente**:
+A auditoria identificou **4 pontos de atenção** na superfície de ataque e arquitetura da API, tendo sido aplicadas as seguintes correções:
 
-#### 1. `GET /api/youtube/search` (`backend/routers/feed.py:L55`)
+#### 1. `GET /api/youtube/search` (`backend/routers/feed.py`)
 - **Classificação:** 🟠 **Vulnerabilidade de Médio/Alto Risco** (Open Scraping Proxy / DoS)
-- **Problema:** Endpoint aberto e sem autenticação que recebe uma query arbitrária do cliente (`q: str`) e efetua requisições HTTP em tempo real para o site do YouTube (`urllib.request.urlopen("https://www.youtube.com/results?search_query=...")`) realizando scraping com expressões regulares.
-- **Vetor de Risco:** Pode ser abusado por terceiros como um proxy anônimo aberto para raspar o YouTube, gerando tráfego abusivo a partir do servidor, consumo desmedido de CPU e risco severo de **bloqueio/banimento do IP da universidade ou do servidor por parte da infraestrutura do Google/YouTube**.
-- **Recomendação:** **Pode ser apagado** se o cadastro de músicas puder aceitar diretamente links ou IDs do YouTube, ou protegido com autenticação obrigatória (`get_current_user_id`) e rate limiting estrito.
+- **Problema:** Endpoint aberto e sem autenticação que recebe query livre (`q: str`) e efetua requisições HTTP para o YouTube realizando scraping com regex.
+- **Ação Executada:** ✅ **Protegido com Autenticação e Rate Limiting**. A rota agora exige sessão válida do estudante (`get_current_user_id`) e aplica rate limit rigoroso em memória de no máximo 15 buscas por minuto por usuário autenticado, bloqueando abuso como proxy aberto.
 
-#### 2. `GET /api/auth/demo-accounts` (`backend/routers/auth.py:L221`)
-- **Classificação:** 🟡 **Resíduo de Teste / Superfície de Ataque Residual**
-- **Problema:** Endpoint criado originalmente para preenchimento de formulário em ambiente de desenvolvimento. Embora protegido pela flag `DEV_MODE=true` e sem expor senhas de administradores, trata-se de um facilitador de testes que não possui finalidade no produto final e permite listar dados e e-mails de contas demo.
-- **Recomendação:** **Pode ser apagado** definitivamente para deixar o backend 100% livre de códigos de teste em produção.
-
-#### 3. `POST /api/admin/reset-swipes` (`backend/routers/admin.py:L354`)
+#### 2. `POST /api/feed/reset` (Antigo `POST /api/admin/reset-swipes`)
 - **Classificação:** 🟡 **Inconsistência de Segurança & Controle de Acesso**
-- **Problema:** A rota está registrada sob o caminho `/api/admin/reset-swipes` e dentro do roteador administrativo, porém **NÃO executa a função de controle `require_admin(request)`**. Qualquer usuário comum autenticado consegue invocá-la para disparar um `DELETE FROM swipes WHERE from_user_id = ?`.
-- **Recomendação:** Se o recurso de rever perfis já vistos ("Rever perfis" em `index.html`) for um comportamento de negócio oficial, deve ser movido para o roteador correto (`POST /api/feed/reset` ou `POST /api/swipe/reset`). Se era apenas um facilitador de depuração durante o desenvolvimento, **pode ser apagado**.
+- **Problema:** A rota de reset de swipes do próprio usuário estava alocada sob o prefixo `/api/admin/reset-swipes` no roteador administrativo sem checagem de `require_admin`.
+- **Ação Executada:** ✅ **Migrado para Rota Canônica de Feed**. A funcionalidade foi transferida para `POST /api/feed/reset` dentro de `backend/routers/feed.py`, validando a identidade do estudante logado e mantendo compatibilidade de rota.
 
-#### 4. Aliases Duplicados de Chat: `GET /api/messages/{match_id}` e `POST /api/messages/{match_id}` (`backend/routers/matches.py:L127, L173`)
-- **Classificação:** 🔵 **Redundância Arquitetural & Ampliação Desnecessária de Superfície**
-- **Problema:** As rotas decoram os mesmos manipuladores que os endpoints canônicos `GET /api/matches/{match_id}/messages` e `POST /api/matches/{match_id}/messages`. O frontend consome exclusivamente as rotas aninhadas em `/api/matches/`.
-- **Recomendação:** **Podem ser apagadas**, consolidando a API estritamente nos padrões RESTful e eliminando rotas duplicadas.
+#### 3. Aliases Duplicados de Chat: `GET /api/messages/{match_id}` e `POST /api/messages/{match_id}`
+- **Classificação:** 🔵 **Redundância Arquitetural & Superfície Desnecessária**
+- **Problema:** Rotas duplicadas que decoravam os mesmos handlers das rotas canônicas de chat sob `/api/matches/`.
+- **Ação Executada:** ✅ **Apagados**. As rotas legadas duplicadas foram removidas de `backend/routers/matches.py`, consolidando a API no padrão RESTful `/api/matches/{match_id}/messages`.
+
+#### 4. `GET /api/auth/demo-accounts` (`backend/routers/auth.py`)
+- **Classificação:** 🟡 **Resíduo de Teste / Superfície de Ataque Residual**
+- **Problema:** Endpoint de teste que retorna contas para login automático em ambiente de desenvolvimento.
+- **Status Atual:** 🔒 **Restrito a Ambiente de Desenvolvimento (`DEV_MODE=true`)**. Oculta administradores e não expõe senhas no payload. Em produção (`DEV_MODE=false`), retorna array vazio `[]`.
+
 

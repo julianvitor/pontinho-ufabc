@@ -1291,7 +1291,7 @@
 
     async function resetSwipes() {
       try {
-        await Pontinho.apiFetch('/api/admin/reset-swipes', { method: 'POST' });
+        await Pontinho.apiFetch('/api/feed/reset', { method: 'POST' });
         Pontinho.showToast('Histórico de swipes resetado! Recarregando...');
         loadFeed();
       } catch (err) {

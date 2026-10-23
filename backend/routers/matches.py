@@ -124,7 +124,6 @@ def unmatch(match_id: int, request: Request):
     return {"success": True, "message": "Match desfeito com sucesso."}
 
 @router.get("/matches/{match_id}/messages")
-@router.get("/messages/{match_id}")
 def get_match_messages(match_id: int, request: Request):
     """Busca o histórico de mensagens de texto de um match e marca as pendentes como lidas."""
     current_id = get_current_user_id(request)
@@ -170,7 +169,6 @@ def get_match_messages(match_id: int, request: Request):
     }
 
 @router.post("/matches/{match_id}/messages")
-@router.post("/messages/{match_id}")
 def send_match_message(match_id: int, msg: MessageCreate, request: Request):
     """Envia uma mensagem de texto no chat."""
     current_id = get_current_user_id(request)

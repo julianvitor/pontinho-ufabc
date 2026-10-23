@@ -196,6 +196,38 @@ Registra uma ação de swipe (*Curtir* ou *Passar*). Caso haja like mútuo, form
 
 ---
 
+### `POST /api/feed/reset`
+Reseta o histórico de swipes do próprio usuário autenticado para permitir a reexibição dos cards de perfis no feed ("Rever perfis").
+
+- **Autenticação**: Exigida (`get_current_user_id`).
+- **Resposta (200 OK)**:
+```json
+{
+  "success": true,
+  "message": "Histórico de swipes resetado! Agora você pode ver todos os perfis novamente."
+}
+```
+
+---
+
+### `GET /api/youtube/search`
+Resolve o ID de vídeo do YouTube para músicas e hinos favoritos cadastrados no perfil do estudante.
+
+- **Autenticação**: Exigida (`get_current_user_id`).
+- **Rate Limiting**: Máximo de 15 buscas por minuto por usuário autenticado (proteção contra abuso como Open Scraping Proxy).
+- **Parâmetros**: `q: str` (termo de busca ou link).
+- **Cache**: Respostas cacheadas em memória para reprodução instantânea.
+- **Resposta (200 OK)**:
+```json
+{
+  "videoId": "suia_i5dEZc",
+  "query": "chico buarque - construção"
+}
+```
+
+---
+
+
 ## 3. Festas & Eventos Universitários (`/api/events`)
 
 ### `GET /api/events`

@@ -350,14 +350,3 @@ def delete_admin_ad(ad_id: int, request: Request):
     conn.commit()
     conn.close()
     return {"success": True}
-
-@router.post("/api/admin/reset-swipes")
-def reset_swipes(request: Request):
-    """Auxiliar para testes: reseta os swipes do usuário logado para que ele possa rever todos os cards."""
-    current_id = get_current_user_id(request)
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM swipes WHERE from_user_id = ?", (current_id,))
-    conn.commit()
-    conn.close()
-    return {"success": True, "message": "Histórico de swipes resetado! Agora você pode ver todos os perfis novamente."}
