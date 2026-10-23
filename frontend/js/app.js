@@ -36,21 +36,29 @@ const Pontinho = {
     return '';
   },
 
-  // Resolve URLs de mídia (seja URL externa completa ou arquivo em /uploads)
+  // Resolve URLs de mídia (seja URL externa completa ou arquivo em /uploads /api/media)
   resolveMediaUrl(url) {
     if (!url) return '';
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
       return url;
     }
+    let finalUrl = url;
     if (url.startsWith('/uploads/') || url.startsWith('/api/')) {
       const base = this.getApiBase();
-      return base ? `${base}${url}` : url;
+      finalUrl = base ? `${base}${url}` : url;
     }
-    return url;
+    if (finalUrl.includes('/api/media/private/') && !finalUrl.includes('token=')) {
+      const token = this.getSessionToken();
+      if (token) {
+        const sep = finalUrl.includes('?') ? '&' : '?';
+        finalUrl = `${finalUrl}${sep}token=${encodeURIComponent(token)}`;
+      }
+    }
+    return finalUrl;
   },
 
   // Upload seguro de foto para a API com streaming e compressão WebP
-  async uploadPhoto(file) {
+  async uploadPhoto(file, isPrivate = false) {
     if (!file) throw new Error('Selecione uma imagem para enviar.');
     if (file.size > 10 * 1024 * 1024) {
       throw new Error('A imagem selecionada ultrapassa o limite de 10 MB.');
@@ -61,11 +69,17 @@ const Pontinho = {
 
     const headers = {};
     const userId = this.getCurrentUserId();
+    const token = this.getSessionToken();
     if (userId) {
       headers['X-User-Id'] = userId.toString();
     }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      headers['X-Session-Token'] = token;
+    }
 
-    const targetUrl = `${this.getApiBase()}/api/upload/photo`;
+    const query = isPrivate ? '?is_private=true' : '';
+    const targetUrl = `${this.getApiBase()}/api/upload/photo${query}`;
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers,

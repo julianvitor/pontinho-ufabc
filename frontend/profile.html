@@ -563,7 +563,8 @@
         if (label) label.innerText = 'Comprimindo...';
         Pontinho.showToast('Sanitizando e otimizando imagem...', 'info');
 
-        const result = await Pontinho.uploadPhoto(file);
+        const isPrivate = (type !== 'public');
+        const result = await Pontinho.uploadPhoto(file, isPrivate);
 
         if (type === 'public') {
           currentPhotos.push(result.url);

@@ -133,6 +133,13 @@ def get_current_user_id(request: Request) -> int:
         if uid:
             return uid
 
+    # 4. Token em parâmetro de query (para carregamento de mídias e imagens autenticadas)
+    query_token = request.query_params.get("token")
+    if query_token:
+        uid = verify_session_token(query_token.strip())
+        if uid:
+            return uid
+
     # Rejeita qualquer outro formato ou identificador não assinado
     raise HTTPException(status_code=401, detail="Você precisa estar autenticado com uma sessão válida.")
 

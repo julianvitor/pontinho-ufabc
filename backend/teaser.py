@@ -15,16 +15,18 @@ logger = logging.getLogger("pontinho.teaser")
 
 DATA_DIR = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent
 UPLOAD_DIR = DATA_DIR / "uploads"
+PRIVATE_UPLOAD_DIR = DATA_DIR / "private_uploads"
 TEASERS_DIR = UPLOAD_DIR / "teasers"
 TEASERS_DIR.mkdir(parents=True, exist_ok=True)
+PRIVATE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 BLUR_RADIUS = 35
 MAX_TEASER_DIMENSION = 600
 
 def get_or_create_server_blurred_teaser(photo_source: str, user_id: int) -> str | None:
     """
-    Recebe o caminho local da primeira foto privada do usuário (confinada a /uploads).
-    Gera de forma permanente e irreversível uma versão borrada em WebP.
+    Recebe o caminho local da primeira foto privada do usuário (confinada a /uploads ou /api/media/private).
+    Gera de forma permanente e irreversível uma versão borrada em WebP salva em /uploads/teasers/.
     Retorna a URL pública segura do arquivo (ex: /uploads/teasers/teaser_2_ab12cd34.webp).
     """
     if not photo_source or not isinstance(photo_source, str):
@@ -45,19 +47,48 @@ def get_or_create_server_blurred_teaser(photo_source: str, user_id: int) -> str 
         logger.warning(f"[Security SSRF Blocked] Requisição externa para foto de teaser rejeitada: {source_clean}")
         return None
 
-    # Sanitização estrita contra Path Traversal (confinamento em UPLOAD_DIR)
+    # Sanitização estrita contra Path Traversal
     local_rel = source_clean
-    if local_rel.startswith("/uploads/"):
+    is_private_route = False
+    if local_rel.startswith("/api/media/private/"):
+        local_rel = local_rel[len("/api/media/private/"):]
+        is_private_route = True
+    elif local_rel.startswith("api/media/private/"):
+        local_rel = local_rel[len("api/media/private/"):]
+        is_private_route = True
+    elif local_rel.startswith("/uploads/"):
         local_rel = local_rel[len("/uploads/"):]
     elif local_rel.startswith("uploads/"):
         local_rel = local_rel[len("uploads/"):]
     elif local_rel.startswith("/"):
         local_rel = local_rel.lstrip("/")
 
+    # Remove query params se existirem (ex: ?token=...)
+    if "?" in local_rel:
+        local_rel = local_rel.split("?", 1)[0]
+
     try:
-        local_file = (UPLOAD_DIR / local_rel).resolve()
-        if not local_file.is_relative_to(UPLOAD_DIR.resolve()) or not local_file.is_file():
-            logger.warning(f"[Security Path Traversal Blocked] Caminho fora de UPLOAD_DIR: {photo_source}")
+        # Se for rota privada, tenta em PRIVATE_UPLOAD_DIR primeiro
+        local_file = None
+        if is_private_route:
+            candidate = (PRIVATE_UPLOAD_DIR / local_rel).resolve()
+            if candidate.is_relative_to(PRIVATE_UPLOAD_DIR.resolve()) and candidate.is_file():
+                local_file = candidate
+
+        # Se não encontrou ou não for rota privada, busca em UPLOAD_DIR
+        if not local_file:
+            candidate = (UPLOAD_DIR / local_rel).resolve()
+            if candidate.is_relative_to(UPLOAD_DIR.resolve()) and candidate.is_file():
+                local_file = candidate
+
+        # Se ainda não encontrou, tenta PRIVATE_UPLOAD_DIR como fallback
+        if not local_file:
+            candidate = (PRIVATE_UPLOAD_DIR / local_rel).resolve()
+            if candidate.is_relative_to(PRIVATE_UPLOAD_DIR.resolve()) and candidate.is_file():
+                local_file = candidate
+
+        if not local_file or not local_file.is_file():
+            logger.warning(f"[Security Path Traversal or File Missing Blocked] Caminho inválido: {photo_source}")
             return None
         img = Image.open(local_file)
 

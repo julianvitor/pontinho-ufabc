@@ -27,6 +27,8 @@ router = APIRouter(prefix="/api/upload", tags=["upload"])
 DATA_DIR = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent
 UPLOAD_DIR = DATA_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+PRIVATE_UPLOAD_DIR = DATA_DIR / "private_uploads"
+PRIVATE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_FILE_SIZE = 10 * 1024 * 1024     # 10 MB máximo de stream na requisição
 CHUNK_SIZE = 64 * 1024               # Leitura segura de 64 KB por chunk para evitar pico de RAM
@@ -51,10 +53,15 @@ def _check_rate_limit(client_id: str):
     _UPLOAD_TRACKER[client_id] = recent
 
 @router.post("/photo")
-async def upload_photo(request: Request, file: UploadFile = File(...)):
+async def upload_photo(
+    request: Request,
+    file: UploadFile = File(...),
+    is_private: bool = False
+):
     """
     Recebe uma imagem, valida o cabeçalho real, sanitiza, redimensiona,
     remove metadados EXIF e comprime para WebP.
+    Se is_private=True, armazena no diretório isolado de fotos privadas.
     Exige que o usuário esteja autenticado.
     """
     user_id = get_current_user_id(request)
@@ -122,8 +129,9 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
             if not frames:
                 raise HTTPException(status_code=400, detail="Arquivo GIF inválido.")
 
+            target_dir = PRIVATE_UPLOAD_DIR if is_private else UPLOAD_DIR
             safe_filename = f"{uuid.uuid4().hex}.gif"
-            destination_path = UPLOAD_DIR / safe_filename
+            destination_path = target_dir / safe_filename
 
             # Salva o GIF animado preservando todos os frames e timings
             frames[0].save(
@@ -151,8 +159,9 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
             else:
                 processed_img = img
 
+            target_dir = PRIVATE_UPLOAD_DIR if is_private else UPLOAD_DIR
             safe_filename = f"{uuid.uuid4().hex}.webp"
-            destination_path = UPLOAD_DIR / safe_filename
+            destination_path = target_dir / safe_filename
 
             # Salva em WebP comprimido e otimizado (sem EXIF / metadados por padrão)
             processed_img.save(
@@ -188,10 +197,12 @@ async def upload_photo(request: Request, file: UploadFile = File(...)):
             detail=f"Falha ao processar e comprimir a imagem: {str(e)}"
         )
 
+    url_path = f"/api/media/private/{safe_filename}" if is_private else f"/uploads/{safe_filename}"
     return {
         "success": True,
-        "url": f"/uploads/{safe_filename}",
+        "url": url_path,
         "filename": safe_filename,
+        "is_private": is_private,
         "original_size": total_bytes,
         "compressed_size": final_size,
         "compression_ratio": f"{round((1 - final_size / total_bytes) * 100, 1)}%" if total_bytes > 0 else "0%"

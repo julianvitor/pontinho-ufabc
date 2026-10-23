@@ -23,6 +23,7 @@ from backend.routers import (
     users_router,
     admin_router,
     upload_router,
+    media_router,
     events_router,
     help_router
 )
@@ -60,6 +61,7 @@ app.include_router(matches_router)
 app.include_router(users_router)
 app.include_router(admin_router)
 app.include_router(upload_router)
+app.include_router(media_router)
 app.include_router(events_router)
 app.include_router(help_router)
 
