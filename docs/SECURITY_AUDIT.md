@@ -252,3 +252,52 @@ Durante o checkup de segurança no backend do **Pontinho**, foram mapeadas **11 
 9. ✅ **[VULN-08] Implementado Rate Limiting (5 req/min)** e mensagem de erro genérica unificada no login (`2c2b583`).
 10. ✅ **[VULN-09] Segregadas fotos privadas do Álbum Secreto** em `private_uploads` servidas unicamente pelo endpoint autenticado `GET /api/media/private/{filename}` com checagem de autorização/match (`96c290f`).
 11. ✅ **[VULN-11] Aumentado requisito mínimo de senha para 8 caracteres** em `backend/models.py`, `backend/routers/auth.py` e `frontend/login.html` conforme NIST SP 800-63B (`7998bd2`).
+
+---
+
+## 🔎 4. Auditoria Exaustiva de Endpoints & Análise de Superfície de Ataque
+
+Após a eliminação das vulnerabilidades críticas e dos backdoors prévios (`GET /api/users/list` e `POST /api/auth/switch-user/{target_user_id}`), foi realizada uma varredura completa em todos os **58 endpoints ativos** registrados na aplicação FastAPI.
+
+### Mapeamento do Inventário de Rotas
+
+| Módulo / Roteador | Qtd. Rotas | Nível de Acesso Principal | Políticas de Proteção |
+|---|:---:|---|---|
+| **Auth** (`/api/auth`) | 5 | Público / Sessão | Rate Limit (Login), Hashes Argon2id, Cookies HttpOnly |
+| **Feed & Swipes** (`/api/feed`, `/api/swipe`, `/api/youtube`) | 3 | Sessão Autenticada / Público | Projeção em Allowlist LGPD, Teasers no Servidor |
+| **Matches & Chat** (`/api/matches`, `/api/messages`) | 9 | Participantes do Match | Validação estrita de autorização de conversa |
+| **Mídia Privada** (`/api/media`) | 1 | Proprietário / Match Aprovado | Prevenção de Path Traversal, No-Cache |
+| **Usuários & Perfil** (`/api/users`) | 7 | Próprio Usuário | Direito LGPD (Art. 18), Sanitização de URLs |
+| **Festas & Eventos** (`/api/events`) | 6 | Autenticado / Admin | Anonimização de participantes para deslogados |
+| **Upload de Arquivos** (`/api/upload`) | 1 | Autenticado | Buffer 10MB, Anti-Image Bomb, Limpeza EXIF |
+| **Ouvidoria & Denúncias** (`/api/help`) | 1 | Público Aberto | Rate limit de conexões, canal confidencial |
+| **Painel Administrativo** (`/api/admin`) | 24 | Exclusivo Administrador (`is_admin=1`) | Verificação estrita via `require_admin()` |
+| **Metadados & Raiz** (`/`, `/api/metadata`) | 2 | Público | Apenas leitura de catálogos estáticos |
+
+---
+
+### 🚨 Endpoints Vulneráveis, Inconsistentes ou Redundantes Identificados
+
+A auditoria identificou **4 pontos de atenção** que representam superfícies de ataque desnecessárias ou inconsistências arquiteturais e que podem ser **apagados ou refatorados imediatamente**:
+
+#### 1. `GET /api/youtube/search` (`backend/routers/feed.py:L55`)
+- **Classificação:** 🟠 **Vulnerabilidade de Médio/Alto Risco** (Open Scraping Proxy / DoS)
+- **Problema:** Endpoint aberto e sem autenticação que recebe uma query arbitrária do cliente (`q: str`) e efetua requisições HTTP em tempo real para o site do YouTube (`urllib.request.urlopen("https://www.youtube.com/results?search_query=...")`) realizando scraping com expressões regulares.
+- **Vetor de Risco:** Pode ser abusado por terceiros como um proxy anônimo aberto para raspar o YouTube, gerando tráfego abusivo a partir do servidor, consumo desmedido de CPU e risco severo de **bloqueio/banimento do IP da universidade ou do servidor por parte da infraestrutura do Google/YouTube**.
+- **Recomendação:** **Pode ser apagado** se o cadastro de músicas puder aceitar diretamente links ou IDs do YouTube, ou protegido com autenticação obrigatória (`get_current_user_id`) e rate limiting estrito.
+
+#### 2. `GET /api/auth/demo-accounts` (`backend/routers/auth.py:L221`)
+- **Classificação:** 🟡 **Resíduo de Teste / Superfície de Ataque Residual**
+- **Problema:** Endpoint criado originalmente para preenchimento de formulário em ambiente de desenvolvimento. Embora protegido pela flag `DEV_MODE=true` e sem expor senhas de administradores, trata-se de um facilitador de testes que não possui finalidade no produto final e permite listar dados e e-mails de contas demo.
+- **Recomendação:** **Pode ser apagado** definitivamente para deixar o backend 100% livre de códigos de teste em produção.
+
+#### 3. `POST /api/admin/reset-swipes` (`backend/routers/admin.py:L354`)
+- **Classificação:** 🟡 **Inconsistência de Segurança & Controle de Acesso**
+- **Problema:** A rota está registrada sob o caminho `/api/admin/reset-swipes` e dentro do roteador administrativo, porém **NÃO executa a função de controle `require_admin(request)`**. Qualquer usuário comum autenticado consegue invocá-la para disparar um `DELETE FROM swipes WHERE from_user_id = ?`.
+- **Recomendação:** Se o recurso de rever perfis já vistos ("Rever perfis" em `index.html`) for um comportamento de negócio oficial, deve ser movido para o roteador correto (`POST /api/feed/reset` ou `POST /api/swipe/reset`). Se era apenas um facilitador de depuração durante o desenvolvimento, **pode ser apagado**.
+
+#### 4. Aliases Duplicados de Chat: `GET /api/messages/{match_id}` e `POST /api/messages/{match_id}` (`backend/routers/matches.py:L127, L173`)
+- **Classificação:** 🔵 **Redundância Arquitetural & Ampliação Desnecessária de Superfície**
+- **Problema:** As rotas decoram os mesmos manipuladores que os endpoints canônicos `GET /api/matches/{match_id}/messages` e `POST /api/matches/{match_id}/messages`. O frontend consome exclusivamente as rotas aninhadas em `/api/matches/`.
+- **Recomendação:** **Podem ser apagadas**, consolidando a API estritamente nos padrões RESTful e eliminando rotas duplicadas.
+

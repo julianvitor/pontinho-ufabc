@@ -1,17 +1,22 @@
 # 📡 Documentação Oficial da API REST - Pontinho
 
-A API do **Pontinho** é construída com **FastAPI** (Python 3.11+), seguindo os princípios REST com payloads JSON, respostas padronizadas, autenticação criptográfica via HMAC-SHA256 e segurança ativa contra extração de dados privados.
+A API do **Pontinho** é construída com **FastAPI** (Python 3.11+), seguindo rigorosamente os princípios RESTful, com payloads JSON, respostas padronizadas, autenticação criptográfica via tokens HMAC-SHA256 assinados, proteção ativa de privacidade segundo a **LGPD (Lei nº 13.709/2018)** e controles de acesso recomendados pela **OWASP**.
 
 ---
 
 ## 🔒 Autenticação e Autorização
 
-A autenticação pode ser enviada por três mecanismos suportados simultaneamente:
-1. **Cookie seguro**: `pontinho_session={user_id}.{timestamp}.{signature}` (injetado automaticamente pelo login).
-2. **Cabeçalho Bearer**: `Authorization: Bearer {token}`
-3. **Cabeçalho Customizado**: `X-Session-Token: {token}` (ou `X-User-Id: {user_id}` para testes locais).
+A autenticação é exigida para a quase totalidade dos endpoints privados e pode ser transmitida por três mecanismos simultâneos:
 
-### Domínios Acadêmicos Permitidos:
+1. **Cookie Seguro**: `pontinho_session={user_id}.{timestamp}.{signature}` (injetado automaticamente pelo endpoint de login com flags `HttpOnly=True`, `SameSite=Lax` e `Secure` dinâmico em HTTPS).
+2. **Cabeçalho Bearer Padrão**: `Authorization: Bearer {token}`
+3. **Cabeçalho Customizado**: `X-Session-Token: {token}`
+4. **Query Parameter (Exclusivo para Mídia Privada)**: `GET /api/media/private/{filename}?token={token}` (para renderização transparente em tags HTML `<img>`).
+
+> [!IMPORTANT]
+> **Identificadores numéricos não assinados (`X-User-Id`) foram terminantemente eliminados (VULN-01)**. Toda requisição autenticada é obrigatoriamente validada pela assinatura HMAC-SHA256 com a chave secreta de ambiente `PONTINHO_SECRET_KEY`.
+
+### Domínios Acadêmicos Permitidos para Cadastro:
 - `@aluno.ufabc.edu.br`
 - `@ufabc.edu.br`
 
@@ -23,9 +28,11 @@ A autenticação pode ser enviada por três mecanismos suportados simultaneament
 2. [Feed & Swipes (`/api/feed` & `/api/swipe`)](#2-feed--swipes-apifeed--apiswipe)
 3. [Festas & Eventos Universitários (`/api/events`)](#3-festas--eventos-universitários-apievents)
 4. [Matches, Chat & Álbum Secreto (`/api/matches`)](#4-matches-chat--álbum-secreto-apimatches)
-5. [Usuários, Perfil & Moderação (`/api/users`)](#5-usuários-perfil--moderação-apiusers)
-6. [Upload de Mídia & GIFs Animados (`/api/upload`)](#6-upload-de-mídia--gifs-animados-apiupload)
-7. [Painel Administrativo (`/api/admin`)](#7-painel-administrativo-apiadmin)
+5. [Mídia Privada do Álbum Secreto (`/api/media`)](#5-mídia-privada-do-álbum-secreto-apimedia)
+6. [Usuários, Perfil & Direitos LGPD (`/api/users`)](#6-usuários-perfil--direitos-lgpd-apiusers)
+7. [Upload de Mídia & GIFs Animados (`/api/upload`)](#7-upload-de-mídia--gifs-animados-apiupload)
+8. [Central de Ajuda & Ouvidoria Pública (`/api/help`)](#8-central-de-ajuda--ouvidoria-pública-apihelp)
+9. [Painel Administrativo & Moderação (`/api/admin`)](#9-painel-administrativo--moderação-apiadmin)
 
 ---
 
@@ -35,11 +42,12 @@ A autenticação pode ser enviada por três mecanismos suportados simultaneament
 Cadastra um novo estudante na plataforma.
 
 - **Autenticação**: Não exigida.
+- **Validação de Senha**: Mínimo de 8 caracteres (conforme NIST SP 800-63B).
 - **Payload**:
 ```json
 {
   "email": "estudante@aluno.ufabc.edu.br",
-  "password": "senha_segura_123",
+  "password": "senha_segura_8chars",
   "name": "Nome do Estudante",
   "ra": "11202021001",
   "terms_accepted": true
@@ -49,35 +57,34 @@ Cadastra um novo estudante na plataforma.
 ```json
 {
   "success": true,
-  "token": "15.1729621200.7f8a9b...",
-  "user": {
-    "id": 15,
-    "ra": "11202021001",
-    "name": "Nome do Estudante",
-    "email": "estudante@aluno.ufabc.edu.br",
-    "is_admin": 0
-  }
+  "user_id": 15,
+  "token": "15.1792723162.8671c38f65d454c8dcd453bec31233ba...",
+  "name": "Nome do Estudante",
+  "email": "estudante@aluno.ufabc.edu.br",
+  "ra": "11202021001",
+  "message": "Cadastro realizado com sucesso!"
 }
 ```
 
 ---
 
 ### `POST /api/auth/login`
-Autentica o estudante e emite a sessão criptograficamente assinada.
+Autentica o estudante, verifica o hash Argon2id (com migração transparente de senhas legadas) e emite a sessão assinada com cookies `HttpOnly`.
 
-- **Autenticação**: Não exigida.
+- **Rate Limiting**: Máximo de 5 tentativas por minuto por IP (retorna HTTP 429 com tempo restante).
+- **Mensagem Genérica Anti-Enumeração**: Retorna `"E-mail acadêmico ou senha incorretos."` para qualquer erro.
 - **Payload**:
 ```json
 {
   "email": "estudante@aluno.ufabc.edu.br",
-  "password": "senha_segura_123"
+  "password": "senha_segura_8chars"
 }
 ```
 - **Resposta (200 OK)**:
 ```json
 {
   "success": true,
-  "token": "15.1729621200.7f8a9b...",
+  "token": "15.1792723162.8671c38f65d454c8dcd453bec31233ba...",
   "user": {
     "id": 15,
     "ra": "11202021001",
@@ -91,7 +98,7 @@ Autentica o estudante e emite a sessão criptograficamente assinada.
 ---
 
 ### `POST /api/auth/logout`
-Encerra a sessão ativa removendo os cookies de autenticação.
+Encerra a sessão ativa removendo os cookies criptografados.
 
 - **Resposta (200 OK)**:
 ```json
@@ -104,7 +111,7 @@ Encerra a sessão ativa removendo os cookies de autenticação.
 ---
 
 ### `GET /api/auth/me`
-Retorna os dados do usuário autenticado na requisição.
+Retorna os dados cadastrais do usuário autenticado na requisição.
 
 - **Resposta (200 OK)**:
 ```json
@@ -114,31 +121,25 @@ Retorna os dados do usuário autenticado na requisição.
     "id": 15,
     "name": "Nome do Estudante",
     "email": "estudante@aluno.ufabc.edu.br",
-    "is_admin": 0,
-    "photos": ["/uploads/abc.webp"]
+    "is_admin": 0
   }
 }
 ```
 
 ---
 
-### `GET /api/auth/demo-accounts`
-Retorna as contas do banco de dados para renderização dos atalhos de login rápido demo.
-
----
-
 ## 2. Feed & Swipes (`/api/feed` & `/api/swipe`)
 
 ### `GET /api/feed`
-Obtém o feed de perfis disponíveis para swipe, intercalado com anúncios publicitários.
+Obtém o deck de cards de estudantes disponíveis para swipe, intercalado com anúncios institucionais/publicitários.
 
-- **Filtros e Regras Aplicadas**:
+- **Regras e Proteções**:
   - Exclui o próprio usuário.
   - Exclui perfis já avaliados (`swipes`).
   - Exclui perfis com bloqueio mútuo (`blocks`).
   - Respeita o filtro de gênero (`target_gender`).
-  - Intercala anúncios com base na frequência cadastrada pelo Admin.
-  - **Segurança do Álbum Secreto**: Fotos privadas são removidas da resposta. Caso o perfil possua fotos secretas, o backend entrega em `secret_teaser_photo` apenas a **primeira foto já irreversivelmente borrada no servidor** (Server-Side Blur via Pillow), impedindo extração de conteúdo não autorizado.
+  - **Minimização LGPD & Allowlist Estrita (VULN-05)**: Remove dados pessoais desnecessários (`ra`, `email`, `password_hash`).
+  - **Teaser do Álbum Secreto (VULN-06)**: Apenas a primeira foto secreta é entregue e **com desfoque destrutivo Gaussiano irreversível gerado no servidor** (`secret_teaser_photo`), impedindo acesso à imagem original por inspeção.
 - **Resposta (200 OK)**:
 ```json
 {
@@ -149,24 +150,17 @@ Obtém o feed de perfis disponíveis para swipe, intercalado com anúncios publi
       "age": 21,
       "campus": "Santo André",
       "course": "Neurociência",
-      "bio": "Apaixonada por neurociência e música indie...",
-      "photos": [
-        "https://images.unsplash.com/photo-1516726817505-f5?w=800"
-      ],
-      "songs": ["Arctic Monkeys - 505", "Duda Beat - Bixinho"],
+      "specific_course": "Neurociência Computacional",
+      "entity": "Enactus",
+      "looking_for": "Algo sério",
+      "bio": "Pesquisa em inteligência computacional e indie rock.",
+      "interests": ["Neurociência", "Música Indie", "Café"],
+      "photos": ["/uploads/mariana_1.webp", "/uploads/mariana_2.webp"],
+      "songs": ["Arctic Monkeys - 505"],
       "has_private_content": true,
       "private_photos_count": 2,
-      "secret_teaser_photo": "/uploads/teasers/teaser_2_1747c85bb0ea57ed.webp",
+      "secret_teaser_photo": "/uploads/teasers/teaser_2_1747c85b.webp",
       "is_ad": false
-    },
-    {
-      "id": 78,
-      "title": "🦊 Kit Exclusivo & Caneca Oficial",
-      "description": "Caneca de tirante de alumínio 850ml e abadá exclusivo.",
-      "image_url": "https://images.unsplash.com/photo-1527529482837?w=800",
-      "button_text": "Pedir Kit",
-      "link_url": "https://pontinho.app",
-      "is_ad": true
     }
   ],
   "total_profiles": 18
@@ -176,18 +170,18 @@ Obtém o feed de perfis disponíveis para swipe, intercalado com anúncios publi
 ---
 
 ### `POST /api/swipe`
-Registra uma ação de swipe (*Curtir* ou *Passar*). Se houver like recíproco, detecta o Match instantaneamente.
+Registra uma ação de swipe (*Curtir* ou *Passar*). Caso haja like mútuo, formaliza o Match automaticamente.
 
 - **Payload**:
 ```json
 {
-  "to_user_id": 2,
+  "target_user_id": 2,
   "action": "like"
 }
 ```
 *(Valores de `action`: `"like"` ou `"pass"`)*
 
-- **Resposta (200 OK - Match)**:
+- **Resposta (200 OK)**:
 ```json
 {
   "success": true,
@@ -195,7 +189,7 @@ Registra uma ação de swipe (*Curtir* ou *Passar*). Se houver like recíproco, 
   "partner": {
     "id": 2,
     "name": "Mariana Silva",
-    "photos": ["https://images.unsplash.com/photo-1516726817505-f5?w=800"]
+    "photos": ["/uploads/mariana_1.webp"]
   }
 }
 ```
@@ -205,43 +199,25 @@ Registra uma ação de swipe (*Curtir* ou *Passar*). Se houver like recíproco, 
 ## 3. Festas & Eventos Universitários (`/api/events`)
 
 ### `GET /api/events`
-Lista todas as festas e eventos universitários ordenados cronologicamente, com contagem de confirmados e indicação de RSVP do usuário logado.
-- **Acesso Público**: Disponível para qualquer visitante (mesmo sem autenticação).
-- **Proteção da Lista de Presença**:
-  - Para visitantes **não autenticados**, `attendees_sample` é entregue vazio (`[]`) e `attendees_locked: true`, protegendo a privacidade dos alunos confirmados.
-  - Para usuários **autenticados**, `attendees_sample` inclui os avatares dos primeiros confirmados.
-  - O contador total (`attendees_count`) é entregue publicamente para promover a adesão às festas.
+Lista todas as festas e eventos universitários da UFABC ordenados cronologicamente.
 
-- **Resposta (200 OK)**:
-```json
-[
-  {
-    "id": 1,
-    "title": "Cervejada Geral UFABC",
-    "description": "6 horas de open bar, funk universitário e eletrônica.",
-    "event_date": "2026-11-14 22:00",
-    "location": "Espaço Modular - Santo André",
-    "image_url": "https://images.unsplash.com/photo-1516450360452?w=1000",
-    "ticket_url": "https://blacktag.com.br",
-    "attendees_count": 14,
-    "is_attending": false,
-    "attendees_sample": [],
-    "attendees_locked": true
-  }
-]
-```
+- **Acesso Aberto**: Visível para visitantes públicos deslogados e usuários autenticados.
+- **Proteção da Lista de Presença**:
+  - Usuários **não logados**: `attendees_sample = []` e `attendees_locked: true`.
+  - Usuários **autenticados**: `attendees_sample` inclui avatares dos estudantes confirmados.
 
 ---
 
 ### `GET /api/events/{event_id}`
-Detalhes completos da festa.
-- **Acesso Público**: Título, descrição, data, local e link de compra de ingressos são acessíveis a todos.
-- **Lista de Confirmados Privada**: A lista completa de participantes (`attendees`) é entregue **exclusivamente para estudantes autenticados**. Para visitantes deslogados, `attendees = []`, `attendees_locked: true` e `attendees_message` orienta o usuário a entrar com seu RA.
+Detalhes específicos de uma festa universitária.
+
+- **Acesso**: Público.
+- **Proteção de Dados**: A lista completa de estudantes confirmados (`attendees`) é entregue **estritamente para estudantes logados**. Visitantes recebem `attendees = []` e instrução para entrar no app.
 
 ---
 
 ### `POST /api/events/{event_id}/rsvp`
-Confirma ou desmarca presença na festa.
+Confirma ou cancela presença na festa (exige autenticação).
 
 - **Payload**:
 ```json
@@ -249,255 +225,192 @@ Confirma ou desmarca presença na festa.
   "status": "going"
 }
 ```
-*(Valores aceitos: `"going"` ou `"not_going"`)*
-
-- **Resposta (200 OK)**:
-```json
-{
-  "success": true,
-  "is_attending": true,
-  "attendees_count": 15,
-  "message": "Presença confirmada! Nos vemos lá! 🎉"
-}
-```
+*(Valores: `"going"` ou `"not_going"`)*
 
 ---
 
 ### `POST /api/events` *(Exclusivo Administrador)*
-Cadastra uma nova festa universitária.
-
-- **Regra de Validação**: O campo `title` tem **limite estrito de no máximo 25 caracteres**.
-- **Payload**:
-```json
-{
-  "title": "Cervejada Geral UFABC",
-  "description": "Open bar universitário de integração.",
-  "event_date": "2026-11-14 22:00",
-  "location": "Espaço Modular - Santo André",
-  "image_url": "/uploads/banner_festa.webp",
-  "ticket_url": "https://blacktag.com.br"
-}
-```
+Cadastra um novo evento universitário.
+- **Regra**: O campo `title` tem limite estrito de **máximo 25 caracteres**.
 
 ---
 
-### `PUT /api/events/{event_id}` *(Exclusivo Administrador)*
-Atualiza os dados de uma festa existente (título limitado a 25 caracteres).
-
----
-
-### `DELETE /api/events/{event_id}` *(Exclusivo Administrador)*
-Remove o evento e apaga em cascata todos os registros de presença confirmada.
+### `PUT /api/events/{event_id}` & `DELETE /api/events/{event_id}` *(Exclusivo Administrador)*
+Edita ou exclui uma festa com exclusão em cascata das confirmações de presença.
 
 ---
 
 ## 4. Matches, Chat & Álbum Secreto (`/api/matches`)
 
 ### `GET /api/matches`
-Retorna todas as conversas ativas do usuário logado, incluindo a última mensagem e contador de mensagens não lidas.
+Retorna as conexões ativas do estudante autenticado, última mensagem trocada e quantidade de mensagens não lidas.
 
 ---
 
-### `GET /api/matches/{partner_id}/messages`
-Retorna o histórico de mensagens e o status de autorização do álbum secreto bilateral entre os dois estudantes.
+### `GET /api/matches/{match_id}/messages`
+Retorna o histórico de mensagens de texto e marca as mensagens recebidas como lidas (`read_at`).
+
+---
+
+### `POST /api/matches/{match_id}/messages`
+Envia uma mensagem no chat do match.
+
+- **Payload**:
+```json
+{
+  "text": "Bora na Cervejada Geral neste sábado?"
+}
+```
+
+---
+
+### `GET /api/matches/{match_id}/private-status`
+Consulta o status das autorizações do Álbum Secreto mútuo.
 
 - **Resposta (200 OK)**:
 ```json
 {
-  "messages": [
-    {
-      "id": 101,
-      "sender_id": 2,
-      "text": "Oi! Vi que você também curte Tame Impala!",
-      "created_at": "2026-10-22 17:30:00",
-      "is_mine": false
-    }
-  ],
-  "partner": {
-    "id": 2,
-    "name": "Mariana Silva",
-    "private_photos": ["/uploads/privada1.webp"],
-    "private_bio": "Minha bio picante e exclusiva..."
-  },
-  "private_access": {
-    "status": "approved",
-    "is_approved": true,
-    "am_i_requester": true
+  "partner_id": 2,
+  "partner_name": "Mariana Silva",
+  "partner_has_private": true,
+  "partner_private_count": 2,
+  "my_request_status": "approved",
+  "their_request_status": "none",
+  "unlocked_content": {
+    "private_photos": ["/api/media/private/626e719a6eb948e4.webp"],
+    "private_bio": "Minha bio exclusiva do álbum secreto..."
   }
 }
 ```
-*(Nota: `private_photos` e `private_bio` só são entregues se `is_approved == true`)*.
+*(Nota: `unlocked_content` só é entregue caso `my_request_status == 'approved'`)*.
 
 ---
 
-### `POST /api/matches/{partner_id}/messages`
-Envia uma mensagem no chat com o match.
+### `POST /api/matches/{match_id}/request-private`
+Envia uma solicitação para visualizar o Álbum Secreto do parceiro de conversa.
+
+---
+
+### `POST /api/matches/{match_id}/respond-private`
+Aprova ou recusa o acesso ao seu Álbum Secreto solicitado pelo parceiro.
 
 - **Payload**:
 ```json
 {
-  "content": "Bora na Cervejada da Geral esse fim de semana?"
+  "action": "approved"
 }
 ```
+*(Valores: `"approved"` ou `"rejected"`)*
 
 ---
 
-### `POST /api/matches/{partner_id}/private-access/request`
-Envia no chat a solicitação para visualizar o álbum secreto do parceiro.
+### `DELETE /api/matches/{match_id}`
+Desfaz a conexão (Unmatch), excluindo permanentemente a conversa e revogando qualquer autorização de álbum secreto.
 
 ---
 
-### `POST /api/matches/{partner_id}/private-access/respond`
-Aprova ou recusa o pedido de visualização do álbum secreto feito pelo parceiro.
+## 5. Mídia Privada do Álbum Secreto (`/api/media`)
 
-- **Payload**:
-```json
-{
-  "action": "approve"
-}
-```
-*(Valores: `"approve"` ou `"reject"`)*
+### `GET /api/media/private/{filename}`
+Entrega protegida de fotos originais do Álbum Secreto (VULN-09).
 
----
-
-### `POST /api/matches/{partner_id}/unmatch`
-Desfaz o match com o usuário (remove a conexão e apaga as mensagens trocadas).
+- **Autenticação**: Obrigatória (Bearer Token, Cookie `pontinho_session` ou Query Parameter `?token=`).
+- **Validação de Autorização**:
+  - O solicitante deve ser o **próprio proprietário** da foto,
+  - Ou **administrador** do sistema para auditoria,
+  - Ou um match com solicitação **aprovada** na tabela `private_access_requests`.
+- **Headers de Segurança**: `Cache-Control: private, no-cache, no-store`, impedindo cache em proxies públicos e CDNs.
+- **Proteção contra Path Traversal**: Arquivo confinado estritamente ao diretório `private_uploads`.
 
 ---
 
-## 5. Usuários, Perfil & Moderação (`/api/users`)
+## 6. Usuários, Perfil & Direitos LGPD (`/api/users`)
 
 ### `GET /api/users/me`
-Retorna o perfil completo do próprio usuário autenticado (incluindo fotos públicas, privadas, bio e músicas).
+Retorna o perfil completo do próprio usuário (dados públicos e privados).
 
 ---
 
 ### `PUT /api/users/me`
-Atualiza os dados cadastrais do perfil.
-- **Regras**:
-  - Mínimo de 2 fotos públicas obrigatórias (`photos`).
-  - Se fotos privadas forem informadas em `private_photos`, o backend **gera ou atualiza imediatamente o teaser borrado** no servidor.
+Atualiza dados cadastrais, bio, interesses, fotos públicas e privadas. Ao salvar fotos privadas, atualiza automaticamente o teaser borrado no servidor.
 
 ---
 
-### `GET /api/users/{user_id}`
-Visualiza o perfil público de outro estudante.
+### `GET /api/users/me/export` *(LGPD Art. 18 - Direito à Portabilidade)*
+Exporta integralmente todos os dados do estudante no Pontinho em formato JSON (perfil, swipes, matches, mensagens, confirmações de festas, denúncias registradas e registros de consentimento).
 
 ---
 
-### `POST /api/users/report`
-Registra uma denúncia contra um usuário por conduta imprópria.
+### `DELETE /api/users/me` *(LGPD Art. 18 - Direito à Eliminação de Dados)*
+Exclui permanentemente a conta e elimina todos os dados em cascata (`ON DELETE CASCADE`), limpando a sessão.
+
+---
+
+### `POST /api/users/{target_user_id}/block` & `POST /api/users/{target_user_id}/unblock`
+Bloqueia ou desbloqueia um usuário, desfazendo conexões ativas e impedindo reaparição no feed.
+
+---
+
+### `POST /api/users/{target_user_id}/report`
+Denuncia um usuário por violação de conduta.
+
 - **Payload**:
 ```json
 {
-  "reported_id": 25,
-  "reason": "Conteúdo impróprio / Assédio",
-  "details": "Mensagens desrespeitosas no chat."
+  "reason": "Uso de foto fake / Não é estudante",
+  "details": "Perfil utilizando fotos de terceiros.",
+  "block_user": true
 }
 ```
 
 ---
 
-### `POST /api/users/block`
-Bloqueia um usuário. Cria um bloqueio bidirecional permanente, impedindo que ambos apareçam no feed ou conversem.
-
-- **Payload**:
-```json
-{
-  "blocked_id": 25,
-  "reason": "Bloqueado pelo usuário"
-}
-```
-
----
-
-## 6. Upload de Mídia & GIFs Animados (`/api/upload`)
+## 7. Upload de Mídia & GIFs Animados (`/api/upload`)
 
 ### `POST /api/upload/photo`
-Realiza o upload seguro de fotos e **GIFs animados**.
+Processa e sanitiza imagens com proteção contra DoS e Image Bombs.
 
-- **Content-Type**: `multipart/form-data`
-- **Campo**: `file` (arquivo JPG, PNG, WEBP ou GIF)
-- **Pipelines de Segurança e Performance**:
-  1. **Streaming em Chunks (64 KB)**: Limite de 10 MB, protegendo contra estouro de memória RAM.
-  2. **Proteção contra Decompression Bomb**: Limite máximo de pixels configurado no Pillow.
-  3. **Preservação de GIFs Animados**: Se for GIF, redimensiona proporcionalmente mantendo todos os frames e timings originais.
-  4. **Fotos Estáticas**: Correção de rotação EXIF de smartphones, downscale Lanczos (máx 1200x1200px) e compressão em WebP otimizado (redução de até 90% do tamanho).
-  5. **Remoção de Metadados EXIF**: Privacidade garantida com exclusão de GPS e dados do aparelho.
-  6. **Moderação Automática com NudeNet**: Detecção e bloqueio automático de conteúdo ilegal ou proibido.
-- **Resposta (200 OK)**:
-```json
-{
-  "success": true,
-  "url": "/uploads/c3d18e...webp",
-  "filename": "c3d18e...webp",
-  "original_size": 2450000,
-  "compressed_size": 185000,
-  "compression_ratio": "92.4%"
-}
-```
-
----
-
-## 7. Painel Administrativo (`/api/admin`)
-
-*(Exclusivo para contas com `is_admin = 1`)*
-
-| Método | Endpoint | Descrição |
-|---|---|---|
-| `GET` | `/api/admin/stats` | Estatísticas gerais (usuários, swipes, matches, mensagens, denúncias, eventos, ads) |
-| `GET` | `/api/admin/reports` | Lista de usuários denunciados com contagem e detalhes de quem denunciou |
-| `GET` | `/api/admin/users` | Lista de estudantes com filtros e paginação |
-| `DELETE` | `/api/admin/users/{id}` | Exclusão de conta em cascata total (swipes, matches, mensagens, uploads) |
-| `GET` | `/api/admin/ads` | Lista todos os anúncios publicitários |
-| `POST` | `/api/admin/ads` | Cadastra anúncio (título, link, imagem, frequência) |
-| `PUT` | `/api/admin/ads/{id}` | Edita anúncio e frequência de exibição |
-| `DELETE` | `/api/admin/ads/{id}` | Remove anúncio |
-| `GET` | `/api/admin/courses` | Lista cursos cadastrados |
-| `POST` | `/api/admin/courses` | Cadastra novo curso |
-| `DELETE` | `/api/admin/courses/{id}` | Exclui curso |
-| `GET` | `/api/admin/entities` | Lista entidades/atléticas universitárias |
-| `POST` | `/api/admin/entities` | Cadastra nova entidade |
-| `DELETE` | `/api/admin/entities/{id}` | Exclui entidade |
-| `GET` | `/api/admin/prompts` | Lista quebra-gelos disponíveis para o perfil |
-| `POST` | `/api/admin/prompts` | Cadastra nova pergunta de perfil |
-| `DELETE` | `/api/admin/prompts/{id}` | Remove pergunta de perfil |
-| `GET` | `/api/admin/complaints` | Lista reclamações e denúncias públicas da ouvidoria (fakes, perseguição, assédio) |
-| `PUT` | `/api/admin/complaints/{id}/status` | Atualiza status de denúncia da ouvidoria (pending, under_review, resolved, dismissed) |
-| `DELETE` | `/api/admin/complaints/{id}` | Descarta ou exclui denúncia da ouvidoria |
+- **Query Param**: `is_private=true` para direcionar a imagem ao armazenamento protegido `private_uploads` (Álbum Secreto).
+- **Formatos Aceitos**: JPEG, PNG, WEBP, GIF animado (preserva frames e timings).
+- **Pipelines**: Remoção total de EXIF, downscale seguro para máximo 1200x1200px, compressão WebP e moderação NudeNet.
 
 ---
 
 ## 8. Central de Ajuda & Ouvidoria Pública (`/api/help`)
 
-Canal de segurança acessível a **qualquer pessoa (mesmo sem conta ou login no aplicativo)** para denúncias de perfis fakes, stalking (perseguição), assédio, difamação ou uso não consentido de fotos.
-
 ### `POST /api/help/complaint`
-- **Acesso**: Público (sem exigência de token JWT ou login).
+Canal aberto para qualquer pessoa (inclusive sem conta ou login) registrar denúncias de perseguição, assédio, perfis fakes ou uso não autorizado de fotos.
+
 - **Payload**:
 ```json
 {
-  "reporter_name": "Nome Opcional",
-  "reporter_contact": "vitima@exemplo.com ou (11) 99999-9999",
+  "reporter_name": "Nome (Opcional)",
+  "reporter_contact": "contato@email.com",
   "complaint_type": "fake_profile",
-  "target_description": "Perfil de 'Lucas' com foto que não pertence a ele",
-  "details": "Estão utilizando minhas fotos do Instagram sem permissão para criar perfil no app."
-}
-```
-*(Tipos de ocorrência aceitos: `"fake_profile"`, `"stalking"`, `"harassment"`, `"image_misuse"`, `"defamation"`, `"other"`)*.
-
-- **Resposta (200 OK)**:
-```json
-{
-  "status": "success",
-  "id": 1,
-  "message": "Sua reclamação foi registrada com sucesso sob protocolo confidencial. Nossa equipe de moderação e segurança apurará com prioridade."
+  "target_description": "Perfil alegando ser estudante de BC&T",
+  "details": "Estão usando minhas fotos sem consentimento."
 }
 ```
 
 ---
 
-## 9. Arquivos Estáticos & Teasers
+## 9. Painel Administrativo & Moderação (`/api/admin`)
 
-- **`/uploads/{filename}`**: Imagens públicas dos perfis, avatares e banners de festas.
-- **`/uploads/teasers/{filename}`**: Imagens de teaser do Álbum Secreto processadas com **desfoque irreversível no servidor** (`radius=35`).
+*(Exclusivo para contas autenticadas com `is_admin = 1`)*
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `GET` | `/api/admin/overview` | Métricas gerais da plataforma (usuários, matches, mensagens, festas, denúncias) |
+| `GET` | `/api/admin/reports` | Lista de usuários denunciados por outros estudantes |
+| `PUT` | `/api/admin/reports/{id}/status` | Atualiza status de denúncia interna |
+| `DELETE` | `/api/admin/reports/{id}` | Descarta ou arquiva denúncia interna |
+| `GET` | `/api/admin/users` | Lista e gerenciamento de contas cadastradas |
+| `DELETE` | `/api/admin/users/{id}` | Exclusão de conta de usuário com expurgo completo |
+| `GET` | `/api/admin/ads` / `POST` / `PUT` / `DELETE` | Gestão de anúncios e campanhas intercaladas no feed |
+| `GET` | `/api/admin/courses` / `POST` / `DELETE` | Gestão de cursos de graduação e pós |
+| `GET` | `/api/admin/entities` / `POST` / `DELETE` | Gestão de entidades acadêmicas e atléticas |
+| `GET` | `/api/admin/prompts` / `POST` / `DELETE` | Gestão de perguntas quebra-gelo para perfis |
+| `GET` | `/api/admin/complaints` | Lista denúncias registradas na Ouvidoria Pública |
+| `PUT` | `/api/admin/complaints/{id}/status` | Atualiza status de denúncia da ouvidoria |
+| `DELETE` | `/api/admin/complaints/{id}` | Exclui denúncia da ouvidoria |
+| `GET` | `/api/metadata` | Metadados públicos (cursos, entidades, perguntas, campi) |
