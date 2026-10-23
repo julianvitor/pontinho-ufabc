@@ -62,6 +62,7 @@
 pontinho-ufabc/
 ├── API.md                    # Manual completo e detalhado da API REST
 ├── README.md                 # Documentação oficial do projeto
+├── SECURITY_AUDIT.md         # Relatório completo de auditoria de segurança e pentest
 ├── docker-compose.yml        # Configuração de containers Docker
 ├── Dockerfile                # Imagem Docker otimizada (Python slim)
 ├── entrypoint.sh             # Script de inicialização do container
