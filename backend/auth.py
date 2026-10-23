@@ -2,13 +2,43 @@
 Utilitários de autenticação, assinatura de sessão criptográfica e validação de e-mail do Pontinho UFABC
 """
 import os
+import sys
 import time
 import hmac
 import hashlib
+from pathlib import Path
 from fastapi import Request, HTTPException, Response
 from backend.database import get_db
 
-SECRET_KEY = os.getenv("PONTINHO_SECRET_KEY", "ufabc_pontinho_super_secret_session_key_2026")
+# Carregamento defensivo de arquivo .env caso as variáveis ainda não estejam no ambiente
+def _load_dotenv_fallback():
+    env_file = Path(__file__).resolve().parent.parent / ".env"
+    if env_file.exists():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+_load_dotenv_fallback()
+
+SECRET_KEY = os.getenv("PONTINHO_SECRET_KEY")
+INSECURE_DEFAULT_KEY = "ufabc_pontinho_super_secret_session_key_2026"
+
+if not SECRET_KEY or len(SECRET_KEY.strip()) < 16 or SECRET_KEY == INSECURE_DEFAULT_KEY:
+    raise RuntimeError(
+        "FALHA CRÍTICA DE SEGURANÇA (VULN-02): A variável de ambiente 'PONTINHO_SECRET_KEY' "
+        "não está definida ou possui valor fraco/padrão. "
+        "Configure uma chave secreta criptográfica forte (mínimo de 32 caracteres) no arquivo .env."
+    )
+
 SESSION_COOKIE_NAME = "pontinho_session"
 SESSION_MAX_AGE = 30 * 24 * 3600  # 30 dias
 

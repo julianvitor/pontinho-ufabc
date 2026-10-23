@@ -12,6 +12,8 @@ services:
       - ./data:/app/data
       - ./backend:/app/backend
       - ./frontend:/app/frontend
+    env_file:
+      - .env
     environment:
       - DATABASE_PATH=/app/data/pontinho.db
       - PYTHONUNBUFFERED=1
