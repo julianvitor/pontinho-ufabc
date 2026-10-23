@@ -10,9 +10,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Diretório de trabalho dentro do container
 WORKDIR /app
 
-# Instala dependências Python
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Instala o Poetry e configura para não criar virtualenv isolado dentro do container
+RUN pip install --no-cache-dir poetry && \
+    poetry config virtualenvs.create false
+
+# Instala dependências Python via Poetry
+COPY pyproject.toml poetry.lock* ./
+RUN poetry install --no-root --no-interaction --no-ansi
 
 # Copia pastas do backend, frontend e script de inicialização
 COPY backend/ ./backend/

@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "pontinho-ufabc"
+version = "2.0.0"
+description = "Backend FastAPI e API REST pura do aplicativo Pontinho UFABC"
+authors = ["Pontinho UFABC Team"]
+readme = "README.md"
+packages = [{include = "backend"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = ">=0.110.0"
+uvicorn = {extras = ["standard"], version = ">=0.28.0"}
+python-multipart = ">=0.0.9"
+livereload = ">=2.7.0"
+pillow = ">=10.0.0"
+nudenet = ">=3.4.0"
+onnxruntime = ">=1.17.0"
+argon2-cffi = ">=23.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

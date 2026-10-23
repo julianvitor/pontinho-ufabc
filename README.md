@@ -66,7 +66,8 @@ pontinho-ufabc/
 ├── docker-compose.yml        # Configuração de containers Docker
 ├── Dockerfile                # Imagem Docker otimizada (Python slim)
 ├── entrypoint.sh             # Script de inicialização do container
-├── requirements.txt          # Dependências do backend Python
+├── pyproject.toml            # Configuração de dependências e metadados do Poetry
+├── poetry.lock               # Lockfile determinístico de dependências do Poetry
 ├── serve_frontend.py         # Servidor frontend desacoplado com Live Reload (porta 3000)
 ├── backend/                  # Aplicação Python / FastAPI modular
 │   ├── __init__.py
@@ -192,21 +193,21 @@ O manual completo com exemplos de payloads pode ser consultado em [API.md](file:
 
 ---
 
-### Opção 2: Localmente com Python
+### Opção 2: Localmente com Poetry
 
-1. **Instalar dependências**:
+1. **Instalar dependências com Poetry**:
    ```bash
-   pip install -r requirements.txt
+   poetry install
    ```
 
 2. **Inicializar e semear a base de dados**:
    ```bash
-   python -m backend.seed
+   poetry run python -m backend.seed
    ```
 
-3. **Executar a API com Uvicorn**:
+3. **Executar a API com Uvicorn via Poetry**:
    ```bash
-   uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+   poetry run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
 ---

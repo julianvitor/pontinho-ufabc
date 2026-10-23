@@ -1,8 +1,0 @@
-fastapi>=0.110.0
-uvicorn>=0.28.0
-python-multipart>=0.0.9
-livereload>=2.7.0
-Pillow>=10.0.0
-nudenet>=3.4.0
-onnxruntime>=1.17.0
-argon2-cffi>=23.1.0
