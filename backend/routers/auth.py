@@ -3,7 +3,7 @@ Rotas de autenticação (Login, Cadastro e Sessão) do Pontinho
 """
 import json
 from fastapi import APIRouter, HTTPException, Request, Response
-from backend.database import get_db, hash_password, verify_password
+from backend.database import get_db, hash_password, verify_password, needs_rehash
 from backend.models import RegisterRequest, LoginRequest
 from backend.auth import (
     get_current_user_id,
@@ -124,6 +124,18 @@ def login_user(data: LoginRequest, response: Response):
 
     if not valid:
         raise HTTPException(status_code=401, detail="Senha incorreta.")
+
+    # Migração automática transparente para Argon2id se o hash for legado (SHA-256)
+    if needs_rehash(stored_hash):
+        try:
+            new_argon_hash = hash_password(cleaned_pw)
+            rehash_conn = get_db()
+            rehash_cursor = rehash_conn.cursor()
+            rehash_cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_argon_hash, user["id"]))
+            rehash_conn.commit()
+            rehash_conn.close()
+        except Exception as e:
+            print(f"[Auth] Erro ao migrar hash para Argon2id: {e}")
 
     # Define a sessão criptograficamente assinada
     session_token = set_auth_session(response, user["id"])

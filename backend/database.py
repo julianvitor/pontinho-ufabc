@@ -21,15 +21,51 @@ def get_db():
     return conn
 
 import hashlib
+import hmac
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHashError
+
+_hasher = PasswordHasher(
+    time_cost=2,
+    memory_cost=65536,  # 64 MB
+    parallelism=1,
+    hash_len=32,
+    salt_len=16
+)
 
 def hash_password(password: str) -> str:
-    """Gera hash SHA-256 com salt fixo para entendimento humano."""
-    salt = "ufabc_pontinho_2026"
-    return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
+    """Gera hash seguro com Argon2id (padrão de ouro OWASP, com salt individual aleatório)."""
+    return _hasher.hash(password)
 
 def verify_password(password: str, hashed: str) -> bool:
-    """Verifica se a senha fornecida confere com o hash salvo."""
-    return hash_password(password) == hashed
+    """
+    Verifica se a senha fornecida confere com o hash salvo.
+    Suporta Argon2id nativamente e provê retrocompatibilidade transparente
+    com os hashes legados SHA-256.
+    """
+    if not hashed:
+        return False
+
+    # 1. Validação Argon2id
+    if hashed.startswith("$argon2"):
+        try:
+            return _hasher.verify(hashed, password)
+        except (VerifyMismatchError, VerificationError, InvalidHashError):
+            return False
+
+    # 2. Retrocompatibilidade para hashes legados SHA-256
+    legacy_salt = "ufabc_pontinho_2026"
+    legacy_hash = hashlib.sha256((legacy_salt + password).encode("utf-8")).hexdigest()
+    return hmac.compare_digest(legacy_hash, hashed)
+
+def needs_rehash(hashed: str) -> bool:
+    """Indica se o hash salvo precisa ser migrado para Argon2id."""
+    if not hashed or not hashed.startswith("$argon2"):
+        return True
+    try:
+        return _hasher.check_needs_rehash(hashed)
+    except Exception:
+        return True
 
 def init_db():
     """Cria todas as tabelas necessárias no banco de dados SQLite."""
