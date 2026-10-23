@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 class RegisterRequest(BaseModel):
     email: str = Field(..., description="E-mail de acesso")
     name: str = Field(..., min_length=2, description="Nome completo")
-    password: str = Field(..., min_length=4, description="Senha de acesso")
+    password: str = Field(..., min_length=8, description="Senha de acesso (mínimo de 8 caracteres)")
     ra: Optional[str] = Field(default="", description="RA (Registro Acadêmico) opcional")
     terms_accepted: bool = Field(default=True, description="Concordância com os Termos de Uso e Política de Privacidade (LGPD)")
 

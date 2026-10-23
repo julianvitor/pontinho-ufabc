@@ -36,6 +36,12 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
     if not cleaned_name or not cleaned_pw:
         raise HTTPException(status_code=400, detail="Nome e Senha são obrigatórios.")
 
+    if len(cleaned_pw) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="A senha deve conter no mínimo 8 caracteres para sua segurança."
+        )
+
     conn = get_db()
     cursor = conn.cursor()
 

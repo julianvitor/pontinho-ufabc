@@ -136,8 +136,8 @@
             id="reg-password" 
             type="password" 
             required 
-            minlength="4" 
-            placeholder="Mínimo 4 caracteres" 
+            minlength="8" 
+            placeholder="Mínimo 8 caracteres" 
             class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
         </div>
@@ -274,6 +274,11 @@
       const termsChecked = document.getElementById('reg-terms').checked;
       if (!termsChecked) {
         Pontinho.showToast('Você precisa aceitar os Termos de Uso e a Política de Privacidade (LGPD).', 'error');
+        return;
+      }
+
+      if (!password || password.length < 8) {
+        Pontinho.showToast('A senha deve conter no mínimo 8 caracteres.', 'error');
         return;
       }
 
