@@ -164,7 +164,7 @@ def get_feed(request: Request):
         gender_filter_sql = " AND LOWER(gender) IN ('não-binário', 'nao-binario', 'não binário', 'nao binario')"
 
     # Buscar perfis ainda não avaliados respeitando o filtro de gênero e exclusão de bloqueios mútuos
-    # Projeção com Allowlist Estrita: NUNCA seleciona 'ra', 'email', 'password_hash' ou 'is_admin'
+    # Projeção com Allowlist Estrita: NUNCA seleciona dados sensíveis como 'email', 'password_hash' ou 'is_admin'
     cursor.execute(f"""
         SELECT id, name, age, campus, course, specific_course, entity, looking_for,
                bio, interests, photos, songs, prompt1_q, prompt1_a, prompt2_q, prompt2_a,

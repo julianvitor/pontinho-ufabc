@@ -511,7 +511,7 @@ const Pontinho = {
               <label class="block text-xs font-bold text-slate-200 mb-1">
                 Quem está envolvido? <span class="text-rose-400">*</span>
               </label>
-              <input type="text" id="complaint-target" required placeholder="Nome, RA, link ou descrição do perfil acusado" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
+              <input type="text" id="complaint-target" required placeholder="Nome, e-mail institucional, link ou descrição do perfil acusado" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
             </div>
 
             <div>

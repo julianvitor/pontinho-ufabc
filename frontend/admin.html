@@ -659,7 +659,6 @@
                     </div>
                     <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-mono">
                       <span>${u.user_email}</span>
-                      ${u.user_ra ? `<span class="text-emerald-400 font-bold">• RA: ${u.user_ra}</span>` : ''}
                     </div>
                   </div>
                 </div>
@@ -745,7 +744,6 @@
               </td>
               <td class="py-3 px-3 text-slate-300 font-mono text-[11px]">
                 <div>${u.email}</div>
-                <span class="inline-block mt-0.5 text-[10px] text-emerald-400 font-mono font-bold bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-500/30">RA: ${u.ra || 'N/A'}</span>
               </td>
               <td class="py-3 px-3">
                 <span class="font-medium text-slate-200">${u.campus}</span>
@@ -754,15 +752,35 @@
               <td class="py-3 px-3 text-slate-300">${u.entity}</td>
               <td class="py-3 px-3 font-semibold text-slate-300">${(u.photos || []).length} fotos</td>
               <td class="py-3 px-3 text-right">
-                <button onclick="deleteUser(${u.id}, '${escapeQuote(u.name)}')" class="px-2.5 py-1 bg-rose-950/50 hover:bg-rose-900/60 text-rose-400 rounded-lg font-bold text-[11px] border border-rose-500/30 transition">
-                  Apagar
-                </button>
+                <div class="flex items-center justify-end gap-1.5">
+                  <button onclick="toggleAdminUser(${u.id}, '${escapeQuote(u.name)}', ${u.is_admin ? 1 : 0})" class="px-2.5 py-1 ${u.is_admin ? 'bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border-amber-500/40' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'} rounded-lg font-bold text-[11px] border transition" title="${u.is_admin ? 'Remover privilégio de Admin' : 'Promover a Administrador'}">
+                    ${u.is_admin ? '⭐ Admin' : '+ Admin'}
+                  </button>
+                  <button onclick="deleteUser(${u.id}, '${escapeQuote(u.name)}')" class="px-2.5 py-1 bg-rose-950/50 hover:bg-rose-900/60 text-rose-400 rounded-lg font-bold text-[11px] border border-rose-500/30 transition">
+                    Apagar
+                  </button>
+                </div>
               </td>
             </tr>
           `;
         }).join('');
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-rose-500">${err.message}</td></tr>`;
+      }
+    }
+
+    async function toggleAdminUser(id, name, currentIsAdmin) {
+      const actionText = currentIsAdmin ? 'remover o acesso de administrador de' : 'promover a administrador';
+      if (!confirm(`Deseja realmente ${actionText} "${name}"?`)) {
+        return;
+      }
+
+      try {
+        const res = await Pontinho.apiFetch(`/api/admin/users/${id}/toggle-admin`, { method: 'PATCH' });
+        Pontinho.showToast(res.message, 'success');
+        loadUsersTable();
+      } catch (err) {
+        Pontinho.showToast(err.message, 'error');
       }
     }
 

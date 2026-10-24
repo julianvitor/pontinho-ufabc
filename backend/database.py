@@ -72,7 +72,7 @@ def init_db():
     conn = get_db()
     cursor = conn.cursor()
 
-    # Tabela de Usuários com RA e Senha
+    # Tabela de Usuários com E-mail Institucional e Senha
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,7 +104,7 @@ def init_db():
     );
     """)
 
-    # Migração automática caso o banco já existisse sem ra, password_hash, gender, target_gender, songs ou terms_accepted_at
+    # Migração automática de compatibilidade caso o banco já existisse sem password_hash, gender, target_gender, songs ou terms_accepted_at
     cursor.execute("PRAGMA table_info(users)")
     existing_cols = [row["name"] for row in cursor.fetchall()]
     if "ra" not in existing_cols:
@@ -125,6 +125,16 @@ def init_db():
     if "terms_accepted_at" not in existing_cols:
         cursor.execute("ALTER TABLE users ADD COLUMN terms_accepted_at TIMESTAMP")
         cursor.execute("UPDATE users SET terms_accepted_at = datetime('now') WHERE terms_accepted_at IS NULL")
+    if "age_verified" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN age_verified INTEGER DEFAULT 0")
+    if "verified_age" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN verified_age INTEGER DEFAULT 0")
+    if "liveness_verified" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN liveness_verified INTEGER DEFAULT 0")
+    if "verification_photo" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN verification_photo TEXT DEFAULT ''")
+    if "age_verified_at" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN age_verified_at TIMESTAMP")
 
     # Tabela de Solicitações de Acesso a Conteúdo Privado (Fotos & Bio Secreta)
     cursor.execute("""

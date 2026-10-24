@@ -92,8 +92,8 @@ def get_admin_reports(request: Request):
     cursor.execute("""
         SELECT
             r.id, r.reporter_id, r.reported_id, r.reason, r.details, r.status, r.created_at,
-            u_rep.name AS reporter_name, u_rep.email AS reporter_email, u_rep.ra AS reporter_ra,
-            u_tar.name AS reported_name, u_tar.email AS reported_email, u_tar.ra AS reported_ra,
+            u_rep.name AS reporter_name, u_rep.email AS reporter_email,
+            u_tar.name AS reported_name, u_tar.email AS reported_email,
             u_tar.photos AS reported_photos
         FROM reports r
         JOIN users u_rep ON u_rep.id = r.reporter_id
@@ -115,7 +115,6 @@ def get_admin_reports(request: Request):
             r.reported_id AS user_id,
             u.name AS user_name,
             u.email AS user_email,
-            u.ra AS user_ra,
             u.photos AS user_photos,
             COUNT(r.id) AS total_reports,
             MAX(r.created_at) AS last_report_date
@@ -179,7 +178,7 @@ def get_admin_users(request: Request):
     require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, ra, name, email, age, campus, course, specific_course, entity, photos, songs, is_admin, created_at FROM users ORDER BY id DESC")
+    cursor.execute("SELECT id, name, email, age, campus, course, specific_course, entity, photos, songs, is_admin, created_at FROM users ORDER BY id DESC")
     rows = cursor.fetchall()
     conn.close()
     result = []
@@ -200,6 +199,34 @@ def delete_user(user_id: int, request: Request):
     conn.commit()
     conn.close()
     return {"success": True, "message": f"Usuário {user_id} excluído com sucesso."}
+
+@router.patch("/api/admin/users/{user_id}/toggle-admin")
+def toggle_user_admin(user_id: int, request: Request):
+    """Promove ou remove privilégios de administrador de um usuário."""
+    current_admin = require_admin(request)
+    if current_admin["id"] == user_id:
+        raise HTTPException(status_code=400, detail="Você não pode revogar seus próprios privilégios de administrador.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, email, is_admin FROM users WHERE id = ?", (user_id,))
+    target = cursor.fetchone()
+    if not target:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    new_status = 0 if target["is_admin"] else 1
+    cursor.execute("UPDATE users SET is_admin = ? WHERE id = ?", (new_status, user_id))
+    conn.commit()
+    conn.close()
+
+    status_str = "promovido a Administrador" if new_status == 1 else "rebaixado a Usuário Comum"
+    return {
+        "success": True,
+        "user_id": user_id,
+        "is_admin": new_status,
+        "message": f"Usuário {target['name']} ({target['email']}) foi {status_str} com sucesso."
+    }
 
 @router.get("/api/admin/courses")
 def get_admin_courses(request: Request):

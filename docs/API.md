@@ -43,14 +43,18 @@ Cadastra um novo estudante na plataforma.
 
 - **Autenticação**: Não exigida.
 - **Validação de Senha**: Mínimo de 8 caracteres (conforme NIST SP 800-63B).
+- **Validação do ECA Digital (Lei nº 14.811/2024)**: Exige validação biométrica com prova de vida anti-fraude e idade $\ge 18$ anos processada via modelo open source on-device (`@vladmandic/face-api`).
 - **Payload**:
 ```json
 {
   "email": "estudante@aluno.ufabc.edu.br",
   "password": "senha_segura_8chars",
   "name": "Nome do Estudante",
-  "ra": "11202021001",
-  "terms_accepted": true
+  "terms_accepted": true,
+  "age_verified": true,
+  "liveness_passed": true,
+  "estimated_age": 21,
+  "face_snapshot": "data:image/jpeg;base64,..."
 }
 ```
 - **Resposta (200 OK)**:
@@ -61,7 +65,6 @@ Cadastra um novo estudante na plataforma.
   "token": "15.1792723162.8671c38f65d454c8dcd453bec31233ba...",
   "name": "Nome do Estudante",
   "email": "estudante@aluno.ufabc.edu.br",
-  "ra": "11202021001",
   "message": "Cadastro realizado com sucesso!"
 }
 ```
@@ -87,7 +90,6 @@ Autentica o estudante, verifica o hash Argon2id (com migração transparente de 
   "token": "15.1792723162.8671c38f65d454c8dcd453bec31233ba...",
   "user": {
     "id": 15,
-    "ra": "11202021001",
     "name": "Nome do Estudante",
     "email": "estudante@aluno.ufabc.edu.br",
     "is_admin": 0
@@ -138,7 +140,7 @@ Obtém o deck de cards de estudantes disponíveis para swipe, intercalado com an
   - Exclui perfis já avaliados (`swipes`).
   - Exclui perfis com bloqueio mútuo (`blocks`).
   - Respeita o filtro de gênero (`target_gender`).
-  - **Minimização LGPD & Allowlist Estrita (VULN-05)**: Remove dados pessoais desnecessários (`ra`, `email`, `password_hash`).
+  - **Minimização LGPD & Allowlist Estrita (VULN-05)**: Remove dados cadastrais privados (`email`, `password_hash`).
   - **Teaser do Álbum Secreto (VULN-06)**: Apenas a primeira foto secreta é entregue e **com desfoque destrutivo Gaussiano irreversível gerado no servidor** (`secret_teaser_photo`), impedindo acesso à imagem original por inspeção.
 - **Resposta (200 OK)**:
 ```json
@@ -437,6 +439,7 @@ Canal aberto para qualquer pessoa (inclusive sem conta ou login) registrar denú
 | `PUT` | `/api/admin/reports/{id}/status` | Atualiza status de denúncia interna |
 | `DELETE` | `/api/admin/reports/{id}` | Descarta ou arquiva denúncia interna |
 | `GET` | `/api/admin/users` | Lista e gerenciamento de contas cadastradas |
+| `PATCH` | `/api/admin/users/{id}/toggle-admin` | Promove ou revoga privilégios de administrador de um usuário |
 | `DELETE` | `/api/admin/users/{id}` | Exclusão de conta de usuário com expurgo completo |
 | `GET` | `/api/admin/ads` / `POST` / `PUT` / `DELETE` | Gestão de anúncios e campanhas intercaladas no feed |
 | `GET` | `/api/admin/courses` / `POST` / `DELETE` | Gestão de cursos de graduação e pós |

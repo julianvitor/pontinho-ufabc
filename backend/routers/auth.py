@@ -25,7 +25,6 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
     sanitized_email = sanitize_and_validate_ufabc_email(data.email)
     cleaned_name = data.name.strip()
     cleaned_pw = data.password.strip()
-    cleaned_ra = (data.ra or "").strip()
 
     if not data.terms_accepted:
         raise HTTPException(
@@ -42,6 +41,41 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
             detail="A senha deve conter no mínimo 8 caracteres para sua segurança."
         )
 
+    # Validação do ECA Digital (Lei 14.811/2024 e Proteção à Criança e Adolescente)
+    if not data.age_verified or not data.liveness_passed:
+        raise HTTPException(
+            status_code=403,
+            detail="O cadastro exige verificação biométrica facial de maioridade (+18) e prova de vida conforme o ECA Digital."
+        )
+
+    if data.estimated_age is not None and data.estimated_age < 18:
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso bloqueado: Idade estimada inferior a 18 anos. O aplicativo é restrito a maiores de idade segundo a legislação vigente."
+        )
+
+    verified_age_val = data.estimated_age if data.estimated_age and data.estimated_age >= 18 else 20
+
+    # Processa snapshot da selfie de verificação se fornecida
+    verification_photo_path = ""
+    if data.face_snapshot and "base64," in data.face_snapshot:
+        try:
+            import base64
+            from pathlib import Path
+            import uuid
+            header, encoded = data.face_snapshot.split("base64,", 1)
+            img_bytes = base64.b64decode(encoded)
+            data_dir = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent
+            uploads_dir = data_dir / "uploads"
+            uploads_dir.mkdir(parents=True, exist_ok=True)
+            filename = f"verify_{uuid.uuid4().hex[:16]}.jpg"
+            file_dest = uploads_dir / filename
+            with open(file_dest, "wb") as f:
+                f.write(img_bytes)
+            verification_photo_path = f"/uploads/{filename}"
+        except Exception:
+            verification_photo_path = ""
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -51,16 +85,7 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
         conn.close()
         raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado no Pontinho.")
 
-    # Se informou RA, verifica se não está duplicado
-    if cleaned_ra:
-        cursor.execute("SELECT id FROM users WHERE ra = ?", (cleaned_ra,))
-        if cursor.fetchone():
-            conn.close()
-            raise HTTPException(status_code=400, detail="Este identificador já está cadastrado no Pontinho.")
-    else:
-        # Se não informou RA, usa o prefixo do e-mail
-        cleaned_ra = sanitized_email.split("@")[0]
-
+    internal_id = sanitized_email.split("@")[0]
     pw_hash = hash_password(cleaned_pw)
 
     # Fotos padrão de avatar iniciais para satisfazer a regra de negócio de no mínimo 2 fotos
@@ -68,20 +93,24 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
         "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
     ]
+    if verification_photo_path:
+        default_photos.insert(0, verification_photo_path)
 
     cursor.execute("""
         INSERT INTO users (
             ra, password_hash, email, name, age, campus, course, specific_course,
             entity, looking_for, bio, interests, photos,
             prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
-            gender, target_gender, terms_accepted_at
-        ) VALUES (?, ?, ?, ?, 20, 'Santo André', 'Ciência e Tecnologia', 'Ciência da Computação',
+            gender, target_gender, terms_accepted_at,
+            age_verified, verified_age, liveness_verified, verification_photo, age_verified_at
+        ) VALUES (?, ?, ?, ?, ?, 'Santo André', 'Ciência e Tecnologia', 'Ciência da Computação',
                   'Geral', 'Amizade', 'Olá, estou no Pontinho!', '["Música", "Tecnologia"]', ?,
                   'O melhor lugar para relaxar é...', 'Ouvindo música boa',
                   'Minha opinião impopular...', 'Conversa olho no olho supera qualquer mensagem',
                   'No intervalo você me encontra...', 'Tomando um café',
-                  'Não informado', 'Todos', datetime('now'))
-    """, (cleaned_ra, pw_hash, sanitized_email, cleaned_name, json.dumps(default_photos)))
+                  'Não informado', 'Todos', datetime('now'),
+                  1, ?, 1, ?, datetime('now'))
+    """, (internal_id, pw_hash, sanitized_email, cleaned_name, verified_age_val, json.dumps(default_photos), verified_age_val, verification_photo_path))
 
     conn.commit()
     new_user_id = cursor.lastrowid
@@ -96,7 +125,6 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
         "token": session_token,
         "name": cleaned_name,
         "email": sanitized_email,
-        "ra": cleaned_ra,
         "message": "Cadastro realizado com sucesso!"
     }
 
@@ -120,7 +148,7 @@ def _check_login_rate_limit(client_ip: str):
 @router.post("/login")
 def login_user(data: LoginRequest, request: Request, response: Response):
     """
-    Login de estudante por E-mail Acadêmico e Senha (ou RA).
+    Login de estudante por E-mail Institucional e Senha.
     Protegido por rate limiting e resposta genérica anti-enumeração de usuários.
     """
     client_ip = request.client.host if request.client else "unknown"
@@ -132,17 +160,17 @@ def login_user(data: LoginRequest, request: Request, response: Response):
     conn = get_db()
     cursor = conn.cursor()
 
-    # Aceita e-mail completo, RA ou prefixo sem @aluno.ufabc.edu.br
+    # Aceita e-mail completo ou prefixo sem @aluno.ufabc.edu.br
     alt_email = f"{login_input}@aluno.ufabc.edu.br" if "@" not in login_input else login_input
 
     cursor.execute("""
         SELECT * FROM users
-        WHERE LOWER(email) = ? OR LOWER(email) = ? OR ra = ?
-    """, (login_input, alt_email, login_input))
+        WHERE LOWER(email) = ? OR LOWER(email) = ?
+    """, (login_input, alt_email))
     user = cursor.fetchone()
     conn.close()
 
-    GENERIC_LOGIN_ERROR = "E-mail acadêmico ou senha incorretos."
+    GENERIC_LOGIN_ERROR = "E-mail institucional ou senha incorretos."
 
     if not user:
         raise HTTPException(status_code=401, detail=GENERIC_LOGIN_ERROR)
@@ -180,7 +208,6 @@ def login_user(data: LoginRequest, request: Request, response: Response):
         "token": session_token,
         "user": {
             "id": user["id"],
-            "ra": user["ra"],
             "name": user["name"],
             "email": user["email"],
             "is_admin": user["is_admin"]
@@ -203,7 +230,7 @@ def get_auth_me(request: Request):
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, ra, name, email, age, campus, course, specific_course, entity, looking_for, bio, photos, is_admin FROM users WHERE id = ?", (user_id,))
+    cursor.execute("SELECT id, name, email, age, campus, course, specific_course, entity, looking_for, bio, photos, is_admin FROM users WHERE id = ?", (user_id,))
     row = cursor.fetchone()
     conn.close()
 

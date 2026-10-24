@@ -26,7 +26,7 @@ Durante o checkup de segurança no backend do **Pontinho**, foram mapeadas **11 
 | **VULN-02** | Chave Secreta de Assinatura de Sessão (HMAC) Hardcoded no Código | 🔴 **CRÍTICA** | A02:2021 – Cryptographic Failures | `backend/auth.py` | ✅ **Corrigido** (`9e06712`) |
 | **VULN-03** | Algoritmo Criptográfico de Hash de Senhas Rápido (SHA-256 com Salt Estático) | 🟠 **ALTA** | A02:2021 – Cryptographic Failures | `backend/database.py` | ✅ **Corrigido** (`ce7e312`) |
 | **VULN-04** | Exposição Pública de Contas, Privilégios e Senhas Padrão em `/demo-accounts` | 🟠 **ALTA** | A01:2021 – Broken Access Control | `backend/routers/auth.py` | ✅ **Corrigido** (`4369f5d`) |
-| **VULN-05** | Vazamento Massivo de PII (RA e E-mail Institucional) no Feed de Swipes | 🟠 **ALTA** | A01:2021 – Security Misconfiguration / LGPD | `backend/routers/feed.py` | ✅ **Corrigido** (`16e8149`) |
+| **VULN-05** | Vazamento de Dados Pessoais (E-mail Institucional) no Feed de Swipes | 🟠 **ALTA** | A01:2021 – Security Misconfiguration / LGPD | `backend/routers/feed.py` | ✅ **Corrigido** (`16e8149`) |
 | **VULN-06** | Blind Server-Side Request Forgery (SSRF) no Gerador de Teasers Borrados | 🟠 **ALTA** | A10:2021 – Server-Side Request Forgery | `backend/teaser.py` | ✅ **Corrigido** (`5849ddd`) |
 | **VULN-07** | Endpoint Não Autenticado de Injeção de Contas Arbitrárias (`POST /api/users`) | 🟠 **ALTA** | A04:2021 – Insecure Design | `backend/routers/users.py` | ✅ **Corrigido** (`e1098ec`) |
 | **VULN-08** | Ausência de Rate Limiting no Login & Enumeração de E-mails Cadastrados | 🟡 **MÉDIA** | A07:2021 – Identification and Auth Failures | `backend/routers/auth.py` | ✅ **Corrigido** (`2c2b583`) |
@@ -112,19 +112,19 @@ Durante o checkup de segurança no backend do **Pontinho**, foram mapeadas **11 
 
 ---
 
-### [VULN-05] Vazamento Massivo de PII (RA e E-mail Institucional) no Feed
+### [VULN-05] Vazamento de Dados Pessoais (E-mail Institucional) no Feed
 - **Severidade:** 🟠 **ALTA** (CVSS: 7.2)
 - **Localização:** `backend/routers/feed.py:L130-L168`
 - **Descrição & Mecanismo:**
-  O feed executa `SELECT * FROM users`. Apesar de remover `password_hash` e fotos privadas antes do retorno, ele mantém no payload os campos `ra` (Registro Acadêmico) e `email`:
+  O feed executa `SELECT * FROM users`. Apesar de remover `password_hash` e fotos privadas antes do retorno, ele mantinha no payload o campo `email`:
   ```python
   d.pop("private_photos", None)
   d.pop("private_bio", None)
   d.pop("password_hash", None)
-  # 'ra' e 'email' continuam dentro de 'd'
+  # 'email' continuava dentro de 'd'
   ```
 - **Cenário de Ataque:**
-  Ao usar a interface de swipes, o usuário pode inspecionar a aba Network e baixar a lista completa de RAs, nomes e e-mails institucionais de todos os outros estudantes.
+  Ao usar a interface de swipes, o usuário poderia inspecionar a aba Network e baixar a lista completa de e-mails institucionais de todos os outros estudantes cadastrados.
 - **Impacto:** Violação grave das normas da LGPD (Lei Geral de Proteção de Dados - Lei 13.709/2018) por desrespeito ao Princípio da Minimização de Dados (Art. 6º, III), viabilizando engenharia social e perseguição (doxxing).
 - **Remediação Recomendada:**
   Definir projeção estrita no banco, buscando e serializando apenas dados públicos: `id, name, age, campus, course, specific_course, entity, looking_for, bio, interests, photos, songs, prompts`.
@@ -239,7 +239,7 @@ Durante o checkup de segurança no backend do **Pontinho**, foram mapeadas **11 
 ### Fase 1: Correções Críticas Imediatas
 1. ✅ **[VULN-01] Fechado o bypass de autenticação** em `backend/auth.py` removendo a aceitação de IDs numéricos simples sem validação de assinatura (`530a0d1`).
 2. ✅ **[VULN-02] Eliminada a chave de sessão hardcoded**, exigindo variável de ambiente estrita `PONTINHO_SECRET_KEY` no `.env` com aborto em tempo de inicialização (`9e06712`).
-3. ✅ **[VULN-05] Bloqueado vazamento de PII no feed** em `backend/routers/feed.py` retirando `ra` e `email` via projeção em Allowlist estrita (`16e8149`).
+3. ✅ **[VULN-05] Bloqueado vazamento de dados no feed** em `backend/routers/feed.py` retirando `email` via projeção em Allowlist estrita (`16e8149`).
 
 ### Fase 2: Fortalecimento de Acesso e Controles
 4. ✅ **[VULN-04] Restrito `/api/auth/demo-accounts`** a `DEV_MODE=true`, ocultando administradores e removendo o campo `password` (`4369f5d`).

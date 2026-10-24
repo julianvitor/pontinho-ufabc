@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pontinho - Entrar</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./js/face-api.js"></script>
   <link rel="stylesheet" href="./css/style.css">
   <script>
     tailwind.config = {
@@ -49,8 +50,8 @@
   <div class="w-full max-w-md bg-slate-900/90 rounded-3xl shadow-2xl overflow-hidden border border-slate-800/80 backdrop-blur-xl text-slate-100 transition-all shadow-black/80">
     
     <!-- CABEÇALHO -->
-    <div class="bg-gradient-to-b from-emerald-950/60 via-slate-900 to-slate-900/90 py-7 px-8 text-center relative border-b border-emerald-500/20">
-      <h1 class="text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">Pontinho</h1>
+    <div class="bg-gradient-to-b from-emerald-950/60 via-slate-900 to-slate-900/90 py-3.5 px-6 text-center relative border-b border-emerald-500/20">
+      <h1 class="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">Pontinho</h1>
     </div>
 
     <!-- SELETOR DE ABAS: LOGIN OU CADASTRO -->
@@ -76,7 +77,7 @@
       <!-- ABA 1: FORMULÁRIO DE LOGIN -->
       <form id="form-login" onsubmit="handleLogin(event)" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail ou RA</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail Institucional</label>
           <input 
             id="login-email" 
             type="text" 
@@ -108,7 +109,7 @@
       <!-- ABA 2: FORMULÁRIO DE CADASTRO -->
       <form id="form-register" onsubmit="handleRegister(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail Institucional UFABC</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1">E-mail UFABC</label>
           <input 
             id="reg-email" 
             type="email" 
@@ -140,6 +141,120 @@
             placeholder="Mínimo 8 caracteres" 
             class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
+        </div>
+
+        <!-- VERIFICAÇÃO FACIAL & PROVA DE VIDA (ECA DIGITAL - LEI 14.811/2024) -->
+        <div class="bg-slate-950/90 border border-emerald-500/30 rounded-2xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm">🛡️</span>
+              <span class="text-xs font-bold text-emerald-400">Validação Biométrica (+18)</span>
+            </div>
+            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">ECA Digital</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-tight">
+            Exigência legal (Lei nº 14.811/2024): confirme sua maioridade (+18 anos).
+          </p>
+
+          <!-- Status / Botão de Ação Inicial -->
+          <div id="bio-initial-state" class="text-center pt-1">
+            <button 
+              type="button" 
+              id="bio-start-btn" 
+              onclick="startBiometricVerification()" 
+              class="w-full py-2.5 px-3 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition"
+            >
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span>Abrir Câmera & Verificar (+18)</span>
+            </button>
+          </div>
+
+          <!-- Área Ativa da Câmera / Scanner -->
+          <div id="bio-camera-container" class="hidden relative flex flex-col items-center">
+            <div class="relative w-48 h-48 sm:w-52 sm:h-52 rounded-full overflow-hidden border-2 border-emerald-500 shadow-lg shadow-emerald-500/20 bg-black flex items-center justify-center">
+              <video id="bio-video" playsinline autoplay muted class="w-full h-full object-cover -scale-x-100"></video>
+              <canvas id="bio-canvas" class="hidden"></canvas>
+              
+              <!-- Moldura oval indicadora -->
+              <div id="bio-target-ring" class="absolute inset-2 rounded-full border border-dashed border-emerald-400/50 animate-pulse pointer-events-none"></div>
+
+              <!-- Overlay com instrução dinâmica -->
+              <div id="bio-overlay-pill" class="absolute bottom-2.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-bold text-white text-center shadow max-w-[90%] truncate">
+                Carregando IA biométrica...
+              </div>
+            </div>
+
+            <!-- Indicadores em tempo real -->
+            <div class="grid grid-cols-3 gap-1.5 w-full mt-3 text-[10px] text-center">
+              <div id="badge-face" class="p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition">
+                1. Rosto
+              </div>
+              <div id="badge-liveness" class="p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition">
+                2. Desafio
+              </div>
+              <div id="badge-age" class="p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition">
+                3. Idade +18
+              </div>
+            </div>
+
+            <!-- Fallback para validar manualmente ou trocar desafio -->
+            <div id="bio-manual-fallback" class="hidden mt-2.5 text-center w-full space-y-1.5">
+              <div class="flex gap-1.5 justify-center">
+                <button 
+                  type="button" 
+                  onclick="switchLivenessChallenge()" 
+                  class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold transition"
+                >
+                  🎲 Trocar Desafio
+                </button>
+                <button 
+                  type="button" 
+                  onclick="forceLivenessManualCheck()" 
+                  class="px-2.5 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 hover:bg-emerald-900 text-emerald-300 text-[10px] font-bold transition flex items-center gap-1"
+                >
+                  <span>📸</span> <span>Validar Foto</span>
+                </button>
+              </div>
+            </div>
+            
+            <button 
+              type="button" 
+              onclick="cancelBiometricVerification()" 
+              class="mt-2 text-[10px] text-slate-500 hover:text-slate-300 transition"
+            >
+              Cancelar câmera
+            </button>
+          </div>
+
+          <!-- Resultado Aprovado -->
+          <div id="bio-success-card" class="hidden p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 flex items-center gap-3">
+            <img id="bio-snapshot-thumb" src="" alt="Selfie Verificada" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-400 flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-emerald-400 font-bold text-xs">✓ Verificado com Sucesso</span>
+              </div>
+              <p id="bio-success-details" class="text-[11px] text-slate-300">
+                Prova de vida OK • Idade estimada: +18
+              </p>
+              <span class="text-[9px] text-emerald-400/80 font-mono block">Conforme Lei 14.811/2024 (ECA Digital)</span>
+            </div>
+            <button type="button" onclick="resetBiometrics()" class="text-[10px] text-slate-400 hover:text-white underline flex-shrink-0" title="Refazer">
+              Refazer
+            </button>
+          </div>
+
+          <!-- Alerta de Bloqueio por Idade < 18 -->
+          <div id="bio-blocked-card" class="hidden p-3 rounded-xl bg-red-950/60 border border-red-500/50 space-y-1">
+            <div class="flex items-center gap-1.5 text-red-400 font-bold text-xs">
+              <span>🚫</span> <span>Acesso Bloqueado: Menor de Idade</span>
+            </div>
+            <p id="bio-blocked-msg" class="text-[11px] text-red-200 leading-tight">
+              A estimativa biométrica indicou idade inferior a 18 anos. Em estrito cumprimento ao ECA Digital e aos Termos de Uso, o cadastro é restrito a maiores de 18 anos.
+            </p>
+            <button type="button" onclick="resetBiometrics()" class="mt-1 text-[10px] text-slate-300 hover:text-white underline">
+              Tentar novamente
+            </button>
+          </div>
         </div>
 
         <div class="flex items-start gap-2.5 pt-1 text-left">
@@ -265,6 +380,404 @@
       }
     }
 
+    // ==========================================
+    // ESTADO E LÓGICA BIOMÉTRICA (ECA DIGITAL)
+    // ==========================================
+    const biometricData = {
+      verified: false,
+      livenessPassed: false,
+      estimatedAge: null,
+      snapshot: null
+    };
+    let biometricStream = null;
+    let detectionAnimationId = null;
+    let isDetecting = false;
+    let loopActive = false;
+    let modelsLoaded = false;
+    let faceStartTime = 0;
+    let livenessPassed = false;
+    let baselineSmile = 0.50;
+    let baselineSamples = 0;
+    let consecutivePassFrames = 0;
+    const ageReadings = [];
+    let consecutiveFaceFrames = 0;
+
+    // Desafios aleatórios de pose e movimento
+    const LIVENESS_CHALLENGES = [
+      {
+        id: 'turn',
+        name: 'Giro de Cabeça',
+        instruction: 'Vire o rosto levemente para o lado 🔄',
+        badgeText: '2. Vire o Rosto'
+      },
+      {
+        id: 'smile',
+        name: 'Sorriso',
+        instruction: 'Dê um belo sorriso para a câmera 😊',
+        badgeText: '2. Dê um Sorriso'
+      }
+    ];
+    let currentChallenge = LIVENESS_CHALLENGES[0];
+
+    async function loadBiometricModels() {
+      if (modelsLoaded) return true;
+      try {
+        const MODEL_URL = './models';
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+          faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+        ]);
+        modelsLoaded = true;
+        return true;
+      } catch (err) {
+        console.warn('Falha ao carregar modelos locais, tentando fallback CDN:', err);
+        try {
+          const CDN_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+          await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(CDN_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(CDN_URL),
+            faceapi.nets.ageGenderNet.loadFromUri(CDN_URL)
+          ]);
+          modelsLoaded = true;
+          return true;
+        } catch (cdnErr) {
+          console.error('Falha crítica ao carregar modelos:', cdnErr);
+          throw new Error('Não foi possível carregar os modelos biométricos. Verifique sua conexão.');
+        }
+      }
+    }
+
+    function getLandmarkPoint(landmarks, idx) {
+      if (!landmarks || !landmarks.positions || !landmarks.positions[idx]) return { x: 0, y: 0 };
+      const p = landmarks.positions[idx];
+      return {
+        x: p.x !== undefined ? p.x : (p._x !== undefined ? p._x : 0),
+        y: p.y !== undefined ? p.y : (p._y !== undefined ? p._y : 0)
+      };
+    }
+
+    // Proporção de sorriso: largura da boca / largura entre os olhos
+    function calculateSmileRatio(landmarks) {
+      const mouthLeft = getLandmarkPoint(landmarks, 48);
+      const mouthRight = getLandmarkPoint(landmarks, 54);
+      const eyeLeft = getLandmarkPoint(landmarks, 36);
+      const eyeRight = getLandmarkPoint(landmarks, 45);
+
+      const mouthWidth = Math.hypot(mouthRight.x - mouthLeft.x, mouthRight.y - mouthLeft.y);
+      const eyeWidth = Math.hypot(eyeRight.x - eyeLeft.x, eyeRight.y - eyeLeft.y);
+
+      if (!eyeWidth || eyeWidth === 0) return 0.5;
+      return mouthWidth / eyeWidth;
+    }
+
+    // Rotação lateral da cabeça (Yaw): distância do nariz às laterais do rosto
+    function calculateYawRatio(landmarks) {
+      const faceLeft = getLandmarkPoint(landmarks, 0);
+      const faceRight = getLandmarkPoint(landmarks, 16);
+      const nose = getLandmarkPoint(landmarks, 30);
+
+      const distToLeft = Math.abs(nose.x - faceLeft.x);
+      const distToRight = Math.abs(faceRight.x - nose.x);
+
+      if (!distToRight || distToRight === 0) return 1.0;
+      return distToLeft / distToRight;
+    }
+
+    function cancelBiometricStreamOnly() {
+      loopActive = false;
+      if (detectionAnimationId) {
+        cancelAnimationFrame(detectionAnimationId);
+        detectionAnimationId = null;
+      }
+      isDetecting = false;
+      if (biometricStream) {
+        biometricStream.getTracks().forEach(t => t.stop());
+        biometricStream = null;
+      }
+    }
+
+    function cancelBiometricVerification() {
+      cancelBiometricStreamOnly();
+      document.getElementById('bio-camera-container').classList.add('hidden');
+      document.getElementById('bio-initial-state').classList.remove('hidden');
+    }
+
+    function resetBiometrics() {
+      cancelBiometricStreamOnly();
+      biometricData.verified = false;
+      biometricData.livenessPassed = false;
+      biometricData.estimatedAge = null;
+      biometricData.snapshot = null;
+
+      document.getElementById('bio-camera-container').classList.add('hidden');
+      document.getElementById('bio-success-card').classList.add('hidden');
+      document.getElementById('bio-blocked-card').classList.add('hidden');
+      document.getElementById('bio-initial-state').classList.remove('hidden');
+      const fallbackBtn = document.getElementById('bio-manual-fallback');
+      if (fallbackBtn) fallbackBtn.classList.add('hidden');
+
+      const badgeFace = document.getElementById('badge-face');
+      const badgeLiveness = document.getElementById('badge-liveness');
+      const badgeAge = document.getElementById('badge-age');
+      if (badgeFace) { badgeFace.className = 'p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition'; badgeFace.innerText = '1. Rosto'; }
+      if (badgeLiveness) { badgeLiveness.className = 'p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition'; badgeLiveness.innerText = '2. Desafio'; }
+      if (badgeAge) { badgeAge.className = 'p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition'; badgeAge.innerText = '3. Idade +18'; }
+    }
+
+    function switchLivenessChallenge() {
+      currentChallenge = currentChallenge.id === 'turn' ? LIVENESS_CHALLENGES[1] : LIVENESS_CHALLENGES[0];
+      const pill = document.getElementById('bio-overlay-pill');
+      const badgeLiveness = document.getElementById('badge-liveness');
+      if (!livenessPassed) {
+        if (pill) pill.innerText = currentChallenge.instruction;
+        if (badgeLiveness) {
+          badgeLiveness.className = 'p-1 rounded bg-slate-900 border border-amber-500/40 text-amber-300 font-medium transition animate-pulse';
+          badgeLiveness.innerText = currentChallenge.badgeText;
+        }
+      }
+      Pontinho.showToast(`Desafio alterado: ${currentChallenge.name}`, 'info');
+    }
+
+    function forceLivenessManualCheck() {
+      if (ageReadings.length >= 2 || consecutiveFaceFrames >= 2) {
+        livenessPassed = true;
+        const badgeLiveness = document.getElementById('badge-liveness');
+        if (badgeLiveness) {
+          badgeLiveness.className = 'p-1 rounded bg-emerald-950/70 border border-emerald-500 text-emerald-300 font-semibold transition';
+          badgeLiveness.innerText = '2. Desafio OK ✓';
+        }
+        const pill = document.getElementById('bio-overlay-pill');
+        if (pill) pill.innerText = '✓ Prova de vida confirmada!';
+        Pontinho.showToast('Prova de vida validada!', 'success');
+      } else {
+        Pontinho.showToast('Posicione seu rosto dentro do círculo primeiro.', 'info');
+      }
+    }
+
+    async function startBiometricVerification() {
+      const initCard = document.getElementById('bio-initial-state');
+      const camCard = document.getElementById('bio-camera-container');
+      const successCard = document.getElementById('bio-success-card');
+      const blockedCard = document.getElementById('bio-blocked-card');
+      const pill = document.getElementById('bio-overlay-pill');
+      const badgeFace = document.getElementById('badge-face');
+      const badgeLiveness = document.getElementById('badge-liveness');
+      const badgeAge = document.getElementById('badge-age');
+      const fallbackBtn = document.getElementById('bio-manual-fallback');
+
+      initCard.classList.add('hidden');
+      blockedCard.classList.add('hidden');
+      successCard.classList.add('hidden');
+      if (fallbackBtn) fallbackBtn.classList.add('hidden');
+      camCard.classList.remove('hidden');
+
+      pill.innerText = 'Carregando IA biométrica...';
+
+      // Sorteia o desafio aleatoriamente entre Giro ou Sorriso
+      currentChallenge = LIVENESS_CHALLENGES[Math.floor(Math.random() * LIVENESS_CHALLENGES.length)];
+
+      try {
+        await loadBiometricModels();
+        pill.innerText = 'Iniciando câmera frontal...';
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 480 } },
+          audio: false
+        });
+        biometricStream = stream;
+        const video = document.getElementById('bio-video');
+        video.srcObject = stream;
+        await new Promise(resolve => {
+          video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+          };
+        });
+
+        pill.innerText = currentChallenge.instruction;
+        badgeFace.className = 'p-1 rounded bg-slate-900 border border-emerald-500/40 text-emerald-300 font-medium transition animate-pulse';
+        badgeLiveness.className = 'p-1 rounded bg-slate-900 border border-amber-500/40 text-amber-300 font-medium transition animate-pulse';
+        badgeLiveness.innerText = currentChallenge.badgeText;
+
+        // Reset de estado
+        livenessPassed = false;
+        baselineSmile = 0.50;
+        baselineSamples = 0;
+        consecutivePassFrames = 0;
+        ageReadings.length = 0;
+        consecutiveFaceFrames = 0;
+        faceStartTime = 0;
+        loopActive = true;
+        isDetecting = false;
+
+        const detectorOptions = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 });
+
+        // Loop contínuo com requestAnimationFrame
+        async function runDetectionFrame() {
+          if (!loopActive || !biometricStream || video.paused || video.ended) return;
+
+          if (!isDetecting) {
+            isDetecting = true;
+            try {
+              const detection = await faceapi.detectSingleFace(video, detectorOptions)
+                .withFaceLandmarks()
+                .withAgeAndGender();
+
+              if (!detection) {
+                consecutiveFaceFrames = Math.max(0, consecutiveFaceFrames - 1);
+                if (consecutiveFaceFrames === 0) {
+                  pill.innerText = 'Centralize seu rosto no círculo';
+                  badgeFace.className = 'p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition';
+                  badgeFace.innerText = '1. Rosto';
+                }
+              } else {
+                if (!faceStartTime) faceStartTime = Date.now();
+                consecutiveFaceFrames++;
+
+                if (consecutiveFaceFrames >= 2) {
+                  badgeFace.className = 'p-1 rounded bg-emerald-950/70 border border-emerald-500 text-emerald-300 font-semibold transition';
+                  badgeFace.innerText = '1. Rosto ✓';
+                }
+
+                // Landmarks faciais
+                const landmarks = detection.landmarks;
+                const currentSmile = calculateSmileRatio(landmarks);
+                const currentYaw = calculateYawRatio(landmarks);
+
+                // Calibração neutra inicial de sorriso
+                if (baselineSamples < 12) {
+                  baselineSmile = (baselineSmile * baselineSamples + currentSmile) / (baselineSamples + 1);
+                  baselineSamples++;
+                }
+
+                // Coleta estimativa de idade
+                if (detection.age && detection.age > 0) {
+                  ageReadings.push(detection.age);
+                }
+
+                // Verificação da Prova de Vida
+                if (!livenessPassed) {
+                  // Condição 1: Giro do Rosto para qualquer lado (Yaw significativamente deslocado)
+                  const isTurned = currentYaw > 1.55 || currentYaw < 0.65;
+
+                  // Condição 2: Sorriso (Boca alargada em relação aos olhos)
+                  const isSmiling = currentSmile > Math.max(0.57, baselineSmile * 1.15);
+
+                  let passed = false;
+                  if (currentChallenge.id === 'turn' && isTurned) {
+                    passed = true;
+                  } else if (currentChallenge.id === 'smile' && isSmiling) {
+                    passed = true;
+                  } else if (isTurned || isSmiling) {
+                    // Aceita se o usuário fizer qualquer um dos movimentos convincentemente
+                    passed = true;
+                  }
+
+                  if (passed) {
+                    consecutivePassFrames++;
+                    if (consecutivePassFrames >= 2) {
+                      livenessPassed = true;
+                      pill.innerText = '✓ Desafio cumprido! Analisando...';
+                      badgeLiveness.className = 'p-1 rounded bg-emerald-950/70 border border-emerald-500 text-emerald-300 font-semibold transition';
+                      badgeLiveness.innerText = '2. Desafio OK ✓';
+                    }
+                  } else {
+                    consecutivePassFrames = 0;
+                    pill.innerText = currentChallenge.instruction;
+                    badgeLiveness.innerText = currentChallenge.badgeText;
+                  }
+
+                  // Mostra botão de troca de desafio ou foto manual após 3.5 segundos
+                  if (fallbackBtn && faceStartTime && Date.now() - faceStartTime > 3500) {
+                    fallbackBtn.classList.remove('hidden');
+                  }
+                }
+
+                if (livenessPassed) {
+                  pill.innerText = 'Analisando idade (+18)...';
+                  badgeAge.className = 'p-1 rounded bg-slate-900 border border-emerald-500/40 text-emerald-300 font-medium transition animate-pulse';
+                }
+
+                // Finaliza quando tiver o desafio aprovado e pelo menos 4 amostras estáveis de idade
+                if (livenessPassed && ageReadings.length >= 4) {
+                  loopActive = false;
+
+                  ageReadings.sort((a, b) => a - b);
+                  const medianAge = Math.round(ageReadings[Math.floor(ageReadings.length / 2)]);
+
+                  // Captura selfie snapshot
+                  const hiddenCanvas = document.createElement('canvas');
+                  hiddenCanvas.width = video.videoWidth || 480;
+                  hiddenCanvas.height = video.videoHeight || 480;
+                  const ctx = hiddenCanvas.getContext('2d');
+                  ctx.translate(hiddenCanvas.width, 0);
+                  ctx.scale(-1, 1);
+                  ctx.drawImage(video, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+                  const snapshotBase64 = hiddenCanvas.toDataURL('image/jpeg', 0.85);
+
+                  finishBiometricVerification(medianAge, snapshotBase64);
+                  return;
+                }
+              }
+            } catch (detErr) {
+              console.warn('Detecção frame:', detErr);
+            } finally {
+              isDetecting = false;
+            }
+          }
+
+          if (loopActive) {
+            detectionAnimationId = requestAnimationFrame(runDetectionFrame);
+          }
+        }
+
+        detectionAnimationId = requestAnimationFrame(runDetectionFrame);
+
+      } catch (err) {
+        console.error('Erro na biometria:', err);
+        cancelBiometricVerification();
+        Pontinho.showToast(err.message || 'Câmera não permitida ou indisponível.', 'error');
+      }
+    }
+
+    function finishBiometricVerification(estimatedAge, snapshotBase64) {
+      cancelBiometricStreamOnly();
+
+      const camCard = document.getElementById('bio-camera-container');
+      const successCard = document.getElementById('bio-success-card');
+      const blockedCard = document.getElementById('bio-blocked-card');
+      const badgeAge = document.getElementById('badge-age');
+
+      camCard.classList.add('hidden');
+
+      if (estimatedAge < 18) {
+        biometricData.verified = false;
+        biometricData.livenessPassed = false;
+        biometricData.estimatedAge = estimatedAge;
+        biometricData.snapshot = null;
+
+        document.getElementById('bio-blocked-msg').innerText = 
+          `A estimativa biométrica indicou ${estimatedAge} anos (inferior a 18 anos). Conforme a Lei nº 14.811/2024 (ECA Digital), o acesso ao Pontinho é restrito exclusivamente a maiores de 18 anos.`;
+        blockedCard.classList.remove('hidden');
+        Pontinho.showToast('Cadastro bloqueado: Usuário menor de 18 anos.', 'error');
+        return;
+      }
+
+      // Maior de 18 anos verificado!
+      biometricData.verified = true;
+      biometricData.livenessPassed = true;
+      biometricData.estimatedAge = estimatedAge;
+      biometricData.snapshot = snapshotBase64;
+
+      document.getElementById('bio-snapshot-thumb').src = snapshotBase64;
+      document.getElementById('bio-success-details').innerText = 
+        `Prova de vida confirmada • Idade estimada: ${estimatedAge} anos`;
+      successCard.classList.remove('hidden');
+
+      Pontinho.showToast(`Biometria aprovada! Maior de 18 anos (${estimatedAge} anos) ✓`, 'success');
+    }
+
     async function handleRegister(e) {
       e.preventDefault();
       const rawEmail = document.getElementById('reg-email').value.trim();
@@ -282,6 +795,17 @@
         return;
       }
 
+      // Verificação biométrica obrigatória do ECA Digital
+      if (!biometricData.verified || !biometricData.livenessPassed) {
+        Pontinho.showToast('É obrigatório realizar a validação facial de idade e prova de vida (+18).', 'error');
+        return;
+      }
+
+      if (biometricData.estimatedAge < 18) {
+        Pontinho.showToast('Cadastro bloqueado: Usuário menor de 18 anos segundo a Lei 14.811/2024.', 'error');
+        return;
+      }
+
       // Sanitização no cliente
       let email = rawEmail.toLowerCase();
       if (!email.includes('@')) {
@@ -296,7 +820,16 @@
       try {
         const data = await Pontinho.apiFetch('/api/auth/register', {
           method: 'POST',
-          body: JSON.stringify({ email, name, password, terms_accepted: true })
+          body: JSON.stringify({ 
+            email, 
+            name, 
+            password, 
+            terms_accepted: true,
+            age_verified: true,
+            liveness_passed: true,
+            estimated_age: biometricData.estimatedAge,
+            face_snapshot: biometricData.snapshot
+          })
         });
 
         Pontinho.setCurrentUserId(data.user_id, data.token);

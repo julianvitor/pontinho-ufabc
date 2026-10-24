@@ -397,7 +397,7 @@
 
     async function toggleRsvp(eventId) {
       if (!Pontinho.getCurrentUserId()) {
-        Pontinho.showToast('Faça login com seu RA para confirmar presença!', 'error');
+        Pontinho.showToast('Faça login com seu e-mail institucional para confirmar presença!', 'error');
         setTimeout(() => { window.location.href = './login.html'; }, 1000);
         return;
       }
@@ -447,7 +447,7 @@
                 ${details.attendees_message || 'Apenas estudantes da UFABC conectados podem ver a lista de confirmados nesta festa.'}
               </p>
               <a href="./login.html" class="inline-block mt-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs rounded-xl shadow-lg transition">
-                Entrar com RA
+                Entrar com e-mail institucional
               </a>
             </div>
           `;

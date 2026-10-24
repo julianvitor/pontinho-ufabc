@@ -148,7 +148,7 @@ def get_event_details(event_id: int, request: Request):
     evt["attendees"] = attendees
     evt["attendees_locked"] = not bool(user_id)
     if not user_id:
-        evt["attendees_message"] = "Faça login com seu RA para ver os estudantes confirmados nesta festa."
+        evt["attendees_message"] = "Faça login com seu e-mail institucional para ver os estudantes confirmados nesta festa."
 
     conn.close()
     return evt

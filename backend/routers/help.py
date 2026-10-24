@@ -68,7 +68,7 @@ def list_admin_complaints(request: Request, status: Optional[str] = None):
         SELECT c.id, c.reporter_id, c.reporter_name, c.reporter_contact,
                c.complaint_type, c.target_description, c.details, c.status,
                c.ip_address, c.created_at,
-               u.name AS reporter_user_name, u.ra AS reporter_user_ra
+               u.name AS reporter_user_name, u.email AS reporter_user_email
         FROM complaints c
         LEFT JOIN users u ON u.id = c.reporter_id
     """

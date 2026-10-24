@@ -8,8 +8,11 @@ class RegisterRequest(BaseModel):
     email: str = Field(..., description="E-mail de acesso")
     name: str = Field(..., min_length=2, description="Nome completo")
     password: str = Field(..., min_length=8, description="Senha de acesso (mínimo de 8 caracteres)")
-    ra: Optional[str] = Field(default="", description="RA (Registro Acadêmico) opcional")
     terms_accepted: bool = Field(default=True, description="Concordância com os Termos de Uso e Política de Privacidade (LGPD)")
+    age_verified: bool = Field(default=False, description="Verificação de maioridade >= 18 anos conforme o ECA Digital")
+    liveness_passed: bool = Field(default=False, description="Prova de vida facial aprovada")
+    estimated_age: Optional[int] = Field(default=None, description="Idade estimada pela biometria")
+    face_snapshot: Optional[str] = Field(default=None, description="Foto da selfie de verificação em base64")
 
 class LoginRequest(BaseModel):
     email: str = Field(..., description="E-mail de acesso")
@@ -89,6 +92,6 @@ class ComplaintCreate(BaseModel):
     reporter_name: Optional[str] = Field(default="", description="Nome do denunciante (opcional)")
     reporter_contact: str = Field(..., min_length=3, description="E-mail ou WhatsApp para contato e retorno da moderação")
     complaint_type: str = Field(..., description="Tipo da ocorrência: fake_profile, harassment, stalking, image_misuse, defamation, other")
-    target_description: str = Field(..., min_length=2, description="Nome, RA, link ou descrição do perfil acusado")
+    target_description: str = Field(..., min_length=2, description="Nome, e-mail institucional, link ou descrição do perfil acusado")
     details: str = Field(..., min_length=5, description="Descrição detalhada do ocorrido")
 
