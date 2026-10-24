@@ -176,64 +176,59 @@ O manual completo com exemplos de payloads pode ser consultado em [docs/API.md](
 
 ## 💻 Como Executar o Projeto
 
-### Opção 1: Via Docker & Docker Compose (Recomendado)
+### 🐳 Via Docker Compose (Recomendado — Comando Único)
 
-1. **Construir a imagem e subir os serviços**:
+Com apenas **um comando**, o Docker inicializa o banco SQLite, executa o seed dos dados e sobe tanto o **Backend (FastAPI)** quanto o **Frontend (Live Reload)** com sincronização em tempo real dos seus arquivos locais:
+
+1. **Subir a aplicação completa**:
    ```bash
-   docker compose up --build -d
+   docker compose up --build
    ```
+   *(Ou adicione `-d` para rodar em segundo plano: `docker compose up --build -d`)*
 
-2. **Acompanhar os logs do servidor**:
+2. **Acompanhar os logs (se rodando em segundo plano)**:
    ```bash
    docker compose logs -f
    ```
 
-3. **Parar os serviços**:
+3. **Parar a aplicação**:
    ```bash
    docker compose down
    ```
 
 ---
 
-### Opção 2: Localmente com Poetry
+### 🐍 Localmente (Sem Docker)
 
-1. **Instalar dependências com Poetry**:
+Se preferir rodar os serviços individualmente na sua máquina:
+
+1. **Configurar variáveis de ambiente**:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Backend (API)**:
    ```bash
    poetry install
-   ```
-
-2. **Inicializar e semear a base de dados**:
-   ```bash
    poetry run python -m backend.seed
-   ```
-
-3. **Executar a API com Uvicorn via Poetry**:
-   ```bash
    poetry run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
----
-
-### Opção 3: Frontend com Live Reload (Desenvolvimento)
-
-Para editar HTML, CSS e JavaScript e ver o navegador recarregar automaticamente a cada alteração:
-
-1. **Subir o servidor frontend com Live Reload**:
+3. **Frontend (Live Reload)**:
    ```bash
    python3 scripts/serve_frontend.py --port 3000
    ```
-
-2. **Acessar**:
-   - [http://127.0.0.1:3000](http://127.0.0.1:3000) (comunicação direta com a API na porta `8000`).
 
 ---
 
 ## 🌐 URLs de Acesso
 
-- **Feed Principal (Swipes)**: [http://localhost:8000](http://localhost:8000)
-- **Festas & Eventos**: [http://localhost:8000/events.html](http://localhost:8000/events.html)
-- **Conversas & Matches**: [http://localhost:8000/matches.html](http://localhost:8000/matches.html)
-- **Meu Perfil**: [http://localhost:8000/profile.html](http://localhost:8000/profile.html)
-- **Login & Cadastro**: [http://localhost:8000/login.html](http://localhost:8000/login.html)
-- **Painel Administrativo**: [http://localhost:8000/admin.html](http://localhost:8000/admin.html)
-- **Documentação Interativa da API (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Frontend da Aplicação (Live Reload)**: [http://localhost:3000](http://localhost:3000)
+  - **Feed Principal (Swipes)**: [http://localhost:3000](http://localhost:3000)
+  - **Festas & Eventos**: [http://localhost:3000/events.html](http://localhost:3000/events.html)
+  - **Conversas & Matches**: [http://localhost:3000/matches.html](http://localhost:3000/matches.html)
+  - **Meu Perfil**: [http://localhost:3000/profile.html](http://localhost:3000/profile.html)
+  - **Login & Cadastro**: [http://localhost:3000/login.html](http://localhost:3000/login.html)
+  - **Painel Administrativo**: [http://localhost:3000/admin.html](http://localhost:3000/admin.html)
+- **Backend API & Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+

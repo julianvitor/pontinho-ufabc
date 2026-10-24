@@ -1,14 +1,14 @@
 services:
-  pontinho-backend:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pontinho-ufabc
+    container_name: pontinho-backend
     restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
-      # Persistência do banco SQLite no host (dentro da pasta ./data)
+      # Persistência do banco SQLite e uploads no host
       - ./data:/app/data
       - ./backend:/app/backend
       - ./frontend:/app/frontend
@@ -18,3 +18,23 @@ services:
     environment:
       - DATABASE_PATH=/app/data/pontinho.db
       - PYTHONUNBUFFERED=1
+      - PONTINHO_SECRET_KEY=${PONTINHO_SECRET_KEY:-pontinho_ufabc_secret_key_desenvolvimento_2026_super_forte_32ch}
+      - DEV_MODE=${DEV_MODE:-true}
+      - SECURE_COOKIES=${SECURE_COOKIES:-false}
+    command: ["--reload"]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pontinho-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "35729:35729"
+    volumes:
+      - ./frontend:/app/frontend
+      - ./scripts:/app/scripts
+    entrypoint: ["python", "scripts/serve_frontend.py", "--host", "0.0.0.0", "--port", "3000"]
+    depends_on:
+      - backend
