@@ -167,6 +167,14 @@ def init_db():
         category TEXT NOT NULL -- 'base' ou 'especifico'
     );
     """)
+    # Deduplica e cria índice único para impedir duplicatas ao rodar a seed
+    cursor.execute("""
+        DELETE FROM courses
+        WHERE id NOT IN (
+            SELECT MIN(id) FROM courses GROUP BY name, category
+        )
+    """)
+    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_courses_name_cat ON courses(name, category)")
 
     # Tabela de Entidades gerenciáveis pelo admin
     cursor.execute("""

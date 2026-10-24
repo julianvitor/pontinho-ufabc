@@ -31,34 +31,49 @@ def seed_database():
     conn = get_db()
     cursor = conn.cursor()
 
-    # 1. Cursos Base
+    # 1. Cursos Base (Cursos Interdisciplinares de Entrada da UFABC)
     base_courses = [
         "BC&T - Bacharelado em Ciência e Tecnologia",
         "BC&H - Bacharelado em Ciências e Humanidades",
-        "LC&T - Licenciatura em Ciências e Tecnologia",
-        "LCH - Licenciatura em Ciências Humanas"
+        "LCNE - Licenciatura em Ciências Naturais e Exatas",
+        "LCH - Licenciatura em Ciências Humanas",
+        "Pós-Graduação (Mestrado / Doutorado)"
     ]
     for c in base_courses:
         cursor.execute("INSERT OR IGNORE INTO courses (name, category) VALUES (?, 'base')", (c,))
 
-    # Cursos Específicos (Pós-BI)
+    # Cursos de Formação Específica (Pós-BI da UFABC)
     specific_courses = [
-        "Ciência da Computação",
-        "Engenharia de Gestão",
-        "Engenharia Aeroespacial",
-        "Engenharia Biomédica",
-        "Engenharia de Energia",
-        "Engenharia de Informação",
-        "Engenharia Ambiental e Urbana",
-        "Engenharia de Materiais",
-        "Neurociência",
+        # Bacharelados
         "Biotecnologia",
-        "Relações Internacionais",
+        "Ciência da Computação",
+        "Ciências Biológicas",
         "Ciências Econômicas",
         "Filosofia",
-        "Matemática",
         "Física",
-        "Química"
+        "Matemática",
+        "Neurociência",
+        "Planejamento Territorial",
+        "Políticas Públicas",
+        "Química",
+        "Relações Internacionais",
+        # Engenharias
+        "Engenharia Aeroespacial",
+        "Engenharia Ambiental e Urbana",
+        "Engenharia Biomédica",
+        "Engenharia de Energia",
+        "Engenharia de Gestão",
+        "Engenharia de Informação",
+        "Engenharia de Instrumentação, Automação e Robótica",
+        "Engenharia de Materiais",
+        # Licenciaturas Específicas
+        "Licenciatura em Ciências Biológicas",
+        "Licenciatura em Filosofia",
+        "Licenciatura em Física",
+        "Licenciatura em Matemática",
+        "Licenciatura em Química",
+        # Opção para quem ainda não ingressou no pós-BI
+        "Apenas Curso Base (Em definição)"
     ]
     for sc in specific_courses:
         cursor.execute("INSERT OR IGNORE INTO courses (name, category) VALUES (?, 'especifico')", (sc,))
