@@ -168,7 +168,7 @@ def get_feed(request: Request):
     cursor.execute(f"""
         SELECT id, name, age, campus, course, specific_course, entity, looking_for,
                bio, interests, photos, songs, prompt1_q, prompt1_a, prompt2_q, prompt2_a,
-               prompt3_q, prompt3_a, gender, private_photos, private_bio
+               prompt3_q, prompt3_a, gender, private_photos, private_bio, is_verified
         FROM users
         WHERE id != ?
           AND id NOT IN (
@@ -217,6 +217,7 @@ def get_feed(request: Request):
             "prompt3_q": d.get("prompt3_q") or "",
             "prompt3_a": d.get("prompt3_a") or "",
             "gender": d.get("gender") or "Não informado",
+            "is_verified": bool(d.get("is_verified", 0)),
             "has_private_content": has_private,
             "private_photos_count": len(private_photos),
             "secret_teaser_photo": teaser_photo,

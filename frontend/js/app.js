@@ -399,7 +399,7 @@ const Pontinho = {
         body: JSON.stringify({ reason, details, block_user })
       });
 
-      this.showToast(resp.message || 'Denúncia enviada à moderação com sucesso!', 'success');
+      this.showToast(resp.message || 'Denúncia enviada.', 'success');
       document.getElementById('global-report-modal').classList.add('hidden');
       if (typeof window._onReportComplete === 'function') {
         window._onReportComplete();
@@ -413,7 +413,7 @@ const Pontinho = {
   },
 
   async blockUser(targetUserId, targetUserName, onComplete = null) {
-    if (!confirm(`Deseja realmente bloquear ${targetUserName || 'este usuário'}? Vocês não verão mais os perfis um do outro.`)) {
+    if (!confirm(`Bloquear ${targetUserName || 'este perfil'}?`)) {
       return;
     }
 
@@ -421,7 +421,7 @@ const Pontinho = {
       const resp = await this.apiFetch(`/api/users/${targetUserId}/block`, {
         method: 'POST'
       });
-      this.showToast(resp.message || 'Usuário bloqueado com sucesso.', 'success');
+      this.showToast(resp.message || 'Usuário bloqueado.', 'success');
       if (typeof onComplete === 'function') {
         onComplete();
       }

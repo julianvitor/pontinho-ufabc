@@ -367,6 +367,31 @@ Retorna o perfil completo do próprio usuário (dados públicos e privados).
 
 ### `PUT /api/users/me`
 Atualiza dados cadastrais, bio, interesses, fotos públicas e privadas. Ao salvar fotos privadas, atualiza automaticamente o teaser borrado no servidor.
+- **Proteção do Selo de Verificado (Continuous Verification)**: Se o usuário possui o selo oficial de verificado (`is_verified = 1`) e atualiza/remove suas fotos sem que pelo menos uma foto contenha o rosto biométrico registrado (distância facial $\ge 0.40$), o selo de verificação é automaticamente revogado no servidor.
+
+---
+
+### `POST /api/users/me/verify-face`
+Valida a identidade do usuário através dos descritores faciais de 128 dimensões extraídos pelo cliente e cálculo estrito de distância euclidiana ($< 0.40$) executado no backend. Concede o selo de perfil verificado (`is_verified = 1`).
+
+- **Payload**:
+```json
+{
+  "live_descriptor": [0.123, -0.456, ...],
+  "photo_descriptors": [
+    [0.120, -0.450, ...],
+    [0.098, -0.412, ...]
+  ]
+}
+```
+- **Resposta (200 OK)**:
+```json
+{
+  "success": true,
+  "is_verified": true,
+  "message": "Identidade confirmada! Seu perfil agora possui o selo oficial de verificado (🔵)."
+}
+```
 
 ---
 

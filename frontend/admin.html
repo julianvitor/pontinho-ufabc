@@ -739,7 +739,7 @@
                 <img src="${photo}" class="w-9 h-9 rounded-full object-cover border border-slate-700">
                 <div>
                   <span class="font-bold text-white block">${u.name}</span>
-                  <span class="text-[10px] text-slate-400">${u.age} anos ${u.is_admin ? '• <strong class="text-amber-400">Admin</strong>' : ''}</span>
+                  <span class="text-[10px] text-slate-400">${u.age} anos ${u.is_admin ? '• <strong class="text-amber-400">Admin</strong>' : ''} ${u.is_verified ? '• <span class="text-cyan-400 font-bold">🔵 Verificado</span>' : ''}</span>
                 </div>
               </td>
               <td class="py-3 px-3 text-slate-300 font-mono text-[11px]">
@@ -1095,11 +1095,10 @@
 
       try {
         if (label) label.innerText = 'Enviando...';
-        Pontinho.showToast('Sanitizando e enviando imagem ou GIF...', 'info');
 
         const result = await Pontinho.uploadPhoto(file);
         document.getElementById('event-image-url').value = result.url;
-        Pontinho.showToast('Capa do evento carregada com sucesso!', 'success');
+        Pontinho.showToast('Capa salva! 📸', 'success');
       } catch (err) {
         Pontinho.showToast(err.message, 'error');
       } finally {

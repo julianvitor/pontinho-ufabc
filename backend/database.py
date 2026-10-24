@@ -100,6 +100,8 @@ def init_db():
         songs TEXT NOT NULL DEFAULT '[]', -- Músicas favoritas / trilha do perfil
         terms_accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         is_admin INTEGER DEFAULT 0,
+        is_verified INTEGER DEFAULT 0,
+        verified_face_descriptor TEXT DEFAULT '',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
@@ -135,6 +137,10 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN verification_photo TEXT DEFAULT ''")
     if "age_verified_at" not in existing_cols:
         cursor.execute("ALTER TABLE users ADD COLUMN age_verified_at TIMESTAMP")
+    if "is_verified" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0")
+    if "verified_face_descriptor" not in existing_cols:
+        cursor.execute("ALTER TABLE users ADD COLUMN verified_face_descriptor TEXT DEFAULT ''")
 
     # Tabela de Solicitações de Acesso a Conteúdo Privado (Fotos & Bio Secreta)
     cursor.execute("""

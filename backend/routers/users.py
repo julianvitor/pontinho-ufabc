@@ -2,12 +2,15 @@
 Rotas de Gerenciamento de Usuário e Perfil do Pontinho UFABC
 """
 import json
+import math
 import sqlite3
 from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db
-from backend.models import UserCreateOrUpdate, ReportCreate
+from backend.models import UserCreateOrUpdate, ReportCreate, VerifyFaceRequest
 from backend.auth import get_current_user_id, clear_auth_session
 from backend.teaser import get_or_create_server_blurred_teaser
+
+FACE_SIMILARITY_THRESHOLD = 0.50  # Limiar estrito de distância euclidiana no servidor
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -28,6 +31,12 @@ def get_my_profile(request: Request):
     d["songs"] = json.loads(d["songs"]) if d.get("songs") else []
     d["private_photos"] = json.loads(d["private_photos"]) if d.get("private_photos") else []
     d["private_bio"] = d.get("private_bio") or ""
+    d["is_verified"] = bool(d.get("is_verified", 0))
+    d["verified_face_descriptor"] = (
+        json.loads(d["verified_face_descriptor"])
+        if d.get("verified_face_descriptor") and d["verified_face_descriptor"].strip()
+        else None
+    )
     return d
 
 @router.put("/me")
@@ -53,6 +62,36 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
     conn = get_db()
     cursor = conn.cursor()
 
+    # Verifica integridade do selo de verificado caso as fotos tenham sido modificadas
+    cursor.execute("SELECT is_verified, verified_face_descriptor FROM users WHERE id = ?", (current_id,))
+    user_row = cursor.fetchone()
+    current_is_verified = user_row["is_verified"] if user_row else 0
+    verified_descriptor_raw = user_row["verified_face_descriptor"] if user_row else ""
+
+    new_is_verified = current_is_verified
+    revoked_notice = False
+    if current_is_verified:
+        # Se o usuário possui selo de verificado, valida se as fotos atuais contêm seu rosto
+        stored_desc = None
+        if verified_descriptor_raw:
+            try:
+                stored_desc = json.loads(verified_descriptor_raw)
+            except Exception:
+                stored_desc = None
+
+        if stored_desc and len(stored_desc) == 128:
+            has_match = False
+            if data.photo_descriptors:
+                valid_photo_descs = [p for p in data.photo_descriptors if len(p) == 128]
+                if valid_photo_descs:
+                    min_dist = min(math.dist(stored_desc, p) for p in valid_photo_descs)
+                    if min_dist < FACE_SIMILARITY_THRESHOLD:
+                        has_match = True
+
+            if not has_match:
+                new_is_verified = 0
+                revoked_notice = True
+
     cursor.execute("""
         UPDATE users SET
             email = ?, name = ?, age = ?, campus = ?, course = ?, specific_course = ?,
@@ -60,7 +99,8 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
             prompt1_q = ?, prompt1_a = ?, prompt2_q = ?, prompt2_a = ?,
             prompt3_q = ?, prompt3_a = ?,
             gender = ?, target_gender = ?, songs = ?,
-            private_photos = ?, private_bio = ?
+            private_photos = ?, private_bio = ?,
+            is_verified = ?
         WHERE id = ?
     """, (
         data.email, data.name, data.age, data.campus, data.course, data.specific_course,
@@ -71,6 +111,7 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
         json.dumps(data.songs or []),
         json.dumps(data.private_photos or []),
         data.private_bio or "",
+        new_is_verified,
         current_id
     ))
 
@@ -84,7 +125,57 @@ def update_my_profile(data: UserCreateOrUpdate, request: Request):
         except Exception:
             pass
 
-    return {"success": True, "message": "Perfil atualizado com sucesso!"}
+    msg = "Perfil atualizado com sucesso!"
+    if revoked_notice:
+        msg = "Perfil atualizado. Como as fotos atuais não coincidem com seu rosto cadastrado, o selo de verificado foi removido."
+
+    return {
+        "success": True, 
+        "is_verified": bool(new_is_verified),
+        "revoked_verification": revoked_notice,
+        "message": msg
+    }
+
+
+@router.post("/me/verify-face")
+def verify_my_face(data: VerifyFaceRequest, request: Request):
+    """
+    Valida a identidade do usuário através do descritor extraído da câmera ao vivo
+    e comparação biométrica (< 0.40) calculada estritamente no backend.
+    """
+    current_id = get_current_user_id(request)
+    if not data.live_descriptor or len(data.live_descriptor) != 128:
+        raise HTTPException(status_code=400, detail="Descritor facial da câmera inválido.")
+
+    valid_photo_descs = [p for p in data.photo_descriptors if len(p) == 128]
+    if not valid_photo_descs:
+        raise HTTPException(status_code=400, detail="Nenhum rosto válido detectado nas fotos públicas.")
+
+    # Cálculo da distância euclidiana estritamente no backend
+    min_dist = min(math.dist(data.live_descriptor, p) for p in valid_photo_descs)
+
+    if min_dist >= FACE_SIMILARITY_THRESHOLD:
+        raise HTTPException(
+            status_code=400, 
+            detail="A selfie não atingiu o nível de similaridade com as fotos do perfil."
+        )
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE users SET
+            is_verified = 1,
+            verified_face_descriptor = ?
+        WHERE id = ?
+    """, (json.dumps(data.live_descriptor), current_id))
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "is_verified": True,
+        "message": "Identidade confirmada! Seu perfil agora possui o selo oficial de verificado (🔵)."
+    }
 
 
 @router.get("/me/export")

@@ -96,21 +96,26 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
     if verification_photo_path:
         default_photos.insert(0, verification_photo_path)
 
+    is_verified_val = 1 if (req.face_descriptor and len(req.face_descriptor) > 0) else 0
+    face_desc_json = json.dumps(req.face_descriptor) if req.face_descriptor else ""
+
     cursor.execute("""
         INSERT INTO users (
             ra, password_hash, email, name, age, campus, course, specific_course,
             entity, looking_for, bio, interests, photos,
             prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
             gender, target_gender, terms_accepted_at,
-            age_verified, verified_age, liveness_verified, verification_photo, age_verified_at
+            age_verified, verified_age, liveness_verified, verification_photo, age_verified_at,
+            is_verified, verified_face_descriptor
         ) VALUES (?, ?, ?, ?, ?, 'Santo André', 'Ciência e Tecnologia', 'Ciência da Computação',
                   'Geral', 'Amizade', 'Olá, estou no Pontinho!', '["Música", "Tecnologia"]', ?,
                   'O melhor lugar para relaxar é...', 'Ouvindo música boa',
                   'Minha opinião impopular...', 'Conversa olho no olho supera qualquer mensagem',
                   'No intervalo você me encontra...', 'Tomando um café',
                   'Não informado', 'Todos', datetime('now'),
-                  1, ?, 1, ?, datetime('now'))
-    """, (internal_id, pw_hash, sanitized_email, cleaned_name, verified_age_val, json.dumps(default_photos), verified_age_val, verification_photo_path))
+                  1, ?, 1, ?, datetime('now'),
+                  ?, ?)
+    """, (internal_id, pw_hash, sanitized_email, cleaned_name, verified_age_val, json.dumps(default_photos), verified_age_val, verification_photo_path, is_verified_val, face_desc_json))
 
     conn.commit()
     new_user_id = cursor.lastrowid
@@ -125,6 +130,7 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
         "token": session_token,
         "name": cleaned_name,
         "email": sanitized_email,
+        "is_verified": bool(is_verified_val),
         "message": "Cadastro realizado com sucesso!"
     }
 
@@ -210,7 +216,8 @@ def login_user(data: LoginRequest, request: Request, response: Response):
             "id": user["id"],
             "name": user["name"],
             "email": user["email"],
-            "is_admin": user["is_admin"]
+            "is_admin": user["is_admin"],
+            "is_verified": dict(user).get("is_verified", 0)
         }
     }
 
@@ -230,7 +237,7 @@ def get_auth_me(request: Request):
 
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, email, age, campus, course, specific_course, entity, looking_for, bio, photos, is_admin FROM users WHERE id = ?", (user_id,))
+    cursor.execute("SELECT id, name, email, age, campus, course, specific_course, entity, looking_for, bio, photos, is_admin, is_verified FROM users WHERE id = ?", (user_id,))
     row = cursor.fetchone()
     conn.close()
 

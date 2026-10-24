@@ -13,6 +13,7 @@ class RegisterRequest(BaseModel):
     liveness_passed: bool = Field(default=False, description="Prova de vida facial aprovada")
     estimated_age: Optional[int] = Field(default=None, description="Idade estimada pela biometria")
     face_snapshot: Optional[str] = Field(default=None, description="Foto da selfie de verificação em base64")
+    face_descriptor: Optional[List[float]] = Field(default=None, description="Vetor de 128 floats do descritor facial extraído na câmera ao vivo")
 
 class LoginRequest(BaseModel):
     email: str = Field(..., description="E-mail de acesso")
@@ -53,6 +54,11 @@ class UserCreateOrUpdate(BaseModel):
     songs: List[str] = Field(default_factory=list, description="Lista de músicas / trilha sonora do perfil")
     private_photos: List[str] = Field(default_factory=list, description="Fotos privadas (visíveis após match + autorização)")
     private_bio: Optional[str] = Field(default="", description="Bio secreta/picante para matches autorizados")
+    photo_descriptors: Optional[List[List[float]]] = Field(default=None, description="Descritores faciais das fotos públicas para validação de integridade do selo no backend")
+
+class VerifyFaceRequest(BaseModel):
+    live_descriptor: List[float] = Field(..., description="Vetor de 128 floats do rosto capturado na câmera ao vivo")
+    photo_descriptors: List[List[float]] = Field(..., min_length=1, description="Lista de vetores de 128 floats das fotos públicas do perfil")
 
 class PrivateAccessAction(BaseModel):
     action: str  # 'approve' ou 'reject'

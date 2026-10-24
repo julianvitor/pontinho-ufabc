@@ -770,44 +770,39 @@ def seed_database():
     ]
 
     for u in mock_users:
-        cursor.execute("""
-            INSERT INTO users (
-                ra, password_hash, email, name, age, campus, course, specific_course, entity,
-                looking_for, bio, interests, photos,
-                prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
-                gender, target_gender, songs, private_photos, private_bio, is_admin
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(email) DO UPDATE SET
-                ra = excluded.ra,
-                password_hash = excluded.password_hash,
-                name = excluded.name,
-                age = excluded.age,
-                campus = excluded.campus,
-                course = excluded.course,
-                specific_course = excluded.specific_course,
-                entity = excluded.entity,
-                looking_for = excluded.looking_for,
-                bio = excluded.bio,
-                interests = excluded.interests,
-                photos = excluded.photos,
-                prompt1_q = excluded.prompt1_q,
-                prompt1_a = excluded.prompt1_a,
-                prompt2_q = excluded.prompt2_q,
-                prompt2_a = excluded.prompt2_a,
-                prompt3_q = excluded.prompt3_q,
-                prompt3_a = excluded.prompt3_a,
-                gender = excluded.gender,
-                target_gender = excluded.target_gender,
-                songs = excluded.songs,
-                private_photos = excluded.private_photos,
-                private_bio = excluded.private_bio,
-                is_admin = excluded.is_admin
-        """, (
-            u["ra"], u["password_hash"], u["email"], u["name"], u["age"], u["campus"], u["course"], u["specific_course"], u["entity"],
-            u["looking_for"], u["bio"], u["interests"], u["photos"],
-            u["prompt1_q"], u["prompt1_a"], u["prompt2_q"], u["prompt2_a"], u["prompt3_q"], u["prompt3_a"],
-            u["gender"], u["target_gender"], u["songs"], u.get("private_photos", "[]"), u.get("private_bio", ""), u["is_admin"]
-        ))
+        cursor.execute("SELECT id FROM users WHERE email = ? OR (ra = ? AND ra != '')", (u["email"], u["ra"]))
+        existing = cursor.fetchone()
+        if existing:
+            cursor.execute("""
+                UPDATE users SET
+                    ra = ?, password_hash = ?, email = ?, name = ?, age = ?, campus = ?,
+                    course = ?, specific_course = ?, entity = ?, looking_for = ?, bio = ?,
+                    interests = ?, photos = ?, prompt1_q = ?, prompt1_a = ?,
+                    prompt2_q = ?, prompt2_a = ?, prompt3_q = ?, prompt3_a = ?,
+                    gender = ?, target_gender = ?, songs = ?, private_photos = ?,
+                    private_bio = ?, is_admin = ?
+                WHERE id = ?
+            """, (
+                u["ra"], u["password_hash"], u["email"], u["name"], u["age"], u["campus"], u["course"], u["specific_course"], u["entity"],
+                u["looking_for"], u["bio"], u["interests"], u["photos"],
+                u["prompt1_q"], u["prompt1_a"], u["prompt2_q"], u["prompt2_a"], u["prompt3_q"], u["prompt3_a"],
+                u["gender"], u["target_gender"], u["songs"], u.get("private_photos", "[]"), u.get("private_bio", ""), u["is_admin"],
+                existing["id"]
+            ))
+        else:
+            cursor.execute("""
+                INSERT INTO users (
+                    ra, password_hash, email, name, age, campus, course, specific_course, entity,
+                    looking_for, bio, interests, photos,
+                    prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
+                    gender, target_gender, songs, private_photos, private_bio, is_admin
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                u["ra"], u["password_hash"], u["email"], u["name"], u["age"], u["campus"], u["course"], u["specific_course"], u["entity"],
+                u["looking_for"], u["bio"], u["interests"], u["photos"],
+                u["prompt1_q"], u["prompt1_a"], u["prompt2_q"], u["prompt2_a"], u["prompt3_q"], u["prompt3_a"],
+                u["gender"], u["target_gender"], u["songs"], u.get("private_photos", "[]"), u.get("private_bio", ""), u["is_admin"]
+            ))
 
     # Match de exemplo entre Mariana (id=2) e Gabriel (id=5) para podermos testar o chat e pedidos privados imediatamente
     cursor.execute("SELECT id FROM users WHERE email = 'mariana.silva@pontinho.app'")

@@ -178,7 +178,7 @@ def get_admin_users(request: Request):
     require_admin(request)
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, email, age, campus, course, specific_course, entity, photos, songs, is_admin, created_at FROM users ORDER BY id DESC")
+    cursor.execute("SELECT id, name, email, age, campus, course, specific_course, entity, photos, songs, is_admin, is_verified, created_at FROM users ORDER BY id DESC")
     rows = cursor.fetchall()
     conn.close()
     result = []

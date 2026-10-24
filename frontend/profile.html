@@ -93,15 +93,18 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-800/80 gap-4">
         <div>
           <h1 class="text-2xl font-black text-white tracking-tight">Editar Perfil</h1>
-          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Preencha seus dados para começar a receber likes.</p>
+          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Complete suas informações.</p>
         </div>
         <div class="flex items-center gap-2">
           <button type="submit" form="profile-form"
-            class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-sm rounded-xl shadow-lg shadow-emerald-950/60 hover:scale-105 active:scale-95 transition">
-            Salvar Perfil
+            class="px-5 py-2 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/60 hover:scale-105 active:scale-95 transition">
+            Salvar
           </button>
         </div>
       </div>
+
+      <!-- BANNER DE STATUS DE VERIFICAÇÃO FACIAL -->
+      <div id="profile-verification-card" class="mt-6"></div>
 
       <form id="profile-form" onsubmit="saveProfile(event)" class="mt-8 space-y-8">
 
@@ -109,10 +112,10 @@
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-white text-sm flex items-center gap-1.5">
-              <span>📸</span> Fotos Públicas (mínimo 2)
+              <span>📸</span> Fotos (mín. 2)
             </h3>
             <span id="photos-count-indicator" class="text-xs font-semibold text-slate-400">
-              0/2 fotos
+              0/2
             </span>
           </div>
 
@@ -125,13 +128,13 @@
           <div
             class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
             <label for="public-file-input"
-              class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 rounded-xl text-xs font-black transition shadow-sm cursor-pointer active:scale-95">
+              class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 rounded-xl text-xs font-black transition shadow-sm cursor-pointer active:scale-95">
               <span>📁</span>
-              <span id="public-upload-label">Enviar Foto ou GIF</span>
+              <span id="public-upload-label">Adicionar Foto</span>
               <input id="public-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif"
                 class="hidden" onchange="handleImageUpload(event, 'public')">
             </label>
-            <span class="text-xs text-slate-400">Envie imagens, Videos Curtos ou GIFs animados</span>
+            <span class="text-xs text-slate-400">Fotos ou GIFs</span>
           </div>
         </div>
 
@@ -459,11 +462,15 @@
     </a>
   </nav>
 
+  <script src="./js/face-api.js"></script>
   <script src="./js/app.js"></script>
   <script>
     let currentPhotos = [];
     let currentPrivatePhotos = [];
     let metadata = null;
+    let currentUserData = null;
+    let modelsLoaded = false;
+    const photoDescriptorCache = new Map();
 
     document.addEventListener('DOMContentLoaded', async () => {
       const user = await Pontinho.requireAuth();
@@ -472,6 +479,359 @@
       await loadMetadata();
       await loadMyProfile();
     });
+
+    function renderVerificationBanner() {
+      const container = document.getElementById('profile-verification-card');
+      if (!container) return;
+
+      const isVerified = currentUserData && currentUserData.is_verified;
+
+      if (isVerified) {
+        container.innerHTML = `
+          <div class="rounded-2xl p-4 sm:p-5 border bg-gradient-to-r from-cyan-950/40 via-blue-950/30 to-slate-900 border-cyan-500/40 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                🔵
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-black text-white text-sm sm:text-base">Perfil Verificado</h4>
+                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">ATIVO</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-0.5">Identidade e fotos confirmadas.</p>
+              </div>
+            </div>
+            <button type="button" onclick="openVerificationModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-bold text-slate-300 hover:text-white bg-slate-950/80 hover:bg-slate-800 rounded-xl border border-slate-700/80 transition active:scale-95 text-center shrink-0">
+              Refazer 🔄
+            </button>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="rounded-2xl p-4 sm:p-5 border bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950/40 border-blue-500/30 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/30 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                🛡️
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-black text-white text-sm sm:text-base">Verifique seu Perfil</h4>
+                  <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Pendente</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Tire uma selfie para validar suas fotos.</p>
+              </div>
+            </div>
+            <button type="button" onclick="openVerificationModal()" class="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-cyan-950/60 transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0">
+              <span>📸</span> <span>Verificar</span>
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    async function ensureFaceApiModels() {
+      if (modelsLoaded) return true;
+      try {
+        const MODEL_URL = './models';
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]);
+        modelsLoaded = true;
+        return true;
+      } catch (err) {
+        console.warn('Fallback para CDN dos modelos face-api:', err);
+        const CDN_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(CDN_URL),
+          faceapi.nets.faceLandmark68Net.loadFromUri(CDN_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(CDN_URL)
+        ]);
+        modelsLoaded = true;
+        return true;
+      }
+    }
+
+    async function getOrComputePhotoDescriptor(photoUrl) {
+      if (!photoUrl) return null;
+      if (photoDescriptorCache.has(photoUrl)) {
+        return photoDescriptorCache.get(photoUrl);
+      }
+      await ensureFaceApiModels();
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = async () => {
+          try {
+            const det = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.35 }))
+              .withFaceLandmarks()
+              .withFaceDescriptor();
+            const desc = det && det.descriptor ? Array.from(det.descriptor) : null;
+            if (desc) photoDescriptorCache.set(photoUrl, desc);
+            resolve(desc);
+          } catch (e) {
+            console.warn('Erro ao calcular descritor da foto:', photoUrl, e);
+            resolve(null);
+          }
+        };
+        img.onerror = () => {
+          console.warn('Erro ao carregar imagem para descritor:', photoUrl);
+          resolve(null);
+        };
+        img.src = Pontinho.resolveMediaUrl(photoUrl);
+      });
+    }
+
+    let verifyStream = null;
+    let verifyAnimId = null;
+    let verifyLoopActive = false;
+    let verifyIsDetecting = false;
+    let verifyLivenessPassed = false;
+    let verifyConsecutivePass = 0;
+    let verifyChallenge = null;
+
+    const VERIFY_CHALLENGES = [
+      { id: 'smile', instruction: 'Dê um belo sorriso para a câmera 😊', badge: '2. Dê um Sorriso' },
+      { id: 'turn', instruction: 'Vire o rosto levemente para o lado 🔄', badge: '2. Vire o Rosto' }
+    ];
+
+    async function openVerificationModal() {
+      if (currentPhotos.length < 2) {
+        Pontinho.showToast('Adicione ao menos 2 fotos antes.', 'error');
+        return;
+      }
+
+      const modal = document.getElementById('verify-face-modal');
+      const video = document.getElementById('verify-cam-video');
+      const loading = document.getElementById('verify-cam-loading');
+      const pill = document.getElementById('verify-instruction-pill');
+      const badgeFace = document.getElementById('verify-badge-face');
+      const badgeLiveness = document.getElementById('verify-badge-liveness');
+      const compBox = document.getElementById('verify-comparison-box');
+      const compSpinner = document.getElementById('verify-comparison-spinner');
+      const compDetails = document.getElementById('verify-comparison-details');
+
+      modal.classList.remove('hidden');
+      loading.classList.remove('hidden');
+      compBox.classList.add('hidden');
+      compDetails.innerText = '';
+
+      verifyChallenge = VERIFY_CHALLENGES[Math.floor(Math.random() * VERIFY_CHALLENGES.length)];
+      pill.innerText = 'Iniciando câmera...';
+      badgeFace.className = 'px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-500 font-medium';
+      badgeFace.innerText = '1. Rosto';
+      badgeLiveness.className = 'px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-500 font-medium';
+      badgeLiveness.innerText = verifyChallenge.badge;
+
+      verifyLivenessPassed = false;
+      verifyConsecutivePass = 0;
+      verifyLoopActive = true;
+      verifyIsDetecting = false;
+
+      try {
+        await ensureFaceApiModels();
+
+        verifyStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+          audio: false
+        });
+        video.srcObject = verifyStream;
+
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+          };
+        });
+
+        loading.classList.add('hidden');
+        pill.innerText = verifyChallenge.instruction;
+        badgeLiveness.className = 'px-2 py-0.5 rounded bg-slate-900 border border-amber-500/40 text-amber-300 font-medium animate-pulse';
+
+        const detectorOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 });
+
+        async function stepVerifyFrame() {
+          if (!verifyLoopActive || !verifyStream || video.paused || video.ended) return;
+
+          if (!verifyIsDetecting) {
+            verifyIsDetecting = true;
+            try {
+              const detection = await faceapi.detectSingleFace(video, detectorOpts)
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+              if (!detection) {
+                badgeFace.className = 'px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-500 font-medium';
+                badgeFace.innerText = '1. Centralize seu rosto';
+              } else {
+                badgeFace.className = 'px-2 py-0.5 rounded bg-slate-900 border border-emerald-500/40 text-emerald-300 font-medium';
+                badgeFace.innerText = '1. Rosto OK ✓';
+
+                const landmarks = detection.landmarks;
+                const nose = landmarks.getNose();
+                const jaw = landmarks.getJawOutline();
+                const mouth = landmarks.getMouth();
+
+                if (!verifyLivenessPassed) {
+                  let passCondition = false;
+                  if (verifyChallenge.id === 'turn') {
+                    const noseTip = nose[3];
+                    const leftJaw = jaw[0];
+                    const rightJaw = jaw[16];
+                    const distLeft = Math.abs(noseTip.x - leftJaw.x);
+                    const distRight = Math.abs(rightJaw.x - noseTip.x);
+                    const yawRatio = distLeft / (distRight || 1);
+                    if (yawRatio < 0.55 || yawRatio > 1.8) {
+                      passCondition = true;
+                    }
+                  } else if (verifyChallenge.id === 'smile') {
+                    const mouthLeft = mouth[0];
+                    const mouthRight = mouth[6];
+                    const mouthWidth = Math.hypot(mouthRight.x - mouthLeft.x, mouthRight.y - mouthLeft.y);
+                    const jawWidth = Math.hypot(jaw[16].x - jaw[0].x, jaw[16].y - jaw[0].y);
+                    const smileRatio = mouthWidth / (jawWidth || 1);
+                    if (smileRatio > 0.48) {
+                      passCondition = true;
+                    }
+                  }
+
+                  if (passCondition) {
+                    verifyConsecutivePass++;
+                    if (verifyConsecutivePass >= 2) {
+                      verifyLivenessPassed = true;
+                      badgeLiveness.className = 'px-2 py-0.5 rounded bg-slate-900 border border-emerald-500/40 text-emerald-300 font-medium';
+                      badgeLiveness.innerText = '2. Prova de vida OK ✓';
+                      pill.innerText = 'Comparando com suas fotos públicas...';
+                      pill.className = 'inline-block px-4 py-1.5 rounded-full bg-slate-950 border border-emerald-500/50 text-xs font-bold text-emerald-300 animate-pulse';
+
+                      // Para o loop e executa a comparação
+                      verifyLoopActive = false;
+                      const liveDesc = Array.from(detection.descriptor);
+                      await executeComparisonWithPhotos(liveDesc);
+                      return;
+                    }
+                  } else {
+                    verifyConsecutivePass = Math.max(0, verifyConsecutivePass - 1);
+                  }
+                }
+              }
+            } catch (frameErr) {
+              console.warn('Frame verification err:', frameErr);
+            } finally {
+              verifyIsDetecting = false;
+            }
+          }
+
+          if (verifyLoopActive) {
+            verifyAnimId = requestAnimationFrame(stepVerifyFrame);
+          }
+        }
+
+        verifyAnimId = requestAnimationFrame(stepVerifyFrame);
+
+      } catch (err) {
+        console.error('Erro na câmera de verificação:', err);
+        closeVerificationModal();
+        Pontinho.showToast(err.message || 'Câmera não permitida ou indisponível.', 'error');
+      }
+    }
+
+    async function executeComparisonWithPhotos(liveDescriptor) {
+      const compBox = document.getElementById('verify-comparison-box');
+      const compSpinner = document.getElementById('verify-comparison-spinner');
+      const compDetails = document.getElementById('verify-comparison-details');
+      const pill = document.getElementById('verify-instruction-pill');
+
+      compBox.classList.remove('hidden');
+      compSpinner.classList.remove('hidden');
+      compDetails.innerText = 'Analisando feições das fotos cadastradas no perfil...';
+
+      let matchedCount = 0;
+      const photoDescriptors = [];
+
+      for (let i = 0; i < currentPhotos.length; i++) {
+        const photoUrl = currentPhotos[i];
+        compDetails.innerText = `Processando foto #${i + 1} de ${currentPhotos.length}...`;
+        const pDesc = await getOrComputePhotoDescriptor(photoUrl);
+        if (pDesc) {
+          matchedCount++;
+          photoDescriptors.push(Array.from(pDesc));
+        }
+      }
+
+      compSpinner.classList.add('hidden');
+
+      if (matchedCount === 0 || photoDescriptors.length === 0) {
+        compDetails.innerHTML = `
+          <div class="text-rose-400 font-bold text-xs space-y-1">
+            <p>❌ Nenhum rosto encontrado nas fotos.</p>
+            <p class="text-[11px] text-slate-400 font-normal">Adicione uma foto do seu rosto e tente novamente.</p>
+          </div>
+        `;
+        pill.innerText = 'Rosto não encontrado nas fotos';
+        pill.className = 'inline-block px-4 py-1.5 rounded-full bg-rose-950/80 border border-rose-500/50 text-xs font-bold text-rose-300';
+        return;
+      }
+
+      try {
+        await Pontinho.apiFetch('/api/users/me/verify-face', {
+          method: 'POST',
+          body: JSON.stringify({
+            live_descriptor: Array.from(liveDescriptor),
+            photo_descriptors: photoDescriptors
+          })
+        });
+
+        compDetails.innerHTML = `
+          <div class="space-y-1.5">
+            <p class="text-emerald-300 font-black text-sm">🎉 Rosto Confirmado!</p>
+            <p class="text-xs text-slate-300">
+              Identidade confirmada com sucesso em relação às suas fotos públicas.
+            </p>
+          </div>
+        `;
+        pill.innerText = 'Verificado com Sucesso!';
+        pill.className = 'inline-block px-4 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-xs font-bold text-emerald-300';
+
+        if (currentUserData) {
+          currentUserData.is_verified = true;
+          currentUserData.verified_face_descriptor = liveDescriptor;
+        }
+        renderVerificationBanner();
+        Pontinho.showToast('Perfil verificado! 🔵', 'success');
+
+        setTimeout(() => {
+          closeVerificationModal();
+        }, 1800);
+
+      } catch (err) {
+        compDetails.innerHTML = `
+          <div class="space-y-1.5 text-rose-300 font-medium text-xs">
+            <p class="font-black text-rose-400">❌ Não foi possível confirmar</p>
+            <p class="text-[11px] text-slate-300">
+              ${err.message || 'A selfie não atingiu o nível de similaridade com as fotos do perfil. Tente com boa iluminação.'}
+            </p>
+          </div>
+        `;
+        pill.innerText = 'Não conferiu';
+        pill.className = 'inline-block px-4 py-1.5 rounded-full bg-rose-950/80 border border-rose-500/50 text-xs font-bold text-rose-300';
+      }
+    }
+
+    function closeVerificationModal() {
+      verifyLoopActive = false;
+      if (verifyAnimId) {
+        cancelAnimationFrame(verifyAnimId);
+        verifyAnimId = null;
+      }
+      if (verifyStream) {
+        verifyStream.getTracks().forEach(t => t.stop());
+        verifyStream = null;
+      }
+      const modal = document.getElementById('verify-face-modal');
+      if (modal) modal.classList.add('hidden');
+    }
 
     async function loadMetadata() {
       try {
@@ -512,6 +872,8 @@
     async function loadMyProfile() {
       try {
         const u = await Pontinho.apiFetch('/api/users/me');
+        currentUserData = u;
+        renderVerificationBanner();
 
         document.getElementById('form-name').value = u.name || '';
         document.getElementById('form-age').value = u.age || 20;
@@ -563,8 +925,7 @@
       const originalText = label ? label.innerText : '';
 
       try {
-        if (label) label.innerText = 'Comprimindo...';
-        Pontinho.showToast('Sanitizando e otimizando imagem...', 'info');
+        if (label) label.innerText = 'Enviando...';
 
         const isPrivate = (type !== 'public');
         const result = await Pontinho.uploadPhoto(file, isPrivate);
@@ -577,9 +938,7 @@
           renderPrivatePhotosGrid();
         }
 
-        const sizeKb = Math.round(result.compressed_size / 1024);
-        const formatName = result.format ? result.format.toUpperCase() : (result.url && result.url.endsWith('.gif') ? 'GIF' : 'WebP');
-        Pontinho.showToast(`Arquivo salvo em ${formatName} (${sizeKb} KB, otimização ${result.compression_ratio})!`, 'success');
+        Pontinho.showToast('Foto adicionada! 📸', 'success');
       } catch (err) {
         Pontinho.showToast(err.message, 'error');
       } finally {
@@ -675,7 +1034,7 @@
 
       // Validação estrita de negócio: pelo menos duas fotos
       if (currentPhotos.length < 2) {
-        Pontinho.showToast('O perfil deve ter obrigatoriamente ao menos duas fotos públicas!', 'error');
+        Pontinho.showToast('Adicione no mínimo 2 fotos.', 'error');
         return;
       }
 
@@ -715,12 +1074,34 @@
         songs: songsArray,
       };
 
+      // Se o usuário era verificado, enviamos os descritores das fotos atuais para validação no backend
+      let photoDescriptors = null;
+      if (currentUserData && currentUserData.is_verified) {
+        Pontinho.showToast('Validando fotos...', 'info');
+        photoDescriptors = [];
+        for (const pUrl of currentPhotos) {
+          const pDesc = await getOrComputePhotoDescriptor(pUrl);
+          if (pDesc) {
+            photoDescriptors.push(Array.from(pDesc));
+          }
+        }
+      }
+
+      payload.photo_descriptors = photoDescriptors;
+
       try {
-        await Pontinho.apiFetch('/api/users/me', {
+        const res = await Pontinho.apiFetch('/api/users/me', {
           method: 'PUT',
           body: JSON.stringify(payload)
         });
-        Pontinho.showToast('Perfil atualizado com sucesso! 🎉', 'success');
+
+        if (res.revoked_verification) {
+          if (currentUserData) currentUserData.is_verified = false;
+          renderVerificationBanner();
+          Pontinho.showToast('Fotos sem seu rosto. Selo removido.', 'error');
+        } else {
+          Pontinho.showToast(res.message || 'Perfil salvo! 🎉', 'success');
+        }
       } catch (err) {
         Pontinho.showToast(err.message, 'error');
       }
@@ -729,7 +1110,7 @@
     // --- LGPD: DIREITOS DO TITULAR ---
     async function exportMyDataLGPD() {
       try {
-        Pontinho.showToast('Preparando o pacote com todos os seus dados pessoais (LGPD)...');
+        Pontinho.showToast('Exportando dados...');
         const data = await Pontinho.apiFetch('/api/users/me/export');
         const jsonStr = JSON.stringify(data, null, 2);
         const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -741,37 +1122,88 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        Pontinho.showToast('Seus dados foram exportados com sucesso! 📥', 'success');
+        Pontinho.showToast('Dados exportados! 📥', 'success');
       } catch (err) {
-        Pontinho.showToast(err.message || 'Erro ao exportar dados.', 'error');
+        Pontinho.showToast(err.message || 'Erro ao exportar.', 'error');
       }
     }
 
     async function deleteMyAccountLGPD() {
-      const confirmed = confirm(
-        '⚠️ ATENÇÃO - DIREITO AO ESQUECIMENTO (LGPD):\n\n' +
-        'Tem certeza absoluta que deseja excluir sua conta do Pontinho?\n\n' +
-        'Esta ação é permanente e irreversível. Todos os seus dados, fotos públicas e privadas, curtidas, matches e histórico de mensagens serão eliminados definitivamente dos nossos servidores.'
-      );
+      const confirmed = confirm('Excluir conta permanentemente? Esta ação não pode ser desfeita.');
       if (!confirmed) return;
 
-      const secondConfirm = prompt('Para confirmar a exclusão permanente, digite EXCLUIR:');
+      const secondConfirm = prompt('Digite EXCLUIR para confirmar:');
       if (secondConfirm !== 'EXCLUIR') {
-        Pontinho.showToast('Exclusão cancelada.');
+        Pontinho.showToast('Cancelado.');
         return;
       }
 
       try {
         await Pontinho.apiFetch('/api/users/me', { method: 'DELETE' });
-        Pontinho.showToast('Sua conta foi excluída permanentemente. Até logo! 👋', 'success');
+        Pontinho.showToast('Conta excluída. 👋', 'success');
         setTimeout(() => {
           window.location.href = './login.html';
         }, 1200);
       } catch (err) {
-        Pontinho.showToast(err.message || 'Erro ao excluir conta.', 'error');
+        Pontinho.showToast(err.message || 'Erro ao excluir.', 'error');
       }
     }
   </script>
+
+  <!-- MODAL DE VERIFICAÇÃO FACIAL -->
+  <div id="verify-face-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 relative shadow-2xl text-slate-100 flex flex-col items-center">
+      <!-- Botão fechar -->
+      <button type="button" onclick="closeVerificationModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+        ✕
+      </button>
+
+      <div class="text-center mb-4">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-bold mb-2">
+          <span>🔵</span> Verificação de Identidade
+        </div>
+        <h3 class="text-lg font-black text-white">Verificação Facial</h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+          Tire uma selfie para validar suas fotos.
+        </p>
+      </div>
+
+      <!-- Container da Câmera -->
+      <div id="verify-cam-box" class="relative w-64 h-64 rounded-full overflow-hidden border-4 border-cyan-500/50 shadow-2xl bg-black flex items-center justify-center my-2">
+        <video id="verify-cam-video" autoplay playsinline muted class="w-full h-full object-cover -scale-x-100"></video>
+        <div id="verify-cam-loading" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center gap-2 text-center p-4">
+          <div class="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-xs text-cyan-300 font-medium">Iniciando câmera...</span>
+        </div>
+      </div>
+
+      <!-- Pílula de instrução e badges -->
+      <div class="w-full text-center mt-3 space-y-2">
+        <div id="verify-instruction-pill" class="inline-block px-4 py-1.5 rounded-full bg-slate-950 border border-slate-800 text-xs font-bold text-cyan-300">
+          Centralize o rosto
+        </div>
+        <div id="verify-status-badges" class="flex items-center justify-center gap-2 text-[11px]">
+          <span id="verify-badge-face" class="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-500 font-medium">1. Rosto</span>
+          <span id="verify-badge-liveness" class="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-500 font-medium">2. Movimento</span>
+        </div>
+      </div>
+
+      <!-- Resultado da Comparação -->
+      <div id="verify-comparison-box" class="w-full mt-4 p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hidden text-center space-y-2">
+        <div id="verify-comparison-spinner" class="flex items-center justify-center gap-2 text-xs text-cyan-400">
+          <div class="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+          <span>Comparando fotos...</span>
+        </div>
+        <div id="verify-comparison-details" class="text-xs text-slate-300 font-medium"></div>
+      </div>
+
+      <div class="w-full mt-5 flex gap-2">
+        <button type="button" onclick="closeVerificationModal()" class="flex-1 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-bold transition">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

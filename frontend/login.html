@@ -117,7 +117,7 @@
             placeholder="nome.sobrenome@aluno.ufabc.edu.br" 
             class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
           >
-          <p class="text-[10px] text-slate-500 mt-1">Exclusivo para estudantes e servidores (@aluno.ufabc.edu.br ou @ufabc.edu.br)</p>
+          <p class="text-[10px] text-slate-500 mt-1">Apenas e-mail institucional @ufabc</p>
         </div>
 
         <div>
@@ -148,12 +148,12 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1.5">
               <span class="text-sm">🛡️</span>
-              <span class="text-xs font-bold text-emerald-400">Validação Biométrica (+18)</span>
+              <span class="text-xs font-bold text-emerald-400">Verificação (+18)</span>
             </div>
-            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">ECA Digital</span>
+            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">+18 Anos</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-tight">
-            Exigência legal (Lei nº 14.811/2024): confirme sua maioridade (+18 anos).
+            Confirme sua maioridade (+18) com uma selfie rápida.
           </p>
 
           <!-- Status / Botão de Ação Inicial -->
@@ -165,7 +165,7 @@
               class="w-full py-2.5 px-3 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition"
             >
               <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-              <span>Abrir Câmera & Verificar (+18)</span>
+              <span>Verificar (+18)</span>
             </button>
           </div>
 
@@ -180,7 +180,7 @@
 
               <!-- Overlay com instrução dinâmica -->
               <div id="bio-overlay-pill" class="absolute bottom-2.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-bold text-white text-center shadow max-w-[90%] truncate">
-                Carregando IA biométrica...
+                Iniciando câmera...
               </div>
             </div>
 
@@ -190,7 +190,7 @@
                 1. Rosto
               </div>
               <div id="badge-liveness" class="p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition">
-                2. Desafio
+                2. Movimento
               </div>
               <div id="badge-age" class="p-1 rounded bg-slate-900 border border-slate-800 text-slate-500 font-medium transition">
                 3. Idade +18
@@ -205,14 +205,14 @@
                   onclick="switchLivenessChallenge()" 
                   class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold transition"
                 >
-                  🎲 Trocar Desafio
+                  🎲 Trocar
                 </button>
                 <button 
                   type="button" 
                   onclick="forceLivenessManualCheck()" 
                   class="px-2.5 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 hover:bg-emerald-900 text-emerald-300 text-[10px] font-bold transition flex items-center gap-1"
                 >
-                  <span>📸</span> <span>Validar Foto</span>
+                  <span>📸</span> <span>Validar</span>
                 </button>
               </div>
             </div>
@@ -222,7 +222,7 @@
               onclick="cancelBiometricVerification()" 
               class="mt-2 text-[10px] text-slate-500 hover:text-slate-300 transition"
             >
-              Cancelar câmera
+              Cancelar
             </button>
           </div>
 
@@ -231,12 +231,11 @@
             <img id="bio-snapshot-thumb" src="" alt="Selfie Verificada" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-400 flex-shrink-0">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-1.5">
-                <span class="text-emerald-400 font-bold text-xs">✓ Verificado com Sucesso</span>
+                <span class="text-emerald-400 font-bold text-xs">✓ Verificado (+18)</span>
               </div>
               <p id="bio-success-details" class="text-[11px] text-slate-300">
-                Prova de vida OK • Idade estimada: +18
+                Idade estimada: +18 anos
               </p>
-              <span class="text-[9px] text-emerald-400/80 font-mono block">Conforme Lei 14.811/2024 (ECA Digital)</span>
             </div>
             <button type="button" onclick="resetBiometrics()" class="text-[10px] text-slate-400 hover:text-white underline flex-shrink-0" title="Refazer">
               Refazer
@@ -246,10 +245,10 @@
           <!-- Alerta de Bloqueio por Idade < 18 -->
           <div id="bio-blocked-card" class="hidden p-3 rounded-xl bg-red-950/60 border border-red-500/50 space-y-1">
             <div class="flex items-center gap-1.5 text-red-400 font-bold text-xs">
-              <span>🚫</span> <span>Acesso Bloqueado: Menor de Idade</span>
+              <span>🚫</span> <span>Menor de 18 anos</span>
             </div>
             <p id="bio-blocked-msg" class="text-[11px] text-red-200 leading-tight">
-              A estimativa biométrica indicou idade inferior a 18 anos. Em estrito cumprimento ao ECA Digital e aos Termos de Uso, o cadastro é restrito a maiores de 18 anos.
+              Cadastro restrito a maiores de 18 anos.
             </p>
             <button type="button" onclick="resetBiometrics()" class="mt-1 text-[10px] text-slate-300 hover:text-white underline">
               Tentar novamente
@@ -265,7 +264,7 @@
             class="mt-0.5 w-4 h-4 rounded border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500/30 cursor-pointer"
           >
           <label for="reg-terms" class="text-[11px] text-slate-400 leading-tight cursor-pointer">
-            Li e concordo com os <a href="./terms.html" target="_blank" class="text-emerald-400 hover:underline font-semibold">Termos de Uso</a> e autorizo o tratamento de dados pessoais segundo a <a href="./terms.html#lgpd" target="_blank" class="text-emerald-400 hover:underline font-semibold">Política de Privacidade (LGPD)</a>.
+            Concordo com os <a href="./terms.html" target="_blank" class="text-emerald-400 hover:underline font-semibold">Termos</a> e a <a href="./terms.html#lgpd" target="_blank" class="text-emerald-400 hover:underline font-semibold">Privacidade</a>.
           </label>
         </div>
 
@@ -369,7 +368,7 @@
         });
 
         Pontinho.setCurrentUserId(data.user.id, data.token);
-        Pontinho.showToast(`Bem-vindo(a) de volta, ${data.user.name}! 🔥`, 'success');
+        Pontinho.showToast(`Bem-vindo(a)! 🔥`, 'success');
         
         setTimeout(() => {
           window.location.href = './index.html';
@@ -387,7 +386,8 @@
       verified: false,
       livenessPassed: false,
       estimatedAge: null,
-      snapshot: null
+      snapshot: null,
+      descriptor: null
     };
     let biometricStream = null;
     let detectionAnimationId = null;
@@ -426,7 +426,8 @@
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
           faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-          faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+          faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL),
+          faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
         ]);
         modelsLoaded = true;
         return true;
@@ -437,7 +438,8 @@
           await Promise.all([
             faceapi.nets.tinyFaceDetector.loadFromUri(CDN_URL),
             faceapi.nets.faceLandmark68Net.loadFromUri(CDN_URL),
-            faceapi.nets.ageGenderNet.loadFromUri(CDN_URL)
+            faceapi.nets.ageGenderNet.loadFromUri(CDN_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(CDN_URL)
           ]);
           modelsLoaded = true;
           return true;
@@ -536,7 +538,7 @@
           badgeLiveness.innerText = currentChallenge.badgeText;
         }
       }
-      Pontinho.showToast(`Desafio alterado: ${currentChallenge.name}`, 'info');
+      Pontinho.showToast(`Desafio: ${currentChallenge.name}`, 'info');
     }
 
     function forceLivenessManualCheck() {
@@ -549,9 +551,9 @@
         }
         const pill = document.getElementById('bio-overlay-pill');
         if (pill) pill.innerText = '✓ Prova de vida confirmada!';
-        Pontinho.showToast('Prova de vida validada!', 'success');
+        Pontinho.showToast('Validação concluída!', 'success');
       } else {
-        Pontinho.showToast('Posicione seu rosto dentro do círculo primeiro.', 'info');
+        Pontinho.showToast('Centralize o rosto no círculo.', 'info');
       }
     }
 
@@ -622,7 +624,8 @@
             try {
               const detection = await faceapi.detectSingleFace(video, detectorOptions)
                 .withFaceLandmarks()
-                .withAgeAndGender();
+                .withAgeAndGender()
+                .withFaceDescriptor();
 
               if (!detection) {
                 consecutiveFaceFrames = Math.max(0, consecutiveFaceFrames - 1);
@@ -715,8 +718,9 @@
                   ctx.scale(-1, 1);
                   ctx.drawImage(video, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
                   const snapshotBase64 = hiddenCanvas.toDataURL('image/jpeg', 0.85);
+                  const faceDescriptor = (detection && detection.descriptor) ? Array.from(detection.descriptor) : null;
 
-                  finishBiometricVerification(medianAge, snapshotBase64);
+                  finishBiometricVerification(medianAge, snapshotBase64, faceDescriptor);
                   return;
                 }
               }
@@ -741,7 +745,7 @@
       }
     }
 
-    function finishBiometricVerification(estimatedAge, snapshotBase64) {
+    function finishBiometricVerification(estimatedAge, snapshotBase64, faceDescriptor = null) {
       cancelBiometricStreamOnly();
 
       const camCard = document.getElementById('bio-camera-container');
@@ -756,6 +760,7 @@
         biometricData.livenessPassed = false;
         biometricData.estimatedAge = estimatedAge;
         biometricData.snapshot = null;
+        biometricData.descriptor = null;
 
         document.getElementById('bio-blocked-msg').innerText = 
           `A estimativa biométrica indicou ${estimatedAge} anos (inferior a 18 anos). Conforme a Lei nº 14.811/2024 (ECA Digital), o acesso ao Pontinho é restrito exclusivamente a maiores de 18 anos.`;
@@ -769,13 +774,14 @@
       biometricData.livenessPassed = true;
       biometricData.estimatedAge = estimatedAge;
       biometricData.snapshot = snapshotBase64;
+      biometricData.descriptor = faceDescriptor;
 
       document.getElementById('bio-snapshot-thumb').src = snapshotBase64;
       document.getElementById('bio-success-details').innerText = 
         `Prova de vida confirmada • Idade estimada: ${estimatedAge} anos`;
       successCard.classList.remove('hidden');
 
-      Pontinho.showToast(`Biometria aprovada! Maior de 18 anos (${estimatedAge} anos) ✓`, 'success');
+      Pontinho.showToast(`Aprovado (+18) ✓`, 'success');
     }
 
     async function handleRegister(e) {
@@ -786,23 +792,23 @@
 
       const termsChecked = document.getElementById('reg-terms').checked;
       if (!termsChecked) {
-        Pontinho.showToast('Você precisa aceitar os Termos de Uso e a Política de Privacidade (LGPD).', 'error');
+        Pontinho.showToast('Aceite os termos para continuar.', 'error');
         return;
       }
 
       if (!password || password.length < 8) {
-        Pontinho.showToast('A senha deve conter no mínimo 8 caracteres.', 'error');
+        Pontinho.showToast('Senha mínima: 8 caracteres.', 'error');
         return;
       }
 
       // Verificação biométrica obrigatória do ECA Digital
       if (!biometricData.verified || !biometricData.livenessPassed) {
-        Pontinho.showToast('É obrigatório realizar a validação facial de idade e prova de vida (+18).', 'error');
+        Pontinho.showToast('Validação facial (+18) obrigatória.', 'error');
         return;
       }
 
       if (biometricData.estimatedAge < 18) {
-        Pontinho.showToast('Cadastro bloqueado: Usuário menor de 18 anos segundo a Lei 14.811/2024.', 'error');
+        Pontinho.showToast('Cadastro bloqueado: menor de 18 anos.', 'error');
         return;
       }
 
@@ -813,7 +819,7 @@
       }
 
       if (!email.endsWith('@aluno.ufabc.edu.br') && !email.endsWith('@ufabc.edu.br')) {
-        Pontinho.showToast('Cadastro permitido exclusivamente com e-mail @aluno.ufabc.edu.br ou @ufabc.edu.br.', 'error');
+        Pontinho.showToast('Use e-mail institucional @ufabc.', 'error');
         return;
       }
 
@@ -828,12 +834,13 @@
             age_verified: true,
             liveness_passed: true,
             estimated_age: biometricData.estimatedAge,
-            face_snapshot: biometricData.snapshot
+            face_snapshot: biometricData.snapshot,
+            face_descriptor: biometricData.descriptor
           })
         });
 
         Pontinho.setCurrentUserId(data.user_id, data.token);
-        Pontinho.showToast(`Cadastro realizado com sucesso! Bem-vindo(a), ${data.name}! 🎓`, 'success');
+        Pontinho.showToast(`Cadastro realizado! 🎓`, 'success');
 
         // Redireciona para completar o perfil (fotos e preferências)
         setTimeout(() => {
