@@ -4,9 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pontinho - Meu Perfil</title>
+  <title>Pontinho</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="alternate icon" href="./favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/style.css?v=pride2">
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('pontinho_theme') === 'pride') {
+          document.documentElement.classList.add('theme-pride');
+          document.documentElement.setAttribute('data-theme', 'pride');
+        }
+      } catch(e) {}
+    })();
+  </script>
   <script>
     tailwind.config = {
       theme: {
@@ -45,6 +57,7 @@
       <a href="./index.html" class="flex items-center group">
         <span
           class="font-black text-xl sm:text-2xl tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent group-hover:brightness-110 transition">Pontinho</span>
+        <span class="theme-pride-badge hidden text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-xs ml-1.5">PRIDE 🏳️‍🌈</span>
       </a>
 
       <!-- Navegação Principal (Visível apenas em Desktop) -->
@@ -69,10 +82,17 @@
         </a>
       </nav>
 
-      <!-- Ações da Navbar: Ajuda, Usuário ou Sair -->
-      <div class="flex items-center gap-2">
+      <!-- Ações da Navbar: Tema, Ajuda, Usuário ou Sair -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Seletor de Tema Visual -->
+        <button type="button" onclick="Pontinho.openThemeModal()"
+          class="theme-pill-btn px-2 sm:px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 rounded-xl border border-slate-700/70 transition flex items-center gap-1 shadow-xs"
+          title="Escolher Tema Visual (UFABC / Orgulho LGBT+)">
+          <span class="theme-active-icon">🌿</span> <span class="hidden sm:inline font-bold theme-active-name">UFABC</span>
+        </button>
+
         <button type="button" onclick="Pontinho.openHelpModal()"
-          class="px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:text-emerald-200 bg-emerald-950/50 hover:bg-emerald-900/60 rounded-xl border border-emerald-800/40 transition flex items-center gap-1.5"
+          class="px-2 sm:px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:text-emerald-200 bg-emerald-950/50 hover:bg-emerald-900/60 rounded-xl border border-emerald-800/40 transition flex items-center gap-1.5"
           title="Central de Ajuda e Segurança">
           <span>🛡️</span> <span class="hidden sm:inline">Ajuda</span>
         </button>
@@ -391,6 +411,50 @@
         </div>
 
       </form>
+
+      <!-- SEÇÃO TEMA E APARÊNCIA -->
+      <div class="mt-8 pt-6 border-t border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">🎨</span>
+            <div>
+              <h3 class="text-sm font-black text-white">Identidade Visual & Tema</h3>
+              <p class="text-[11px] text-slate-400">Personalize o estilo da sua interface</p>
+            </div>
+          </div>
+          <button type="button" onclick="Pontinho.openThemeModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-xs">
+            <span>Escolher</span> <span class="theme-active-icon">🌿</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div onclick="Pontinho.setTheme('default')" class="theme-option-card p-3.5 rounded-2xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-xl shadow-xs">
+              🌿
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-xs text-white">Verde UFABC</span>
+                <span class="text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/40">Padrão</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Tons de verde esmeralda e teal</p>
+            </div>
+          </div>
+
+          <div onclick="Pontinho.setTheme('pride')" class="theme-option-card p-3.5 rounded-2xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-pink-950/60 border border-pink-500/30 flex items-center justify-center text-xl shadow-xs">
+              🏳️‍🌈
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-xs text-white">Orgulho LGBT+</span>
+                <span class="text-[9px] font-bold px-1 py-0.5 rounded bg-pink-950 text-pink-300 border border-pink-800/40">Pride</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Cores vibrantes do arco-íris</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- SEÇÃO LGPD E GESTÃO DE PRIVACIDADE -->
       <div class="mt-8 pt-6 border-t border-slate-800 space-y-4">

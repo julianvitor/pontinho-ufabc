@@ -592,7 +592,231 @@ const Pontinho = {
       btn.disabled = false;
       btn.innerHTML = '<span>🛡️</span> <span>Enviar Reclamação</span>';
     }
+  },
+
+  // ==========================================
+  // GERENCIAMENTO DE TEMAS (PADRÃO UFABC / ORGULHO LGBT+)
+  // ==========================================
+  getTheme() {
+    return localStorage.getItem('pontinho_theme') || 'default';
+  },
+
+  applyTheme(theme) {
+    const isPride = theme === 'pride';
+    const root = document.documentElement;
+    const body = document.body;
+
+    if (isPride) {
+      root.classList.add('theme-pride');
+      root.setAttribute('data-theme', 'pride');
+      if (body) {
+        body.classList.add('theme-pride');
+        body.setAttribute('data-theme', 'pride');
+      }
+    } else {
+      root.classList.remove('theme-pride');
+      root.setAttribute('data-theme', 'default');
+      if (body) {
+        body.classList.remove('theme-pride');
+        body.setAttribute('data-theme', 'default');
+      }
+    }
+
+    // Atualiza favicons dinamicamente
+    const faviconHref = isPride ? './favicon-pride.svg' : './favicon.svg';
+    const iconLinks = document.querySelectorAll("link[rel*='icon']");
+    iconLinks.forEach(link => {
+      link.href = faviconHref;
+    });
+
+    // Atualiza botão de like dos cards
+    const likeBtn = document.querySelector('button[onclick*="handleSwipe(\'like\')"]');
+    if (likeBtn) {
+      likeBtn.innerHTML = isPride ? '💖' : '💚';
+      likeBtn.title = isPride ? 'Curtir (Orgulho LGBT+)' : 'Curtir';
+    }
+
+    // Atualiza indicadores e textos nos seletores de tema da interface
+    document.querySelectorAll('.theme-active-icon').forEach(el => {
+      el.textContent = isPride ? '🏳️‍🌈' : '🌿';
+    });
+    document.querySelectorAll('.theme-active-name').forEach(el => {
+      el.textContent = isPride ? 'Pride' : 'UFABC';
+    });
+    document.querySelectorAll('.theme-pride-badge').forEach(el => {
+      if (isPride) {
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    });
+
+    // Se o modal de temas estiver aberto, atualiza cards ativos
+    const cardUfabc = document.getElementById('theme-card-default');
+    const cardPride = document.getElementById('theme-card-pride');
+    if (cardUfabc && cardPride) {
+      if (isPride) {
+        cardUfabc.classList.remove('active');
+        cardPride.classList.add('active', 'active-pride');
+        const checkUfabc = document.getElementById('theme-check-default');
+        const checkPride = document.getElementById('theme-check-pride');
+        if (checkUfabc) checkUfabc.classList.add('hidden');
+        if (checkPride) checkPride.classList.remove('hidden');
+      } else {
+        cardPride.classList.remove('active', 'active-pride');
+        cardUfabc.classList.add('active');
+        const checkUfabc = document.getElementById('theme-check-default');
+        const checkPride = document.getElementById('theme-check-pride');
+        if (checkUfabc) checkUfabc.classList.remove('hidden');
+        if (checkPride) checkPride.classList.add('hidden');
+      }
+    }
+  },
+
+  setTheme(theme, notify = true) {
+    if (theme !== 'pride' && theme !== 'default') theme = 'default';
+    localStorage.setItem('pontinho_theme', theme);
+    this.applyTheme(theme);
+    if (notify) {
+      if (theme === 'pride') {
+        this.showToast('Tema Orgulho LGBT+ ativado! 🏳️‍🌈✨', 'success');
+      } else {
+        this.showToast('Tema UFABC Esmeralda ativado! 🌿', 'success');
+      }
+    }
+  },
+
+  toggleTheme() {
+    const current = this.getTheme();
+    const next = current === 'pride' ? 'default' : 'pride';
+    this.setTheme(next, true);
+  },
+
+  initTheme() {
+    const saved = this.getTheme();
+    this.applyTheme(saved);
+  },
+
+  openThemeModal() {
+    let modal = document.getElementById('global-theme-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'global-theme-modal';
+      modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all';
+      document.body.appendChild(modal);
+    }
+
+    const currentTheme = this.getTheme();
+    const isPride = currentTheme === 'pride';
+
+    modal.innerHTML = `
+      <div class="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-3xl p-6 shadow-2xl relative overflow-hidden animate-fade-in" onclick="event.stopPropagation()">
+        <!-- Luz de fundo do modal -->
+        <div class="absolute -top-10 -right-10 w-40 h-40 ${isPride ? 'bg-pink-500/20' : 'bg-emerald-500/20'} rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-40 h-40 ${isPride ? 'bg-cyan-500/20' : 'bg-teal-500/20'} rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800 relative z-10">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-lg border border-slate-700">
+              🎨
+            </div>
+            <div>
+              <h3 class="font-black text-base text-white">Personalizar Tema</h3>
+              <p class="text-xs text-slate-400">Escolha a identidade visual do Pontinho</p>
+            </div>
+          </div>
+          <button type="button" onclick="Pontinho.closeThemeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm transition">
+            ✕
+          </button>
+        </div>
+
+        <div class="py-4 space-y-3 relative z-10">
+          <!-- Opção 1: Tema UFABC (Padrão) -->
+          <div id="theme-card-default" onclick="Pontinho.setTheme('default'); Pontinho.closeThemeModal();"
+            class="theme-option-card flex items-center justify-between p-3.5 rounded-2xl border ${!isPride ? 'active border-emerald-500' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'}">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-xl shadow-xs">
+                🌿
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-white">Verde UFABC</span>
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-emerald-950 text-emerald-400 border border-emerald-800/40">Padrão</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Tons de verde esmeralda e teal originais da universidade</p>
+                <div class="flex items-center gap-1.5 mt-2">
+                  <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-white/20" title="#10b981"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-teal-600 border border-white/20" title="#0d9488"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-emerald-900 border border-white/20" title="#064e3b"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#090d16] border border-white/20" title="#090d16"></span>
+                </div>
+              </div>
+            </div>
+            <div id="theme-check-default" class="${!isPride ? '' : 'hidden'} text-emerald-400 text-lg font-black ml-2">
+              ✓
+            </div>
+          </div>
+
+          <!-- Opção 2: Tema Orgulho LGBT+ (Pride) -->
+          <div id="theme-card-pride" onclick="Pontinho.setTheme('pride'); Pontinho.closeThemeModal();"
+            class="theme-option-card flex items-center justify-between p-3.5 rounded-2xl border ${isPride ? 'active active-pride border-pink-500' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'}">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500/20 via-purple-500/20 to-cyan-500/20 border border-pink-500/30 flex items-center justify-center text-xl shadow-xs">
+                🏳️‍🌈
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-white">Orgulho LGBT+</span>
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-pink-950 text-pink-300 border border-pink-800/40">Pride</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Cores do arco-íris, brilhos holográficos e celebração da diversidade</p>
+                <div class="flex items-center gap-1.5 mt-2">
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#ff3366] border border-white/20" title="Vermelho"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#ff7a18] border border-white/20" title="Laranja"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#ffd200] border border-white/20" title="Amarelo"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#10b981] border border-white/20" title="Verde"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#06b6d4] border border-white/20" title="Azul"></span>
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#8b5cf6] border border-white/20" title="Violeta"></span>
+                </div>
+              </div>
+            </div>
+            <div id="theme-check-pride" class="${isPride ? '' : 'hidden'} text-pink-400 text-lg font-black ml-2">
+              ✓
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500 relative z-10">
+          <span>Sua preferência fica salva no navegador</span>
+          <button type="button" onclick="Pontinho.closeThemeModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition">
+            Fechar
+          </button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+    modal.onclick = (e) => {
+      if (e.target === modal) Pontinho.closeThemeModal();
+    };
+  },
+
+  closeThemeModal() {
+    const modal = document.getElementById('global-theme-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
   }
 };
 
+// Inicialização automática do tema ao carregar
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => Pontinho.initTheme());
+  } else {
+    Pontinho.initTheme();
+  }
+}
+
 window.Pontinho = Pontinho;
+
