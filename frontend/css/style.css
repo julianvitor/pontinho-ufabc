@@ -165,26 +165,30 @@ body {
 }
 
 /* ========================================================
-   TEMA ORGULHO LGBT+ (PRIDE THEME) - COMPLETO E VIBRANTE
+   TEMA DARK PRIDE (ORGULHO LGBT+ DARK) - ELEGANTE & PROFUNDO
    ======================================================== */
 :root {
   --pride-rainbow-h: linear-gradient(90deg, #ff3366 0%, #ff7a18 18%, #ffd200 36%, #10b981 54%, #06b6d4 72%, #8b5cf6 90%, #ec4899 100%);
-  --pride-rainbow-soft: linear-gradient(135deg, rgba(255, 51, 102, 0.2), rgba(255, 122, 24, 0.15), rgba(255, 210, 0, 0.15), rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.18), rgba(139, 92, 246, 0.22));
+  --pride-rainbow-soft: linear-gradient(135deg, rgba(255, 51, 102, 0.12), rgba(255, 122, 24, 0.08), rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.10), rgba(139, 92, 246, 0.12));
+  --pride-dark-cta: linear-gradient(135deg, #be185d 0%, #7c3aed 50%, #2563eb 100%);
+  --pride-dark-cta-hover: linear-gradient(135deg, #db2777 0%, #9333ea 50%, #3b82f6 100%);
 }
 
 html[data-theme="pride"],
 html.theme-pride,
 body.theme-pride {
-  --ufabc-emerald: #ec4899;
-  --ufabc-dark: #701a75;
+  --ufabc-emerald: #c084fc;
+  --ufabc-dark: #3b0764;
+  --bg-main: #090d16;
+  --bg-card: #0f172a;
 }
 
-/* Transição global suave */
+/* Transição suave entre temas */
 html, body {
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-/* 1. LOGO PONTINHO: Arco-íris radiante com Shimmer animado */
+/* 1. LOGO PONTINHO: Arco-íris refinado com shimmer suave sobre fundo dark */
 html.theme-pride .bg-clip-text,
 html.theme-pride [class*="bg-clip-text"] {
   background-image: var(--pride-rainbow-h) !important;
@@ -193,7 +197,7 @@ html.theme-pride [class*="bg-clip-text"] {
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   color: transparent !important;
-  animation: prideRainbowFlow 4s linear infinite !important;
+  animation: prideRainbowFlow 6s linear infinite !important;
 }
 
 @keyframes prideRainbowFlow {
@@ -201,145 +205,161 @@ html.theme-pride [class*="bg-clip-text"] {
   100% { background-position: 200% 50%; }
 }
 
-/* 2. CABEÇALHO: Linha do arco-íris e sombra colorida */
+/* 2. CABEÇALHO: Linha ultrafina sutil com gradiente arco-íris e sombra escura */
 html.theme-pride header {
-  border-bottom: 2.5px solid transparent !important;
+  border-bottom: 1.5px solid transparent !important;
   border-image: var(--pride-rainbow-h) 1 !important;
-  box-shadow: 0 4px 20px -2px rgba(236, 72, 153, 0.2) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.75), 0 1px 0 0 rgba(168, 85, 247, 0.25) !important;
 }
 
-/* 3. BOTÕES PRINCIPAIS E AÇÕES (Criar Conta, Entrar, Salvar, Conversar, etc.) */
+/* 3. BOTÕES PRINCIPAIS E AÇÕES (Criar Conta, Entrar, Salvar, Swipes, etc.) */
+/* Mantêm o visual Dark Premium com degradê rico fuchsia-roxo-índigo, texto branco cristalino e glow elegante */
 html.theme-pride button[class*="from-emerald-"],
 html.theme-pride a[class*="from-emerald-"]:not([class*="bg-clip-text"]),
 html.theme-pride button[class*="from-emerald-600"],
 html.theme-pride a[class*="from-emerald-600"],
 html.theme-pride [class*="bg-gradient-to-r"][class*="from-emerald-"]:not([class*="bg-clip-text"]):not(div),
 html.theme-pride [class*="bg-gradient-to-tr"][class*="from-emerald-"]:not([class*="bg-clip-text"]):not(div) {
-  background-image: var(--pride-rainbow-h) !important;
-  background-size: 160% auto !important;
-  color: #090d16 !important;
-  font-weight: 900 !important;
-  border: none !important;
-  box-shadow: 0 4px 18px -2px rgba(236, 72, 153, 0.5), 0 2px 10px -2px rgba(6, 182, 212, 0.4) !important;
+  background-image: var(--pride-dark-cta) !important;
+  background-size: 140% auto !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 18px -2px rgba(124, 58, 237, 0.45), 0 2px 8px -2px rgba(190, 24, 93, 0.35) !important;
   transition: all 0.25s ease !important;
 }
 
 html.theme-pride button[class*="from-emerald-"]:hover,
 html.theme-pride a[class*="from-emerald-"]:not([class*="bg-clip-text"]):hover {
+  background-image: var(--pride-dark-cta-hover) !important;
   background-position: 100% 50% !important;
-  box-shadow: 0 6px 25px -2px rgba(236, 72, 153, 0.7), 0 4px 15px -2px rgba(6, 182, 212, 0.6) !important;
-  filter: brightness(1.08) !important;
+  box-shadow: 0 6px 24px -2px rgba(147, 51, 234, 0.6), 0 3px 12px -2px rgba(219, 39, 119, 0.5) !important;
+  filter: brightness(1.05) !important;
   transform: translateY(-1px) scale(1.01);
 }
 
-/* 4. HERO / LANDING CARD: Fundo com tons de roxo/magenta no lugar do verde */
+/* 4. BALÕES DE CHAT ENVIADOS (matches.html) */
+html.theme-pride div[class*="from-emerald-"][class*="to-teal-"] {
+  background-image: linear-gradient(135deg, #831843 0%, #581c87 55%, #1e1b4b 100%) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(192, 132, 252, 0.25) !important;
+}
+
+/* 5. HERO / CARDS DA LANDING: Fundo dark obsidian com nuances cósmicas e borda suave */
 html.theme-pride .to-emerald-950,
 html.theme-pride [class*="to-emerald-950"] {
-  --tw-gradient-to: #3b0764 !important;
-  background-image: linear-gradient(135deg, #090d16 0%, #170d28 50%, #3b0764 100%) !important;
-  border-color: rgba(236, 72, 153, 0.4) !important;
-  box-shadow: 0 12px 40px -10px rgba(168, 85, 247, 0.3) !important;
+  --tw-gradient-to: #181028 !important;
+  background-image: linear-gradient(135deg, #090d16 0%, #0d111e 45%, #181028 100%) !important;
+  border-color: rgba(168, 85, 247, 0.25) !important;
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(168, 85, 247, 0.15) !important;
 }
 
-/* 5. NÉVOAS E LUZES AMBIENTES DE FUNDO */
+/* 6. NÉVOAS E LUZES AMBIENTES DE FUNDO (Discretas, escuras e atmosféricas) */
 html.theme-pride [class*="bg-emerald-500\/"],
 html.theme-pride [class*="bg-teal-500\/"] {
-  background-color: rgba(236, 72, 153, 0.18) !important;
+  background-color: rgba(168, 85, 247, 0.12) !important;
 }
 html.theme-pride div.fixed:first-of-type {
-  background: radial-gradient(circle, rgba(244, 63, 94, 0.22) 0%, rgba(168, 85, 247, 0.15) 50%, transparent 70%) !important;
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.12) 0%, rgba(219, 39, 119, 0.08) 45%, transparent 70%) !important;
 }
 html.theme-pride div.fixed:nth-of-type(2) {
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, rgba(139, 92, 246, 0.15) 50%, transparent 70%) !important;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.10) 0%, rgba(99, 102, 241, 0.08) 45%, transparent 70%) !important;
 }
 
-/* 6. TEXTOS VERDES TRANSFORMADOS EM ROSA/VIOLETA/MAGENTA */
+/* 7. TEXTOS EM DESTAQUE: Tons harmoniosos de lavanda, púrpura e fuchsia */
 html.theme-pride [class*="text-emerald-"],
 html.theme-pride [class*="text-teal-"],
 html.theme-pride [class*="text-ufabc-"] {
-  color: #f472b6 !important;
+  color: #c084fc !important;
 }
 html.theme-pride .text-emerald-300 {
-  color: #f9a8d4 !important;
+  color: #d8b4fe !important;
 }
 html.theme-pride .text-emerald-400 {
-  color: #f472b6 !important;
+  color: #c084fc !important;
 }
 html.theme-pride .text-emerald-500 {
-  color: #ec4899 !important;
+  color: #a855f7 !important;
 }
 html.theme-pride .hover\:text-emerald-400:hover,
 html.theme-pride .hover\:text-emerald-300:hover {
-  color: #fbcfe8 !important;
+  color: #f0abfc !important;
 }
 
-/* 7. BORDAS VERDES TRANSFORMADAS EM ROSA/MAGENTA/PRIDE */
+/* 8. BORDAS EM DESTAQUE E FOCO (Inputs, Cards, etc.) */
 html.theme-pride [class*="border-emerald-"],
 html.theme-pride [class*="border-teal-"],
 html.theme-pride [class*="border-ufabc-"] {
-  border-color: rgba(236, 72, 153, 0.5) !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
 }
 html.theme-pride [class*="focus:border-emerald-"]:focus,
 html.theme-pride [class*="focus:border-emerald-"]:focus-within {
-  border-color: #ec4899 !important;
-  box-shadow: 0 0 15px rgba(236, 72, 153, 0.35) !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3) !important;
 }
 
-/* 8. BADGES E FUNDOS DE PILL VERDES */
+/* 9. BADGES E FUNDOS DE PILL */
 html.theme-pride [class*="bg-emerald-950"],
 html.theme-pride [class*="bg-teal-950"],
 html.theme-pride [class*="bg-ufabc-"] {
-  background-color: rgba(139, 92, 246, 0.25) !important;
-  border-color: rgba(236, 72, 153, 0.5) !important;
-  color: #f472b6 !important;
+  background-color: rgba(46, 16, 101, 0.55) !important;
+  border-color: rgba(168, 85, 247, 0.35) !important;
+  color: #d8b4fe !important;
 }
 
-/* 9. BOTÃO DE CURTIDA (LIKE) NOS CARDS TINDER */
+/* 10. BOTÃO DE CURTIDA (LIKE) NOS CARDS TINDER */
 html.theme-pride button[onclick*="'like'"] {
-  background: var(--pride-rainbow-h) !important;
-  box-shadow: 0 0 25px rgba(236, 72, 153, 0.65) !important;
-  color: #090d16 !important;
+  background: linear-gradient(135deg, #3b0764 0%, #1e1b4b 100%) !important;
+  border: 2px solid rgba(236, 72, 153, 0.5) !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.35), inset 0 0 12px rgba(236, 72, 153, 0.2) !important;
+  color: #ffffff !important;
 }
 html.theme-pride button[onclick*="'like'"]:hover {
-  transform: scale(1.15) !important;
-  box-shadow: 0 0 32px rgba(168, 85, 247, 0.8) !important;
+  transform: scale(1.12) !important;
+  border-color: rgba(236, 72, 153, 0.8) !important;
+  box-shadow: 0 0 28px rgba(236, 72, 153, 0.65), inset 0 0 16px rgba(168, 85, 247, 0.3) !important;
 }
 
-/* Carimbo de Like no Swipe em modo Pride */
+/* Carimbo de Like no Swipe */
 html.theme-pride .swipe-stamp.like {
-  color: #ec4899 !important;
-  border-color: #ec4899 !important;
-  background-color: rgba(236, 72, 153, 0.3) !important;
-  box-shadow: 0 0 30px rgba(236, 72, 153, 0.7) !important;
+  color: #e879f9 !important;
+  border-color: #e879f9 !important;
+  background-color: rgba(88, 28, 135, 0.4) !important;
+  box-shadow: 0 0 25px rgba(217, 70, 239, 0.45) !important;
 }
 
 /* Indicadores de foto ativos */
 html.theme-pride .photo-indicator.active,
 html.theme-pride .modal-photo-indicator.active {
   background: var(--pride-rainbow-h) !important;
-  box-shadow: 0 0 12px rgba(236, 72, 153, 0.95) !important;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.8) !important;
 }
 
 /* Efeito de seleção de texto */
 html.theme-pride ::selection {
-  background-color: #ec4899 !important;
+  background-color: rgba(168, 85, 247, 0.4) !important;
   color: #ffffff !important;
 }
 
-/* Scrollbar com toque Pride */
+/* Scrollbar com toque Dark Pride */
 html.theme-pride ::-webkit-scrollbar-thumb:hover {
-  background: #ec4899 !important;
+  background: #7c3aed !important;
 }
 
-/* 10. BADGE PRIDE VISÍVEL NO CABEÇALHO */
+/* 11. BADGE PRIDE VISÍVEL NO CABEÇALHO */
 .theme-pride-badge {
   display: none;
 }
 html.theme-pride .theme-pride-badge {
   display: inline-flex !important;
+  background: linear-gradient(90deg, rgba(244, 63, 94, 0.3), rgba(168, 85, 247, 0.3), rgba(14, 165, 233, 0.3)) !important;
+  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.25) !important;
 }
 
-/* 11. BOTÃO DISPARADOR DO SELETOR NA NAVBAR */
+/* 12. BOTÃO DISPARADOR DO SELETOR NA NAVBAR */
 .theme-pill-btn {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -350,10 +370,10 @@ html.theme-pride .theme-pride-badge {
   transform: scale(0.95);
 }
 html.theme-pride .theme-pill-btn {
-  border-color: rgba(236, 72, 153, 0.6) !important;
-  background: linear-gradient(135deg, rgba(255, 51, 102, 0.22), rgba(139, 92, 246, 0.28)) !important;
-  box-shadow: 0 0 14px rgba(236, 72, 153, 0.45) !important;
-  color: #fbcfe8 !important;
+  border-color: rgba(168, 85, 247, 0.45) !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.25) !important;
+  color: #f1f5f9 !important;
 }
 
 /* Card de opções do modal de temas */
@@ -369,8 +389,111 @@ html.theme-pride .theme-pill-btn {
   background-color: rgba(16, 185, 129, 0.15) !important;
 }
 html.theme-pride .theme-option-card.active-pride {
-  border-color: #ec4899 !important;
-  background-color: rgba(236, 72, 153, 0.2) !important;
+  border-color: #a855f7 !important;
+  background-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+/* ==========================================
+   EFEITOS DINÂMICOS DE FUNDO (AURORA & PONTINHOS VIVOS)
+   ========================================== */
+
+/* Animações orgânicas de respiração e flutuação suave dos orbs */
+@keyframes ambientAurora1 {
+  0%, 100% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 0.85;
+  }
+  33% {
+    transform: translate(-42%, 48px) scale(1.15);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(-58%, -36px) scale(0.9);
+    opacity: 0.75;
+  }
+}
+
+@keyframes ambientAurora2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-55px, -45px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes ambientAurora3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(0.9);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(45px, -40px) scale(1.18);
+    opacity: 0.85;
+  }
+}
+
+.ambient-glow-1 {
+  animation: ambientAurora1 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ambient-glow-2 {
+  animation: ambientAurora2 15s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.ambient-glow-3 {
+  animation: ambientAurora3 18s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Partículas delicadas de luz ("Pontinhos" flutuantes) */
+@keyframes pontinhoFloatPulse {
+  0%, 100% {
+    opacity: 0.12;
+    transform: translateY(0) scale(0.75);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(-22px) scale(1.2);
+  }
+}
+
+.ambient-pontinho {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.95) 0%, rgba(16, 185, 129, 0) 70%);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.45);
+  pointer-events-none;
+  animation: pontinhoFloatPulse var(--twinkle-dur, 7s) ease-in-out infinite var(--twinkle-delay, 0s);
+  will-change: transform, opacity;
+}
+
+/* Suporte dinâmico ao Tema Orgulho LGBT+ */
+html.theme-pride .ambient-glow-1 {
+  background-color: rgba(236, 72, 153, 0.14) !important;
+}
+html.theme-pride .ambient-glow-2 {
+  background-color: rgba(168, 85, 247, 0.14) !important;
+}
+html.theme-pride .ambient-glow-3 {
+  background-color: rgba(56, 189, 248, 0.12) !important;
+}
+html.theme-pride .ambient-pontinho {
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.95) 0%, rgba(168, 85, 247, 0) 70%) !important;
+  box-shadow: 0 0 12px rgba(217, 70, 239, 0.5) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-glow-1,
+  .ambient-glow-2,
+  .ambient-glow-3,
+  .ambient-pontinho {
+    animation: none !important;
+  }
 }
 
 

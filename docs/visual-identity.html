@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pontinho — Guia de Identidade Visual & Design System</title>
+  <link rel="icon" type="image/svg+xml" href="../frontend/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            ufabc: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #090d16;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .code-block {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.45);
+    }
+    /* Demonstração dos Orbs */
+    @keyframes demoAurora1 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+      50% { transform: translate(25px, 20px) scale(1.15); opacity: 1; }
+    }
+    @keyframes demoAurora2 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.75; }
+      50% { transform: translate(-25px, -20px) scale(1.18); opacity: 0.95; }
+    }
+    .demo-aurora-1 { animation: demoAurora1 8s ease-in-out infinite; }
+    .demo-aurora-2 { animation: demoAurora2 10s ease-in-out infinite; }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 selection:bg-emerald-500 selection:text-white relative overflow-x-hidden">
+
+  <!-- Glows de Fundo da Documentação -->
+  <div class="fixed top-[-100px] left-1/4 w-[600px] h-[350px] bg-emerald-500/15 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-teal-500/15 rounded-full blur-[130px] pointer-events-none -z-10"></div>
+
+  <!-- CABEÇALHO DA DOCUMENTAÇÃO -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 font-black text-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          P
+        </span>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-black text-lg tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
+              Pontinho
+            </h1>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">
+              Design System v2.0
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">Guia Oficial de Identidade Visual e Arquitetura UI/UX (Documentação Interna)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-xs bg-slate-800/80 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700/60 font-mono text-[11px]">
+          🔒 Uso Interno
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL EM DUAS COLUNAS -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- MENU LATERAL DE NAVEGAÇÃO RÁPIDA -->
+    <aside class="lg:col-span-3 space-y-2">
+      <div class="sticky top-24 glass-panel p-4 rounded-3xl space-y-1 text-xs">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 px-3 py-1">Índice do Guia</div>
+        <a href="#filosofia" class="block px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold transition">1. Conceito & Metáfora Visual</a>
+        <a href="#cores" class="block px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold transition">2. Paleta de Cores & Tokens</a>
+        <a href="#temas" class="block px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold transition">3. Temas (UFABC & Orgulho LGBT+)</a>
+        <a href="#tipografia" class="block px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold transition">4. Tipografia & Hierarquia</a>
+        <a href="#efeito-pontinhos" class="block px-3 py-2 rounded-xl text-emerald-300 bg-emerald-950/40 border border-emerald-800/40 font-bold transition">5. Fundo Dinâmico (Pontinhos & Grafo)</a>
+        <a href="#profundidade" class="block px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold transition">6. Camadas, Glassmorphism & Z-Index</a>
+        <a href="#componentes" class="block px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold transition">7. Anatomia de Componentes</a>
+        <a href="#regras" class="block px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold transition">8. Regras de Ouro & Acessibilidade</a>
+      </div>
+    </aside>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <main class="lg:col-span-9 space-y-12">
+
+      <!-- 1. CONCEITO & METÁFORA VISUAL -->
+      <section id="filosofia" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>🌿</span> Visão Geral da Marca
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">1. Conceito & Metáfora Visual</h2>
+        
+        <p class="text-slate-300 text-sm leading-relaxed">
+          O <strong class="text-white">Pontinho</strong> foi idealizado como a rede social de conexões universitárias exclusivas da comunidade da <strong class="text-emerald-400">UFABC</strong>. O design reflete uma atmosfera noturna moderna, acolhedora, vibrante e segura.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="glass-card p-4 rounded-2xl border border-emerald-500/20 space-y-2">
+            <span class="text-2xl">📍</span>
+            <h3 class="font-bold text-white text-sm">O "Pontinho"</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              O ponto de encontro, o campus universitário (Santo André & SBC), a unidade fundamental de um estudante no ecossistema da universidade.
+            </p>
+          </div>
+          <div class="glass-card p-4 rounded-2xl border border-teal-500/20 space-y-2">
+            <span class="text-2xl">🕸️</span>
+            <h3 class="font-bold text-white text-sm">O Grafo Social</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Pontos luminosos não existem isolados: ao se aproximarem, conectam-se por arestas suaves que representam afinidades musicais, amizades e encontros.
+            </p>
+          </div>
+          <div class="glass-card p-4 rounded-2xl border border-rose-500/20 space-y-2">
+            <span class="text-2xl">🛡️</span>
+            <h3 class="font-bold text-white text-sm">Privacidade & Respeito</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Espaço fechado, autenticado e seguro. O design transmite confiança através de contraste refinado, micro-tags LGPD e ouvidoria acessível.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. PALETA DE CORES & TOKENS -->
+      <section id="cores" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>🎨</span> Cores da Plataforma
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">2. Paleta de Cores & Tokens</h2>
+        <p class="text-slate-300 text-sm leading-relaxed">
+          O sistema de cores adota o verde institucional da UFABC reimaginado em gradientes esmeralda e turquesa de alta luminosidade sobre um fundo obsidiana ultra-escuro.
+        </p>
+
+        <!-- Cores Primárias e Secundárias -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Tons Principais</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#10b981] shadow-md shadow-emerald-500/20"></div>
+              <div>
+                <div class="font-bold text-xs text-white">UFABC Emerald</div>
+                <div class="text-[11px] font-mono text-emerald-400">#10b981</div>
+                <div class="text-[10px] text-slate-500">Ações primárias, swipes de like, badges</div>
+              </div>
+            </div>
+
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#14b8a6] shadow-md shadow-teal-500/20"></div>
+              <div>
+                <div class="font-bold text-xs text-white">UFABC Teal</div>
+                <div class="text-[11px] font-mono text-teal-400">#14b8a6</div>
+                <div class="text-[10px] text-slate-500">Gradientes secundários, festas, links</div>
+              </div>
+            </div>
+
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#090d16] border border-slate-700"></div>
+              <div>
+                <div class="font-bold text-xs text-white">Obsidian Base</div>
+                <div class="text-[11px] font-mono text-slate-400">#090d16</div>
+                <div class="text-[10px] text-slate-500">Fundo principal (background canvas)</div>
+              </div>
+            </div>
+
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#0f172a] border border-slate-700"></div>
+              <div>
+                <div class="font-bold text-xs text-white">Slate Card</div>
+                <div class="text-[11px] font-mono text-slate-400">#0f172a</div>
+                <div class="text-[10px] text-slate-500">Superfície dos cards e painéis</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cores Semânticas de Estado -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Cores Semânticas & Feedback</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#f43f5e]"></div>
+              <div>
+                <div class="font-bold text-xs text-white">Rose Flame</div>
+                <div class="text-[11px] font-mono text-rose-400">#f43f5e</div>
+                <div class="text-[10px] text-slate-500">Dislike, denúncias, ouvidoria, erros</div>
+              </div>
+            </div>
+
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#f59e0b]"></div>
+              <div>
+                <div class="font-bold text-xs text-white">Amber Alert</div>
+                <div class="text-[11px] font-mono text-amber-400">#f59e0b</div>
+                <div class="text-[10px] text-slate-500">Avisos, moderação, filtros de campus</div>
+              </div>
+            </div>
+
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#38bdf8]"></div>
+              <div>
+                <div class="font-bold text-xs text-white">Sky Info</div>
+                <div class="text-[11px] font-mono text-sky-400">#38bdf8</div>
+                <div class="text-[10px] text-slate-500">Badges de curso, dados acadêmicos</div>
+              </div>
+            </div>
+
+            <div class="glass-card p-3 rounded-2xl space-y-2">
+              <div class="h-12 rounded-xl bg-[#a855f7]"></div>
+              <div>
+                <div class="font-bold text-xs text-white">Pride Purple</div>
+                <div class="text-[11px] font-mono text-purple-400">#a855f7</div>
+                <div class="text-[10px] text-slate-500">Destaque do tema Orgulho LGBT+</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. TEMAS (PADRÃO UFABC & ORGULHO LGBT+) -->
+      <section id="temas" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>🏳️‍🌈</span> Sistema Multi-Tema
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">3. Temas (Padrão UFABC & Orgulho LGBT+)</h2>
+        
+        <p class="text-slate-300 text-sm leading-relaxed">
+          O Pontinho suporta troca dinâmica de tema armazenada no <code class="bg-slate-800 px-1.5 py-0.5 rounded text-emerald-400 font-mono text-xs">localStorage('pontinho_theme')</code>. A classe <code class="bg-slate-800 px-1.5 py-0.5 rounded text-purple-400 font-mono text-xs">theme-pride</code> no elemento raiz <code class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300 font-mono text-xs">&lt;html&gt;</code> redefine automaticamente paletas, orbs de fundo e partículas.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Tema 1: UFABC -->
+          <div class="p-5 rounded-2xl bg-slate-900 border-2 border-emerald-500/40 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 font-bold text-sm text-white">
+                <span>🌿</span> Tema Padrão UFABC
+              </div>
+              <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded-md">Ativo por Padrão</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Inspirado nas cores universitárias. Gradientes esmeralda-turquesa, badges verdes, aura noturna calma e tecnológica.
+            </p>
+            <div class="h-3 rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600"></div>
+          </div>
+
+          <!-- Tema 2: Pride -->
+          <div class="p-5 rounded-2xl bg-slate-900 border-2 border-purple-500/40 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 font-bold text-sm text-white">
+                <span>🏳️‍🌈</span> Tema Orgulho LGBT+
+              </div>
+              <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded-md">Inclusivo & Festivo</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Celebra a diversidade universitária. Botões com gradiente arco-íris, partículas com tons rosa/roxo/azul/âmbar e badge comemorativo.
+            </p>
+            <div class="h-3 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 via-sky-400 to-amber-400"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. TIPOGRAFIA & HIERARQUIA -->
+      <section id="tipografia" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>🔤</span> Tipografia & Escala
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">4. Tipografia & Hierarquia</h2>
+
+        <p class="text-slate-300 text-sm leading-relaxed">
+          A família tipográfica oficial é a <strong class="text-white">Plus Jakarta Sans</strong>, escolhida por sua legibilidade em telas de alta densidade (Retina/OLED), curvas modernas e peso geométrico equilibrado para mobile.
+        </p>
+
+        <div class="space-y-4 pt-2">
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+            <div class="text-[11px] font-mono text-slate-500">Display / Hero (text-3xl ou 4xl font-black)</div>
+            <div class="text-3xl font-black text-white tracking-tight">Pontinho UFABC</div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+            <div class="text-[11px] font-mono text-slate-500">Título de Seção (text-lg ou xl font-bold)</div>
+            <div class="text-lg font-bold text-white">Conexões, amizades e festas</div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+            <div class="text-[11px] font-mono text-slate-500">Corpo de Texto (text-xs ou sm text-slate-300)</div>
+            <div class="text-xs text-slate-300 leading-relaxed">
+              O Pontinho é a plataforma de conexões desenvolvida para a comunidade universitária da UFABC. Perfis fechados e festas compartilhadas com respeito.
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
+            <div class="text-[11px] font-mono text-slate-500">Micro-labels & Badges (text-[10px] ou [11px] font-black uppercase tracking-wider)</div>
+            <div class="flex gap-2">
+              <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Santo André</span>
+              <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-teal-500/15 text-teal-300 border border-teal-500/30">BCT 2024</span>
+              <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/30">Ouvidoria</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. FUNDO DINÂMICO (PONTINHOS & GRAFO) -->
+      <section id="efeito-pontinhos" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 border border-emerald-500/30">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>✨</span> Efeito Exclusivo
+        </div>
+        <div class="space-y-1">
+          <h2 class="text-2xl sm:text-3xl font-black text-white">5. Fundo Dinâmico (Pontinhos & Grafo de Conexões)</h2>
+          <p class="text-xs text-emerald-400 font-semibold">Implementado em <code class="font-mono">frontend/js/ambient.js</code> e <code class="font-mono">frontend/css/style.css</code></p>
+        </div>
+
+        <p class="text-slate-300 text-sm leading-relaxed">
+          O efeito dinâmico une duas camadas complementares: os <strong class="text-white">Orbs de Aurora em CSS</strong> (camada difusa de iluminação) e o <strong class="text-emerald-300">Canvas de Grafo Social ("Pontinhos Vivos")</strong>, que desenha nós flutuantes e conexões orgânicas entre eles.
+        </p>
+
+        <!-- DEMONSTRAÇÃO VISUAL AO VIVO DO CANVAS -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Pré-visualização Interativa do Grafo (Passe o mouse por cima)</span>
+            <span class="text-[11px] font-mono text-emerald-400">Canvas 60 FPS • DPI Aware</span>
+          </div>
+
+          <div class="relative w-full h-64 rounded-3xl overflow-hidden border border-slate-700/80 bg-[#090d16] shadow-2xl">
+            <!-- Simulação dos Orbs de Fundo no Card -->
+            <div class="demo-aurora-1 absolute -top-10 left-10 w-48 h-48 bg-emerald-500/20 rounded-full blur-[60px] pointer-events-none"></div>
+            <div class="demo-aurora-2 absolute -bottom-10 right-10 w-48 h-48 bg-teal-500/20 rounded-full blur-[60px] pointer-events-none"></div>
+            
+            <!-- Canvas Vivo -->
+            <canvas id="guide-demo-canvas" class="w-full h-full block relative z-10 cursor-crosshair"></canvas>
+
+            <div class="absolute bottom-3 left-4 z-20 pointer-events-none">
+              <span class="text-[11px] font-semibold bg-slate-900/80 px-2.5 py-1 rounded-xl border border-slate-700/80 text-slate-300">
+                ✨ Nós = Estudantes &bull; Linhas = Conexões/Afinidades
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Explicação Técnica da Arquitetura -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div class="glass-card p-5 rounded-2xl space-y-3">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>⚛️</span> 1. Partículas ("Pontinhos")
+            </h3>
+            <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+              <li><strong>Física de flutuação suave:</strong> Vetores <code class="font-mono text-emerald-400">vx</code> e <code class="font-mono text-emerald-400">vy</code> sutis ascendentes, simulando bioluminescência/estrelas.</li>
+              <li><strong>Pulso de brilho (Sine):</strong> <code class="font-mono text-emerald-400">alpha = base + sin(angle) * 0.25</code> com halo <code class="font-mono text-emerald-400">shadowBlur: 8</code>.</li>
+              <li><strong>Quantidade adaptativa:</strong> Ajusta a densidade de nós conforme a área da tela (<code class="font-mono text-emerald-400">width * height / 22000</code>).</li>
+            </ul>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl space-y-3">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>🌐</span> 2. Arestas do Grafo Social
+            </h3>
+            <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside leading-relaxed">
+              <li><strong>Cálculo euclidiano rápido:</strong> Distância entre pares calculada via <code class="font-mono text-emerald-400">dx*dx + dy*dy &lt; maxDistSq</code> sem chamadas repetidas de raiz quadrada.</li>
+              <li><strong>Opacidade proporcional:</strong> Linhas se tornam mais transparentes conforme os pontos se afastam (<code class="font-mono text-emerald-400">1 - dist / maxDist</code>).</li>
+              <li><strong>Interação com Mouse:</strong> O cursor atua como um nó ativo atraindo conexões dinâmicas.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Performance & Eficiência -->
+        <div class="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-2 text-xs">
+          <div class="font-bold text-emerald-300 flex items-center gap-2">
+            <span>⚡</span> Otimizações Críticas de Performance e Bateria
+          </div>
+          <p class="text-slate-300 leading-relaxed">
+            O script escuta o evento <code class="bg-slate-900 px-1 rounded font-mono text-emerald-400">document.addEventListener('visibilitychange')</code>. Quando a aba do navegador é minimizada ou o usuário troca de aplicativo, o loop de animação do Canvas é <strong>imediatamente pausado</strong> via <code class="bg-slate-900 px-1 rounded font-mono text-emerald-400">cancelAnimationFrame</code>, reduzindo o consumo de CPU e bateria do celular a <strong>zero</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 6. PROFUNDIDADE, GLASSMORPHISM & Z-INDEX -->
+      <section id="profundidade" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>📐</span> Estrutura de Camadas
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">6. Camadas, Glassmorphism & Z-Index</h2>
+        
+        <p class="text-slate-300 text-sm leading-relaxed">
+          Para que o fundo dinâmico brilhe com nitidez sem conflitar com botões, cartões de swipe ou modais, a plataforma estabelece uma hierarquia de empilhamento estrita:
+        </p>
+
+        <div class="space-y-2 text-xs font-mono">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <span class="text-purple-400 font-bold">z-50 (Modais & Sheets)</span>
+            <span class="text-slate-400">Central de Ajuda (help-modal.html), Seletor de Temas</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <span class="text-sky-400 font-bold">z-40 (Navbar Superior)</span>
+            <span class="text-slate-400">Header com backdrop-blur-md sticky top-0</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <span class="text-emerald-400 font-bold">z-10 (Conteúdo Principal & Cards)</span>
+            <span class="text-slate-400">&lt;main&gt;, Tinder Cards, Hero de Apresentação, Formulários</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-emerald-500/40 flex items-center justify-between text-white font-bold">
+            <span class="text-emerald-300">z-0 (Fundo Dinâmico Ativo)</span>
+            <span class="text-emerald-300">Canvas #ambient-canvas + Orbs .ambient-glow-1/2/3</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-slate-500">
+            <span>Base Root (Canvas do Documento)</span>
+            <span>&lt;body&gt; com background-color #090d16</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. ANATOMIA DE COMPONENTES -->
+      <section id="componentes" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>🧩</span> Biblioteca de Componentes
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">7. Anatomia de Componentes</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Botões -->
+          <div class="glass-card p-5 rounded-2xl space-y-3">
+            <h3 class="font-bold text-white text-sm">Botões de Ação</h3>
+            <div class="space-y-2">
+              <button class="w-full py-2.5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-950/60">
+                Botão Primário (Gradiente Emerald/Teal)
+              </button>
+              <button class="w-full py-2.5 bg-slate-900 text-emerald-300 font-bold text-xs rounded-xl border border-emerald-500/30">
+                Botão Secundário (Borda & Glow)
+              </button>
+              <button class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs rounded-xl shadow-lg shadow-rose-950/60">
+                Botão Crítico / Ouvidoria
+              </button>
+            </div>
+          </div>
+
+          <!-- Badges & Tags -->
+          <div class="glass-card p-5 rounded-2xl space-y-3">
+            <h3 class="font-bold text-white text-sm">Badges & Micro-tags</h3>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs">
+                apenas para membros da UFABC
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold text-xs">
+                Orgulho LGBT+ 🏳️‍🌈
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 font-bold text-xs">
+                ⚠️ Aberto a todos
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs">
+                🔒 Comunidade Fechada
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. REGRAS DE OURO & MANUTENÇÃO -->
+      <section id="regras" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
+        <div class="flex items-center gap-2.5 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+          <span>📏</span> Boas Práticas
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">8. Regras de Ouro & Acessibilidade</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-300 leading-relaxed pt-2">
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-emerald-400">1. Mobile First Estrito</div>
+            <p>O aplicativo foi concebido para o uso diário no smartphone em corredores e salas da UFABC. Mantenha os contêineres principais centrados em <code class="font-mono text-slate-400">max-w-md</code>.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-emerald-400">2. Respeito ao Movimento Reduzido</div>
+            <p>A diretiva <code class="font-mono text-slate-400">@media (prefers-reduced-motion: reduce)</code> deve sempre desativar animações intensas de orbs e partículas para usuários sensíveis.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-emerald-400">3. Interações Táteis Claras</div>
+            <p>Use <code class="font-mono text-slate-400">active:scale-[0.98]</code> em botões e feedback visual imediato (toasts esmeralda ou vermelhos) em qualquer requisição à API.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-emerald-400">4. Desacoplamento de Modais</div>
+            <p>Componentes extensos (como a Central de Ajuda) devem residir em seus próprios arquivos HTML dedicados (<code class="font-mono text-slate-400">help-modal.html</code>) e serem carregados sob demanda via fetch assíncrono.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- RODAPÉ DA DOCUMENTAÇÃO -->
+      <footer class="pt-6 pb-12 text-center text-xs text-slate-500 border-t border-slate-800/60 space-y-1">
+        <div>Pontinho UFABC &bull; Documentação Técnica Interna de Identidade Visual</div>
+        <div>Arquivo: <code class="font-mono text-emerald-400">docs/visual-identity.html</code> &bull; Versão 2.0 (2026)</div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- SCRIPT PARA A DEMO VIVA DO CANVAS DENTRO DO GUIA -->
+  <script>
+    (function() {
+      const canvas = document.getElementById('guide-demo-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      let rect = canvas.getBoundingClientRect();
+      let width = (canvas.width = rect.width);
+      let height = (canvas.height = rect.height);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      function resize() {
+        rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.scale(dpr, dpr);
+      }
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+
+      const count = 35;
+      const particles = [];
+
+      class DemoParticle {
+        constructor() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.radius = Math.random() * 2 + 1.2;
+          this.vx = (Math.random() - 0.5) * 0.6;
+          this.vy = -(Math.random() * 0.5 + 0.2);
+          this.baseAlpha = Math.random() * 0.5 + 0.35;
+          this.alpha = this.baseAlpha;
+          this.angle = Math.random() * Math.PI * 2;
+          this.speed = Math.random() * 0.03 + 0.01;
+          const greenTones = ['rgba(52, 211, 153, ', 'rgba(16, 185, 129, ', 'rgba(45, 212, 191, '];
+          this.color = greenTones[Math.floor(Math.random() * greenTones.length)];
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.angle += this.speed;
+          this.alpha = this.baseAlpha + Math.sin(this.angle) * 0.25;
+
+          if (this.y < -10) this.y = height + 10;
+          if (this.x < -10) this.x = width + 10;
+          if (this.x > width + 10) this.x = -10;
+        }
+
+        draw() {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = this.color + Math.max(0.1, Math.min(1, this.alpha)) + ')';
+          ctx.shadowColor = this.color + '0.8)';
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      for (let i = 0; i < count; i++) {
+        particles.push(new DemoParticle());
+      }
+
+      const mouse = { x: -1000, y: -1000 };
+      canvas.addEventListener('mousemove', (e) => {
+        const bounds = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - bounds.left;
+        mouse.y = e.clientY - bounds.top;
+      });
+      canvas.addEventListener('mouseleave', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, width, height);
+
+        const maxDist = 95;
+        const maxDistSq = maxDist * maxDist;
+
+        // Linhas de grafo
+        for (let i = 0; i < particles.length; i++) {
+          const p1 = particles[i];
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < maxDistSq) {
+              const dist = Math.sqrt(distSq);
+              const lineAlpha = (1 - dist / maxDist) * 0.22;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(52, 211, 153, ${lineAlpha})`;
+              ctx.lineWidth = 0.9;
+              ctx.stroke();
+            }
+          }
+
+          // Interação com mouse
+          const mdx = p1.x - mouse.x;
+          const mdy = p1.y - mouse.y;
+          const mDistSq = mdx * mdx + mdy * mdy;
+          if (mDistSq < 110 * 110) {
+            const mDist = Math.sqrt(mDistSq);
+            const mAlpha = (1 - mDist / 110) * 0.45;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.strokeStyle = `rgba(52, 211, 153, ${mAlpha})`;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+          }
+
+          p1.update();
+          p1.draw();
+        }
+      }
+
+      animate();
+    })();
+  </script>
+</body>
+</html>

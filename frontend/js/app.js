@@ -431,125 +431,77 @@ const Pontinho = {
   },
 
   // Central de Ajuda, Descrição do App e Canal de Ouvidoria / Denúncias Pública
-  openHelpModal() {
+  async openHelpModal() {
     let modal = document.getElementById('global-help-modal');
     if (!modal) {
       modal = document.createElement('div');
       modal.id = 'global-help-modal';
       modal.className = 'fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 transition-opacity';
+      
+      // Fecha ao clicar fora do cartão
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          Pontinho.closeHelpModal();
+        }
+      });
+
+      // Fecha ao pressionar ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          Pontinho.closeHelpModal();
+        }
+      });
+
       document.body.appendChild(modal);
     }
 
-    modal.innerHTML = `
-      <div class="bg-slate-900 border border-slate-700/80 w-full max-w-lg rounded-3xl p-5 sm:p-6 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
-        <!-- Cabeçalho -->
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div class="flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-base">
-              🛡️
-            </span>
-            <div>
-              <h3 class="font-black text-base text-white">Central de Ajuda & Segurança</h3>
-              <p class="text-[11px] text-emerald-400 font-medium">Sobre o Pontinho e Canal de Ouvidoria</p>
-            </div>
-          </div>
-          <button onclick="document.getElementById('global-help-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold">✕</button>
+    // Se o HTML do modal ainda não foi carregado, busca do arquivo próprio help-modal.html
+    if (!modal.dataset.loaded) {
+      modal.innerHTML = `
+        <div class="flex items-center justify-center p-8 bg-slate-900 border border-slate-700/80 rounded-3xl text-emerald-400 gap-3 shadow-2xl">
+          <svg class="animate-spin h-5 w-5 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="text-xs font-semibold text-slate-300">Carregando Central de Ajuda...</span>
         </div>
+      `;
+      modal.classList.remove('hidden');
 
-        <!-- Seção: Sobre o App -->
-        <div class="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
-          <div class="flex items-center gap-2 text-emerald-300 font-bold text-xs uppercase tracking-wider">
-            <span>✨</span> O que é o Pontinho?
-          </div>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            O <strong class="text-white">Pontinho</strong> é a plataforma oficial de conexões, amizades e encontros desenvolvida exclusivamente para a comunidade universitária da <strong class="text-emerald-400">UFABC</strong> (Campi Santo André e São Bernardo do Campo).
-          </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-[11px] text-slate-400">
-            <div class="flex items-start gap-1.5 p-2 bg-slate-900/80 rounded-xl border border-slate-800/80">
-              <span class="text-emerald-400 font-bold">🔒</span>
-              <span><strong>Comunidade Fechada:</strong> Perfis e listas de festas são restritos a estudantes conectados.</span>
-            </div>
-            <div class="flex items-start gap-1.5 p-2 bg-slate-900/80 rounded-xl border border-slate-800/80">
-              <span class="text-teal-400 font-bold">🎉</span>
-              <span><strong>Festas Universitárias:</strong> Divulgação pública de eventos e rolês de entidades e repúblicas.</span>
-            </div>
-          </div>
-        </div>
+      try {
+        const response = await fetch('./help-modal.html');
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status} ao carregar modal`);
+        }
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const content = doc.getElementById('global-help-modal-content');
 
-        <!-- Seção: Formulário de Reclamação / Denúncia para Qualquer Pessoa -->
-        <div class="bg-gradient-to-br from-rose-950/30 via-slate-950/80 to-slate-900 p-4 sm:p-5 rounded-2xl border border-rose-500/30 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 text-rose-300 font-bold text-xs uppercase tracking-wider">
-              <span>⚠️</span> Ouvidoria & Denúncias
-            </div>
-            <span class="text-[10px] bg-rose-500/20 text-rose-300 font-bold px-2 py-0.5 rounded-full border border-rose-500/30">
-              Aberto a todos
-            </span>
-          </div>
-
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Mesmo que você <strong class="text-white">não possua uma conta no app</strong>, utilize este canal seguro para relatar perfis falsos, perseguição (stalking), assédio ou uso não consentido de fotos. Nossa moderação analisa cada caso com máxima prioridade e sigilo.
-          </p>
-
-          <form id="public-complaint-form" onsubmit="Pontinho._submitComplaint(event)" class="space-y-3 pt-1">
-            <div>
-              <label class="block text-xs font-bold text-slate-200 mb-1">
-                Tipo da Ocorrência <span class="text-rose-400">*</span>
-              </label>
-              <select id="complaint-type" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500">
-                <option value="">Selecione o problema...</option>
-                <option value="fake_profile">👤 Perfil Falso / Fake (alguém usando minhas fotos ou dados)</option>
-                <option value="stalking">👀 Perseguição / Stalking</option>
-                <option value="harassment">🚫 Assédio ou Comportamento Ofensivo</option>
-                <option value="image_misuse">📸 Uso Não Autorizado de Imagens / Fotos</option>
-                <option value="defamation">📢 Difamação ou Exposição Indevida</option>
-                <option value="other">⚠️ Outro tipo de violação de segurança</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-200 mb-1">
-                Quem está envolvido? <span class="text-rose-400">*</span>
-              </label>
-              <input type="text" id="complaint-target" required placeholder="Nome, e-mail institucional, link ou descrição do perfil acusado" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-200 mb-1">
-                O que aconteceu? <span class="text-rose-400">*</span>
-              </label>
-              <textarea id="complaint-details" rows="3" required placeholder="Descreva os fatos detalhadamente para que nossa equipe possa apurar com rapidez..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label class="block text-xs font-bold text-slate-200 mb-1">
-                  Seu Contato (E-mail ou WhatsApp) <span class="text-rose-400">*</span>
-                </label>
-                <input type="text" id="complaint-contact" required placeholder="contato@exemplo.com ou telefone" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-200 mb-1">
-                  Seu Nome (opcional)
-                </label>
-                <input type="text" id="complaint-reporter-name" placeholder="Seu nome ou apelido" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500">
-              </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 pt-2">
-              <button type="button" onclick="document.getElementById('global-help-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
-                Fechar
-              </button>
-              <button type="submit" id="btn-submit-complaint" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-lg shadow-rose-950/60 transition flex items-center gap-1.5">
-                <span>🛡️</span> <span>Enviar Reclamação</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    `;
+        if (content) {
+          modal.innerHTML = '';
+          modal.appendChild(document.importNode(content, true));
+          modal.dataset.loaded = 'true';
+        } else {
+          modal.innerHTML = html;
+          modal.dataset.loaded = 'true';
+        }
+      } catch (err) {
+        console.error('Falha ao carregar help-modal.html:', err);
+        this.showToast('Não foi possível carregar a Central de Ajuda.', 'error');
+        modal.classList.add('hidden');
+        return;
+      }
+    }
 
     modal.classList.remove('hidden');
+  },
+
+  closeHelpModal() {
+    const modal = document.getElementById('global-help-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
   },
 
   async _submitComplaint(e) {
@@ -561,8 +513,10 @@ const Pontinho = {
     const reporter_name = document.getElementById('complaint-reporter-name').value;
 
     const btn = document.getElementById('btn-submit-complaint');
-    btn.disabled = true;
-    btn.textContent = 'Enviando...';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+    }
 
     try {
       const response = await fetch(`${this.getApiBase()}/api/help/complaint`, {
@@ -585,12 +539,16 @@ const Pontinho = {
       }
 
       this.showToast(data.message || 'Denúncia registrada com sucesso!', 'success');
-      document.getElementById('global-help-modal').classList.add('hidden');
+      const form = document.getElementById('public-complaint-form');
+      if (form) form.reset();
+      this.closeHelpModal();
     } catch (err) {
       this.showToast(err.message, 'error');
     } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<span>🛡️</span> <span>Enviar Reclamação</span>';
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🛡️</span> <span>Enviar Reclamação</span>';
+      }
     }
   },
 
@@ -679,7 +637,7 @@ const Pontinho = {
     this.applyTheme(theme);
     if (notify) {
       if (theme === 'pride') {
-        this.showToast('Tema Orgulho LGBT+ ativado! 🏳️‍🌈✨', 'success');
+        this.showToast('Tema Dark Pride ativado! 🏳️‍🌈✨', 'success');
       } else {
         this.showToast('Tema UFABC Esmeralda ativado! 🌿', 'success');
       }
@@ -712,8 +670,8 @@ const Pontinho = {
     modal.innerHTML = `
       <div class="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-3xl p-6 shadow-2xl relative overflow-hidden animate-fade-in" onclick="event.stopPropagation()">
         <!-- Luz de fundo do modal -->
-        <div class="absolute -top-10 -right-10 w-40 h-40 ${isPride ? 'bg-pink-500/20' : 'bg-emerald-500/20'} rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-10 -left-10 w-40 h-40 ${isPride ? 'bg-cyan-500/20' : 'bg-teal-500/20'} rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -top-10 -right-10 w-40 h-40 ${isPride ? 'bg-purple-600/15' : 'bg-emerald-500/20'} rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-40 h-40 ${isPride ? 'bg-indigo-600/15' : 'bg-teal-500/20'} rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="flex items-center justify-between pb-4 border-b border-slate-800 relative z-10">
           <div class="flex items-center gap-2.5">
@@ -759,17 +717,17 @@ const Pontinho = {
 
           <!-- Opção 2: Tema Orgulho LGBT+ (Pride) -->
           <div id="theme-card-pride" onclick="Pontinho.setTheme('pride'); Pontinho.closeThemeModal();"
-            class="theme-option-card flex items-center justify-between p-3.5 rounded-2xl border ${isPride ? 'active active-pride border-pink-500' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'}">
+            class="theme-option-card flex items-center justify-between p-3.5 rounded-2xl border ${isPride ? 'active active-pride border-purple-500' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'}">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500/20 via-purple-500/20 to-cyan-500/20 border border-pink-500/30 flex items-center justify-center text-xl shadow-xs">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500/20 via-pink-500/20 to-indigo-500/20 border border-purple-500/30 flex items-center justify-center text-xl shadow-xs">
                 🏳️‍🌈
               </div>
               <div>
                 <div class="flex items-center gap-2">
                   <span class="font-bold text-sm text-white">Orgulho LGBT+</span>
-                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-pink-950 text-pink-300 border border-pink-800/40">Pride</span>
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-purple-950 text-purple-300 border border-purple-800/40">Dark Pride</span>
                 </div>
-                <p class="text-xs text-slate-400 mt-0.5">Cores do arco-íris, brilhos holográficos e celebração da diversidade</p>
+                <p class="text-xs text-slate-400 mt-0.5">Base dark profunda, gradientes cósmicos e toques holográficos</p>
                 <div class="flex items-center gap-1.5 mt-2">
                   <span class="w-3.5 h-3.5 rounded-full bg-[#ff3366] border border-white/20" title="Vermelho"></span>
                   <span class="w-3.5 h-3.5 rounded-full bg-[#ff7a18] border border-white/20" title="Laranja"></span>
@@ -780,7 +738,7 @@ const Pontinho = {
                 </div>
               </div>
             </div>
-            <div id="theme-check-pride" class="${isPride ? '' : 'hidden'} text-pink-400 text-lg font-black ml-2">
+            <div id="theme-check-pride" class="${isPride ? '' : 'hidden'} text-purple-400 text-lg font-black ml-2">
               ✓
             </div>
           </div>
