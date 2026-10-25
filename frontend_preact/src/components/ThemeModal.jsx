@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
+import { createPortal } from 'preact/compat';
 import { getStoredTheme, applyTheme } from '../services/theme.js';
 import { showToast } from '../services/api.js';
 
@@ -8,8 +9,14 @@ export function ThemeModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       setCurrentTheme(getStoredTheme());
+
+      function handleKeyDown(e) {
+        if (e.key === 'Escape') onClose();
+      }
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -26,7 +33,7 @@ export function ThemeModal({ isOpen, onClose }) {
 
   const isPride = currentTheme === 'pride';
 
-  return (
+  const modalContent = (
     <div
       id="global-theme-modal"
       class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity"
@@ -132,4 +139,6 @@ export function ThemeModal({ isOpen, onClose }) {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
