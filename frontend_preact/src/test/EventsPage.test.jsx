@@ -39,4 +39,47 @@ describe('EventsPage Component', () => {
       expect(screen.getByText(/Ver Quem Vai/i)).toBeTruthy();
     });
   });
+
+  it('opens attendees modal in document.body when clicking Ver Quem Vai with locked list', async () => {
+    const mockEvents = [
+      {
+        id: 1,
+        title: 'Cervejada Geral UFABC',
+        description: 'Open bar',
+        event_date: '2026-11-14 22:00',
+        location: 'Santo André',
+        attendees_count: 42,
+        is_attending: false
+      }
+    ];
+
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockEvents
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          attendees_locked: true,
+          attendees_message: 'Apenas estudantes da UFABC conectados podem ver a lista de confirmados nesta festa.'
+        })
+      });
+
+    render(<EventsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Ver Quem Vai/i)).toBeTruthy();
+    });
+
+    screen.getByText(/Ver Quem Vai/i).click();
+
+    await waitFor(() => {
+      expect(screen.getByText('Lista de Confirmados Privada')).toBeTruthy();
+      expect(screen.getByText(/Entrar com e-mail institucional/i)).toBeTruthy();
+      expect(screen.getByText('Lista privada')).toBeTruthy();
+    });
+  });
 });
