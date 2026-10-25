@@ -467,7 +467,7 @@ html.theme-pride .theme-option-card.active-pride {
   border-radius: 9999px;
   background: radial-gradient(circle, rgba(52, 211, 153, 0.95) 0%, rgba(16, 185, 129, 0) 70%);
   box-shadow: 0 0 10px rgba(52, 211, 153, 0.45);
-  pointer-events-none;
+  pointer-events: none;
   animation: pontinhoFloatPulse var(--twinkle-dur, 7s) ease-in-out infinite var(--twinkle-delay, 0s);
   will-change: transform, opacity;
 }
