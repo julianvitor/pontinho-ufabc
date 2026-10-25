@@ -28,7 +28,7 @@ function AppContent({ onOpenTheme, onOpenHelp }) {
         <Navbar onOpenTheme={onOpenTheme} onOpenHelp={onOpenHelp} />
       )}
 
-      <div class="flex-1 flex flex-col relative z-10">
+      <div class="flex-1 flex flex-col relative">
         <Router>
           <Route path="/" component={FeedPage} />
           <Route path="/index.html" component={FeedPage} />

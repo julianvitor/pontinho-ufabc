@@ -299,7 +299,12 @@ export function EventsPage() {
 
       {/* MODAL: LISTA DE QUEM VAI AO EVENTO */}
       {attendeesModalOpen && (
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div
+          class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setAttendeesModalOpen(false);
+          }}
+        >
           <div class="bg-slate-900 border border-slate-800 w-full max-w-xl rounded-t-3xl sm:rounded-3xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col text-slate-100">
             <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
               <div>
@@ -311,13 +316,24 @@ export function EventsPage() {
               <button
                 type="button"
                 onClick={() => setAttendeesModalOpen(false)}
-                class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm transition"
+                class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <div class="p-5 overflow-y-auto max-h-[60vh] space-y-3">
+            {/* Barra de contagem e busca */}
+            <div class="px-5 py-3 bg-slate-900/60 border-b border-slate-800/80 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-300">
+                {attendeesLocked
+                  ? '0 confirmados'
+                  : `${attendeesList.length} ${attendeesList.length === 1 ? 'estudante confirmado' : 'estudantes confirmados'}`}
+              </span>
+              <span class="text-[11px] text-emerald-400 font-semibold">Dica: clique no perfil para ver detalhes</span>
+            </div>
+
+            {/* Lista de confirmados */}
+            <div class="p-4 overflow-y-auto space-y-3 flex-1 divide-y divide-slate-800/60">
               {attendeesLoading && (
                 <div class="p-8 text-center text-slate-400 text-xs">
                   <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -331,7 +347,9 @@ export function EventsPage() {
                     🔒
                   </div>
                   <h4 class="text-base font-black text-white">Lista de Confirmados Privada</h4>
-                  <p class="text-xs text-slate-300 max-w-xs mx-auto">{attendeesMessage}</p>
+                  <p class="text-xs text-slate-300 max-w-xs mx-auto">
+                    {attendeesMessage || 'Apenas estudantes da UFABC conectados podem ver a lista de confirmados nesta festa.'}
+                  </p>
                   <a
                     href="/login"
                     class="inline-block mt-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs rounded-xl shadow-lg transition"
@@ -356,7 +374,7 @@ export function EventsPage() {
                   return (
                     <div
                       key={u.id || u.name}
-                      class="flex items-center justify-between gap-3 pt-3 first:pt-0 border-t border-slate-800/60 first:border-t-0"
+                      class="flex items-center justify-between gap-3 pt-3 first:pt-0"
                     >
                       <div
                         class="flex items-center gap-3 cursor-pointer"
@@ -394,47 +412,61 @@ export function EventsPage() {
         </div>
       )}
 
-      {/* MODAL PREVIEW DE USUÁRIO */}
+      {/* MODAL: VISUALIZAR PERFIL DO PARTICIPANTE */}
       {userPreview && (
-        <div class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl flex flex-col text-slate-100">
-            <div class="relative h-64 bg-slate-950">
+        <div
+          class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setUserPreview(null);
+          }}
+        >
+          <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="relative h-72 bg-slate-950">
               <img
                 src={
-                  resolveMediaUrl(userPreview.avatar) ||
+                  resolveMediaUrl(userPreview.avatar || (userPreview.photos && userPreview.photos[0])) ||
                   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600'
                 }
-                alt={userPreview.name}
+                alt={userPreview.name || 'Foto'}
                 class="w-full h-full object-cover"
               />
               <button
                 type="button"
                 onClick={() => setUserPreview(null)}
-                class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center font-bold text-sm"
+                class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center font-bold backdrop-blur-md hover:bg-black/80"
               >
                 ✕
               </button>
               <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
               <div class="absolute bottom-3 left-4 right-4">
-                <h3 class="text-xl font-black text-white">
-                  {userPreview.name}, {userPreview.age}
-                </h3>
-                <p class="text-xs text-emerald-300 font-semibold">🎓 {userPreview.course}</p>
-                <p class="text-[11px] text-slate-400">📍 {userPreview.campus}</p>
+                <div class="flex items-baseline gap-2">
+                  <h3 class="text-2xl font-black text-white">{userPreview.name || 'Estudante'}</h3>
+                  <span class="text-xl font-light text-slate-300">{userPreview.age || ''}</span>
+                </div>
+                <p class="text-xs text-emerald-300 font-semibold">
+                  🎓 {userPreview.course} • {userPreview.campus}
+                </p>
               </div>
             </div>
-            {userPreview.bio && (
-              <div class="p-4 text-xs text-slate-300 bg-slate-950/60 border-t border-slate-800">
-                "{userPreview.bio}"
+
+            <div class="p-5 overflow-y-auto space-y-4">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                  Sobre mim
+                </span>
+                <p class="text-xs text-slate-200 leading-relaxed bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                  {userPreview.bio || 'Sem bio cadastrada no perfil.'}
+                </p>
               </div>
-            )}
-            <div class="p-4 text-center">
-              <a
-                href="/"
-                class="inline-block w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-slate-950 font-black text-xs rounded-xl shadow-md transition"
-              >
-                Buscar nos Swipes 🔥
-              </a>
+
+              <div class="pt-2">
+                <a
+                  href="/"
+                  class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-md active:scale-98"
+                >
+                  <span>🔥</span> Encontrar no Swipe
+                </a>
+              </div>
             </div>
           </div>
         </div>
