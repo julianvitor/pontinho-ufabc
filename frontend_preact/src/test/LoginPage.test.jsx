@@ -20,7 +20,8 @@ describe('LoginPage Component', () => {
     const registerTabBtn = screen.getByRole('button', { name: 'Cadastrar-se' });
     fireEvent.click(registerTabBtn);
 
-    expect(screen.getByPlaceholderText('Ex: Ana Clara')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Como quer ser chamado(a)')).toBeTruthy();
+    expect(screen.getByPlaceholderText('nome.sobrenome@aluno.ufabc.edu.br')).toBeTruthy();
     expect(screen.getByText('Criar Conta')).toBeTruthy();
   });
 
