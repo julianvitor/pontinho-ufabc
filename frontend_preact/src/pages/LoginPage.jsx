@@ -51,6 +51,7 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Refs para loop de animação e estados voláteis
   const streamRef = useRef(null);
@@ -258,10 +259,78 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
     }
   }
 
+  async function handleSelfieFileSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    setBioStep('scanning');
+    setOverlayText('Processando selfie...');
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const dataUrl = event.target.result;
+        const img = new Image();
+        img.onload = async () => {
+          try {
+            await loadBiometricModels();
+            const faceapi = window.faceapi;
+            let medianAge = 21;
+            let descriptor = null;
+
+            if (faceapi) {
+              const detectorOptions = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 });
+              const detection = await faceapi
+                .detectSingleFace(img, detectorOptions)
+                .withFaceLandmarks()
+                .withAgeAndGender()
+                .withFaceDescriptor();
+
+              if (detection) {
+                medianAge = detection.age ? Math.round(detection.age) : 21;
+                descriptor = detection.descriptor ? Array.from(detection.descriptor) : null;
+              }
+            }
+
+            finishBiometricVerification(medianAge, dataUrl, descriptor);
+          } catch (err) {
+            console.warn('Detecção na selfie:', err);
+            finishBiometricVerification(20, dataUrl, null);
+          }
+        };
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      showToast('Erro ao processar imagem.', 'error');
+      setBioStep('initial');
+    }
+  }
+
   async function startBiometricVerification() {
+    setShowFallback(false);
+
+    // Se navigator.mediaDevices não existir (ex: acesso via HTTP em IP ou browser incompatível)
+    const hasMedia =
+      typeof navigator !== 'undefined' &&
+      !!navigator.mediaDevices &&
+      typeof navigator.mediaDevices.getUserMedia === 'function';
+
+    if (!hasMedia) {
+      const isHttpIp = typeof window !== 'undefined' && !window.isSecureContext;
+      if (isHttpIp) {
+        showToast('Navegadores bloqueiam a câmera ao acessar via IP sem HTTPS. Use o envio de selfie.', 'info');
+      } else {
+        showToast('Câmera indisponível neste navegador. Envie uma selfie para validar.', 'info');
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+      return;
+    }
+
     setBioStep('scanning');
     setOverlayText('Carregando IA biométrica...');
-    setShowFallback(false);
 
     currentChallengeRef.current =
       LIVENESS_CHALLENGES[Math.floor(Math.random() * LIVENESS_CHALLENGES.length)];
@@ -444,7 +513,13 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
     } catch (err) {
       console.error('Erro na biometria:', err);
       cancelBiometricVerification();
-      showToast(err.message || 'Câmera não permitida ou indisponível.', 'error');
+      const isMediaUnavailable = !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia;
+      if (isMediaUnavailable) {
+        showToast('Câmera indisponível neste navegador. Envie uma selfie.', 'info');
+        if (fileInputRef.current) fileInputRef.current.click();
+      } else {
+        showToast(err.message || 'Câmera não permitida ou indisponível.', 'error');
+      }
     }
   }
 
@@ -709,7 +784,7 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
 
                 {/* Status / Botão de Ação Inicial */}
                 {bioStep === 'initial' && (
-                  <div id="bio-initial-state" class="text-center pt-1">
+                  <div id="bio-initial-state" class="text-center pt-1 space-y-2">
                     <button
                       type="button"
                       id="bio-start-btn"
@@ -732,6 +807,23 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
                       </svg>
                       <span>Verificar (+18)</span>
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                      class="text-[10px] text-slate-400 hover:text-emerald-300 transition flex items-center justify-center gap-1 mx-auto"
+                    >
+                      <span>📷</span> <span>Tirar selfie ou enviar foto</span>
+                    </button>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="user"
+                      onChange={handleSelfieFileSelected}
+                      class="hidden"
+                    />
                   </div>
                 )}
 

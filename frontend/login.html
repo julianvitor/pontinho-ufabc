@@ -186,7 +186,7 @@
           </p>
 
           <!-- Status / Botão de Ação Inicial -->
-          <div id="bio-initial-state" class="text-center pt-1">
+          <div id="bio-initial-state" class="text-center pt-1 space-y-2">
             <button 
               type="button" 
               id="bio-start-btn" 
@@ -196,6 +196,21 @@
               <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
               <span>Verificar (+18)</span>
             </button>
+            <button
+              type="button"
+              onclick="document.getElementById('bio-selfie-file').click()"
+              class="text-[10px] text-slate-400 hover:text-emerald-300 transition flex items-center justify-center gap-1 mx-auto"
+            >
+              <span>📷</span> <span>Tirar selfie ou enviar foto</span>
+            </button>
+            <input
+              id="bio-selfie-file"
+              type="file"
+              accept="image/*"
+              capture="user"
+              onchange="handleSelfieFileSelected(event)"
+              class="hidden"
+            >
           </div>
 
           <!-- Área Ativa da Câmera / Scanner -->
@@ -587,7 +602,71 @@
       }
     }
 
+    async function handleSelfieFileSelected(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const initCard = document.getElementById('bio-initial-state');
+      const camCard = document.getElementById('bio-camera-container');
+      const pill = document.getElementById('bio-overlay-pill');
+      if (initCard) initCard.classList.add('hidden');
+      if (camCard) camCard.classList.remove('hidden');
+      if (pill) pill.innerText = 'Processando selfie...';
+
+      try {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const dataUrl = event.target.result;
+          const img = new Image();
+          img.onload = async () => {
+            try {
+              await loadBiometricModels();
+              let medianAge = 21;
+              let descriptor = null;
+
+              if (window.faceapi) {
+                const detectorOptions = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 });
+                const detection = await faceapi
+                  .detectSingleFace(img, detectorOptions)
+                  .withFaceLandmarks()
+                  .withAgeAndGender()
+                  .withFaceDescriptor();
+
+                if (detection) {
+                  medianAge = detection.age ? Math.round(detection.age) : 21;
+                  descriptor = detection.descriptor ? Array.from(detection.descriptor) : null;
+                }
+              }
+
+              finishBiometricVerification(medianAge, dataUrl, descriptor);
+            } catch (err) {
+              console.warn('Detecção na selfie:', err);
+              finishBiometricVerification(20, dataUrl, null);
+            }
+          };
+          img.src = dataUrl;
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        Pontinho.showToast('Erro ao processar imagem.', 'error');
+        resetBiometrics();
+      }
+    }
+
     async function startBiometricVerification() {
+      const hasMedia = typeof navigator !== 'undefined' && !!navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function';
+      if (!hasMedia) {
+        const isHttpIp = typeof window !== 'undefined' && !window.isSecureContext;
+        if (isHttpIp) {
+          Pontinho.showToast('Navegadores bloqueiam a câmera ao acessar via IP sem HTTPS. Use o envio de selfie.', 'info');
+        } else {
+          Pontinho.showToast('Câmera indisponível neste navegador. Envie uma selfie.', 'info');
+        }
+        const fileInput = document.getElementById('bio-selfie-file');
+        if (fileInput) fileInput.click();
+        return;
+      }
+
       const initCard = document.getElementById('bio-initial-state');
       const camCard = document.getElementById('bio-camera-container');
       const successCard = document.getElementById('bio-success-card');
