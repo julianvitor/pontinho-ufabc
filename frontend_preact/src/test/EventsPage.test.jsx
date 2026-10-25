@@ -17,7 +17,7 @@ describe('EventsPage Component', () => {
         event_date: '2026-11-14 22:00',
         location: 'Espaço Modular - Santo André',
         attendees_count: 42,
-        user_status: null
+        is_attending: false
       }
     ];
 
@@ -35,8 +35,8 @@ describe('EventsPage Component', () => {
       expect(screen.getByText('14')).toBeTruthy();
       expect(screen.getByText('NOV')).toBeTruthy();
       expect(screen.getByText(/42 confirmados/i)).toBeTruthy();
-      expect(screen.getByText(/Vou/i)).toBeTruthy();
-      expect(screen.getByText(/Talvez/i)).toBeTruthy();
+      expect(screen.getByText(/Vou Colar!/i)).toBeTruthy();
+      expect(screen.getByText(/Ver Quem Vai/i)).toBeTruthy();
     });
   });
 });

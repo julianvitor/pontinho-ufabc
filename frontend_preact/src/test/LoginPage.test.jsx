@@ -10,14 +10,14 @@ describe('LoginPage Component', () => {
 
   it('renders login tab by default with email and password inputs', () => {
     render(<LoginPage />);
-    expect(screen.getByPlaceholderText('nome.sobrenome@aluno.ufabc.edu.br')).toBeTruthy();
+    expect(screen.getByPlaceholderText('nome@aluno.ufabc.edu.br')).toBeTruthy();
     expect(screen.getByPlaceholderText('••••••••')).toBeTruthy();
-    expect(screen.getByText('Acessar Conta')).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: 'Entrar' }).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('switches to register tab when clicking Cadastrar', async () => {
+  it('switches to register tab when clicking Cadastrar-se', async () => {
     render(<LoginPage />);
-    const registerTabBtn = screen.getByRole('button', { name: 'Cadastrar' });
+    const registerTabBtn = screen.getByRole('button', { name: 'Cadastrar-se' });
     fireEvent.click(registerTabBtn);
 
     expect(screen.getByPlaceholderText('Ex: Ana Clara')).toBeTruthy();
@@ -45,7 +45,7 @@ describe('LoginPage Component', () => {
 
     // Clica no botão demo Eren
     fireEvent.click(screen.getByText('Eren'));
-    const emailInput = screen.getByPlaceholderText('nome.sobrenome@aluno.ufabc.edu.br');
+    const emailInput = screen.getByPlaceholderText('nome@aluno.ufabc.edu.br');
     expect(emailInput.value).toBe('eren.jaeger@pontinho.app');
   });
 });

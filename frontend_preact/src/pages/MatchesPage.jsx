@@ -150,7 +150,7 @@ export function MatchesPage() {
   }
 
   return (
-    <main class="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 pb-24 md:pb-6 relative z-10 flex flex-col h-[calc(100vh-65px)]">
+    <main class="flex-1 max-w-5xl w-full mx-auto p-2 sm:p-6 pb-24 md:pb-6 flex flex-col h-[calc(100dvh-75px)] md:h-[620px] relative z-10">
       <div class="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex-1 flex flex-col md:flex-row min-h-0">
         {/* LISTA DE CONVERSAS */}
         <div

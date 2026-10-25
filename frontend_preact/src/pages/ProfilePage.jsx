@@ -199,7 +199,7 @@ export function ProfilePage() {
   }
 
   return (
-    <main class="flex-1 w-full max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-6 relative z-10">
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 pb-20 md:pb-8 relative z-10">
       <div class="mb-6 flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-black text-white flex items-center gap-2">

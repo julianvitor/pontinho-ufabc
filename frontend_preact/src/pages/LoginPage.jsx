@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { apiFetch, setCurrentUserId, showToast } from '../services/api.js';
 
-export function LoginPage() {
+export function LoginPage({ onOpenTheme, onOpenHelp }) {
   const [tab, setTab] = useState('login');
   const [demoAccounts, setDemoAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -171,82 +171,111 @@ export function LoginPage() {
   }
 
   return (
-    <div class="flex-1 w-full max-w-md mx-auto px-4 py-8 flex flex-col justify-center relative z-10">
-      <div class="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md relative overflow-hidden">
-        {/* Glow de fundo */}
-        <div class="absolute -top-16 -right-16 w-36 h-36 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div class="absolute -bottom-16 -left-16 w-36 h-36 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Título */}
-        <div class="text-center mb-6">
-          <span class="font-black text-3xl tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
-            Pontinho
-          </span>
-          <p class="text-xs text-slate-400 mt-1 font-medium">Apenas para a comunidade UFABC</p>
-        </div>
-
-        {/* Abas */}
-        <div class="grid grid-cols-2 p-1 bg-slate-950/80 rounded-2xl border border-slate-800 mb-6">
+    <div class="min-h-[100dvh] flex flex-col justify-center items-center p-3 sm:p-4 text-slate-100 font-sans antialiased relative z-10">
+      {/* BARRA SUPERIOR DE AJUDA E RETORNO */}
+      <header class="w-full max-w-md mx-auto mb-3 flex items-center justify-between px-2 z-10">
+        <a href="/" class="text-xs font-semibold text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition">
+          <span>❮</span> Início
+        </a>
+        <div class="flex items-center gap-1.5">
           <button
             type="button"
+            onClick={onOpenTheme}
+            class="theme-pill-btn px-2 sm:px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 rounded-xl border border-slate-700/70 transition flex items-center gap-1 shadow-xs"
+            title="Escolher Tema Visual (UFABC / Orgulho LGBT+)"
+          >
+            <span class="theme-active-icon">🌿</span> <span class="hidden sm:inline font-bold theme-active-name">UFABC</span>
+          </button>
+          <button
+            type="button"
+            onClick={onOpenHelp}
+            class="px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:text-emerald-200 bg-emerald-950/50 hover:bg-emerald-900/60 rounded-xl border border-emerald-800/40 transition flex items-center gap-1.5"
+            title="Central de Ajuda e Segurança"
+          >
+            <span>🛡️</span> <span>Ajuda</span>
+          </button>
+        </div>
+      </header>
+
+      {/* CARD PRINCIPAL DE AUTENTICAÇÃO */}
+      <div class="w-full max-w-md bg-slate-900/90 rounded-3xl shadow-2xl overflow-hidden border border-slate-800/80 backdrop-blur-xl text-slate-100 transition-all shadow-black/80 relative z-10">
+        {/* CABEÇALHO */}
+        <div class="bg-gradient-to-b from-emerald-950/60 via-slate-900 to-slate-900/90 py-3.5 px-6 text-center relative border-b border-emerald-500/20">
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent flex items-center justify-center gap-2">
+            <span>Pontinho</span>
+            <span class="theme-pride-badge hidden text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-xs">
+              PRIDE 🏳️‍🌈
+            </span>
+          </h1>
+        </div>
+
+        {/* SELETOR DE ABAS: LOGIN OU CADASTRO */}
+        <div class="flex border-b border-slate-800 bg-slate-950/60">
+          <button
+            id="tab-btn-login"
+            type="button"
             onClick={() => setTab('login')}
-            class={`py-2 text-xs font-bold rounded-xl transition ${
+            class={`flex-1 py-3.5 text-xs sm:text-sm transition ${
               tab === 'login'
-                ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30 shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80'
+                : 'font-semibold text-slate-400 hover:text-slate-200'
             }`}
           >
             Entrar
           </button>
           <button
+            id="tab-btn-register"
             type="button"
             onClick={() => setTab('register')}
-            class={`py-2 text-xs font-bold rounded-xl transition ${
+            class={`flex-1 py-3.5 text-xs sm:text-sm transition ${
               tab === 'register'
-                ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30 shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80'
+                : 'font-semibold text-slate-400 hover:text-slate-200'
             }`}
           >
-            Cadastrar
+            Cadastrar-se
           </button>
         </div>
 
-        {/* TAB 1: LOGIN */}
-        {tab === 'login' && (
-          <form onSubmit={handleLogin} class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1.5">E-mail Institucional</label>
-              <input
-                type="email"
-                required
-                value={loginEmail}
-                onInput={(e) => setLoginEmail(e.target.value)}
-                placeholder="nome.sobrenome@aluno.ufabc.edu.br"
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 transition"
-              />
-            </div>
+        <div class="p-5 sm:p-6">
+          {/* TAB 1: LOGIN */}
+          {tab === 'login' && (
+            <form id="form-login" onSubmit={handleLogin} class="space-y-3.5">
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">E-mail Institucional</label>
+                <input
+                  id="login-email"
+                  type="text"
+                  required
+                  value={loginEmail}
+                  onInput={(e) => setLoginEmail(e.target.value)}
+                  placeholder="nome@aluno.ufabc.edu.br"
+                  class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                />
+              </div>
 
-            <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1.5">Senha</label>
-              <input
-                type="password"
-                required
-                value={loginPassword}
-                onInput={(e) => setLoginPassword(e.target.value)}
-                placeholder="••••••••"
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/60 transition"
-              />
-            </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Senha</label>
+                <input
+                  id="login-password"
+                  type="password"
+                  required
+                  value={loginPassword}
+                  onInput={(e) => setLoginPassword(e.target.value)}
+                  placeholder="••••••••"
+                  class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                />
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              class="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 transition active:scale-[0.99] disabled:opacity-50"
-            >
-              {loading ? 'Entrando...' : 'Acessar Conta'}
-            </button>
-          </form>
-        )}
+              <button
+                type="submit"
+                disabled={loading}
+                class="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 hover:shadow-emerald-900/60 transition active:scale-[0.99] disabled:opacity-50"
+              >
+                {loading ? 'Entrando...' : 'Entrar'}
+              </button>
+            </form>
+          )}
 
         {/* TAB 2: CADASTRO */}
         {tab === 'register' && (
@@ -475,6 +504,7 @@ export function LoginPage() {
           </div>
         )}
       </div>
+    </div>
 
       <footer class="mt-6 text-center text-xs text-slate-500 flex items-center justify-center gap-3">
         <a href="/terms" class="hover:text-emerald-400 transition">Termos de Uso</a>

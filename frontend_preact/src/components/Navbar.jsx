@@ -33,7 +33,7 @@ export function Navbar({ onOpenTheme, onOpenHelp }) {
 
   return (
     <header class="bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40 shadow-sm">
-      <div class="max-w-4xl mx-auto px-4 h-[51px] flex items-center justify-between gap-4">
+      <div class="max-w-5xl mx-auto px-4 h-[51px] flex items-center justify-between gap-4">
         {/* Marca */}
         <a href="/" class="flex items-center group">
           <span class="font-black text-xl sm:text-2xl tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
