@@ -541,13 +541,6 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
 
   return (
     <div class="min-h-[100dvh] flex flex-col justify-center items-center p-3 sm:p-4 text-slate-100 font-sans antialiased relative overflow-x-hidden">
-      {/* EFEITOS DINÂMICOS DE FUNDO (GLOWS AURORA & PONTINHOS VIVOS) */}
-      <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="ambient-glow-1 absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-emerald-500/20 rounded-full blur-[100px]" />
-        <div class="ambient-glow-2 absolute bottom-0 right-0 w-[450px] h-[350px] bg-teal-500/20 rounded-full blur-[100px]" />
-        <div class="ambient-glow-3 absolute top-1/3 left-[-100px] w-[350px] h-[350px] bg-emerald-400/10 rounded-full blur-[110px]" />
-      </div>
-
       {/* BARRA SUPERIOR DE AJUDA E RETORNO */}
       <header class="w-full max-w-md mx-auto mb-3 flex items-center justify-between px-2 z-10">
         <a href="/" class="text-xs font-semibold text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition">
