@@ -223,7 +223,8 @@ Se preferir rodar os serviços individualmente na sua máquina:
 
 ## 🌐 URLs de Acesso
 
-- **Frontend da Aplicação (Live Reload)**: [http://localhost:3000](http://localhost:3000)
+- **Frontend Preact (SPA + Vite HMR)**: [http://localhost:3001](http://localhost:3001)
+- **Frontend Clássico (Live Reload)**: [http://localhost:3000](http://localhost:3000)
   - **Feed Principal (Swipes)**: [http://localhost:3000](http://localhost:3000)
   - **Festas & Eventos**: [http://localhost:3000/events.html](http://localhost:3000/events.html)
   - **Conversas & Matches**: [http://localhost:3000/matches.html](http://localhost:3000/matches.html)

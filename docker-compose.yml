@@ -38,3 +38,19 @@ services:
     entrypoint: ["python", "scripts/serve_frontend.py", "--host", "0.0.0.0", "--port", "3000"]
     depends_on:
       - backend
+
+  frontend-preact:
+    build:
+      context: ./frontend_preact
+      dockerfile: Dockerfile
+    container_name: pontinho-frontend-preact
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./frontend_preact:/app
+      - /app/node_modules
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend

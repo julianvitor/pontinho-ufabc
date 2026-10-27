@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/preact';
+import { render, screen, waitFor, fireEvent } from '@testing-library/preact';
 import { FeedPage } from '../pages/FeedPage.jsx';
 import { setCurrentUserId } from '../services/api.js';
 
@@ -91,4 +91,73 @@ describe('FeedPage Component', () => {
       expect(screen.getByText('PASSO')).toBeTruthy();
     });
   });
+
+  it('opens and renders 100% identical profile details modal', async () => {
+    setCurrentUserId(1, 'mock_token');
+
+    const mockFeed = {
+      cards: [
+        {
+          id: 4,
+          name: 'Mikasa Ackerman',
+          age: 20,
+          campus: 'Santo André',
+          course: 'BCT',
+          specific_course: 'Engenharia Aeroespacial',
+          entity: 'DA Livre',
+          looking_for: 'Amizades',
+          bio: 'Adoro treinar e ouvir música.',
+          photos: ['https://images.unsplash.com/photo-3', 'https://images.unsplash.com/photo-4'],
+          songs: ['Linked Horizon - Guren no Yumiya'],
+          is_verified: true,
+          has_private_content: true,
+          private_photos_count: 2,
+          interests: ['Academia', 'Anime'],
+          prompt1_q: 'Um fato sobre mim',
+          prompt1_a: 'Nunca me atraso para aulas.',
+          prompt2_q: 'Melhor lugar na UFABC',
+          prompt2_a: 'O terraço do bloco A.',
+          prompt3_q: 'Não vivo sem',
+          prompt3_a: 'Meu cachecol vermelho.'
+        }
+      ]
+    };
+
+    global.fetch = vi.fn().mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/api/youtube/search')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ videoId: 'dQw4w9WgXcQ' })
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => mockFeed
+      });
+    });
+
+    render(<FeedPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Mikasa Ackerman')).toBeTruthy();
+    });
+
+    const detailsBtn = screen.getByTitle('Ver perfil completo e músicas');
+    fireEvent.click(detailsBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText('Detalhes do Perfil')).toBeTruthy();
+      expect(screen.getByText('Adoro treinar e ouvir música.')).toBeTruthy();
+      expect(screen.getAllByText(/Linked Horizon - Guren no Yumiya/i).length).toBeGreaterThan(0);
+      expect(screen.getByText(/Álbum & Bio Secreta/i)).toBeTruthy();
+      expect(screen.getByText('#Academia')).toBeTruthy();
+      expect(screen.getByText('#Anime')).toBeTruthy();
+      expect(screen.getByText('Um fato sobre mim')).toBeTruthy();
+      expect(screen.getByText('"Nunca me atraso para aulas."')).toBeTruthy();
+      expect(screen.getByText(/Denunciar ou Bloquear este perfil/i)).toBeTruthy();
+    });
+  });
 });
+

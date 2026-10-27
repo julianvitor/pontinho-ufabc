@@ -1,18 +1,29 @@
 import { defineConfig } from 'vite'
 import preact from '@preact/preset-vite'
 
+const backendTarget = process.env.BACKEND_URL || 'http://localhost:8000'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [preact()],
   server: {
+    host: '0.0.0.0',
     port: 3001,
+    strictPort: true,
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
+    hmr: {
+      clientPort: 3001,
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: backendTarget,
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:8000',
+        target: backendTarget,
         changeOrigin: true,
       }
     }
