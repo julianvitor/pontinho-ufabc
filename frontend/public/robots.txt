@@ -1,0 +1,36 @@
+# Pontinho UFABC - Robots Exclusion Standard
+# É expressamente proibida a indexação, scraping e extração de dados por agentes automatizados.
+
+User-agent: *
+Disallow: /
+
+# Bloqueio explícito de crawlers de IA e Web Scraping
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /

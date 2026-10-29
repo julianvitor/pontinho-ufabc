@@ -159,5 +159,65 @@ describe('FeedPage Component', () => {
       expect(screen.getByText(/Denunciar ou Bloquear este perfil/i)).toBeTruthy();
     });
   });
+
+  it('triggers pre-fetch of more cards when 5 or fewer cards remain', async () => {
+    setCurrentUserId(1, 'mock_token');
+
+    const initialCards = Array.from({ length: 6 }, (_, i) => ({
+      id: i + 10,
+      name: `User ${i + 10}`,
+      age: 20 + i,
+      campus: 'Santo André',
+      course: 'BC&T',
+      photos: ['https://images.unsplash.com/photo-10']
+    }));
+
+    const moreCards = [
+      {
+        id: 99,
+        name: 'User 99',
+        age: 25,
+        campus: 'São Bernardo do Campo',
+        course: 'BC&H',
+        photos: ['https://images.unsplash.com/photo-99']
+      }
+    ];
+
+    let fetchCount = 0;
+    global.fetch = vi.fn().mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/api/feed?limit=20')) {
+        fetchCount++;
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            cards: fetchCount === 1 ? initialCards : moreCards,
+            total_profiles: 10,
+            has_more: true
+          })
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({})
+      });
+    });
+
+    render(<FeedPage />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/User 1[0-5]/).length).toBeGreaterThan(0);
+    });
+
+    // Clica no botão de like para swipar o primeiro card (restando 5 cards)
+    const likeBtn = screen.getByTitle('Curtir');
+    fireEvent.click(likeBtn);
+
+    await waitFor(() => {
+      // Como restaram 5 cards, deve ter disparado uma segunda requisição em background para buscar mais cards
+      expect(fetchCount).toBeGreaterThanOrEqual(2);
+    });
+  });
 });
 

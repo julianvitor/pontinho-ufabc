@@ -24,12 +24,18 @@ export function FeedPage() {
   const [submittingReport, setSubmittingReport] = useState(false);
 
   const [matchData, setMatchData] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
 
   const cardRef = useRef(null);
   const stampLikeRef = useRef(null);
   const stampNopeRef = useRef(null);
   const playerRef = useRef(null);
   const isSwipingRef = useRef(false);
+  const isFetchingMoreRef = useRef(false);
+  const cardsRef = useRef(cards);
+  cardsRef.current = cards;
+  const hasMoreRef = useRef(hasMore);
+  hasMoreRef.current = hasMore;
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -66,17 +72,58 @@ export function FeedPage() {
     } catch (_) {}
   }
 
+  function shuffleCards(cardList) {
+    if (!Array.isArray(cardList) || cardList.length <= 1) return cardList;
+    const arr = [...cardList];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   async function loadFeed() {
     setLoading(true);
     try {
-      const data = await apiFetch('/api/feed');
-      setCards(data.cards || []);
+      const data = await apiFetch('/api/feed?limit=20');
+      const loadedCards = shuffleCards(data.cards || []);
+      setCards(loadedCards);
       setCurrentIndex(0);
       setCurrentPhotoIndex(0);
+      setHasMore(data.has_more ?? (loadedCards.length >= 20));
     } catch (err) {
       showToast(err.message || 'Erro ao carregar feed', 'error');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchMoreCards() {
+    if (isFetchingMoreRef.current || !hasMoreRef.current) return;
+    isFetchingMoreRef.current = true;
+    try {
+      const data = await apiFetch('/api/feed?limit=20');
+      const newCards = shuffleCards(data.cards || []);
+      if (newCards.length === 0) {
+        setHasMore(false);
+      } else {
+        setCards((prev) => {
+          const existingIds = new Set(prev.filter((c) => !c.is_ad).map((c) => c.id));
+          const filteredNew = newCards.filter((c) => c.is_ad || !existingIds.has(c.id));
+          if (filteredNew.length === 0) {
+            setHasMore(false);
+            return prev;
+          }
+          return [...prev, ...filteredNew];
+        });
+        if (data.has_more !== undefined) {
+          setHasMore(Boolean(data.has_more));
+        }
+      }
+    } catch (_) {
+      // Falha silenciosa em background
+    } finally {
+      isFetchingMoreRef.current = false;
     }
   }
 
@@ -156,7 +203,14 @@ export function FeedPage() {
       if (stampLikeRef.current) stampLikeRef.current.style.opacity = '0';
       if (stampNopeRef.current) stampNopeRef.current.style.opacity = '0';
 
-      setCurrentIndex((i) => i + 1);
+      setCurrentIndex((prevIdx) => {
+        const nextIdx = prevIdx + 1;
+        const remaining = cardsRef.current.length - nextIdx;
+        if (remaining <= 5 && hasMoreRef.current && !isFetchingMoreRef.current) {
+          fetchMoreCards();
+        }
+        return nextIdx;
+      });
       setCurrentPhotoIndex(0);
       isSwipingRef.current = false;
 

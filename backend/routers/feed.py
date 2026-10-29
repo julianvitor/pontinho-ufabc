@@ -135,12 +135,14 @@ def reset_feed_swipes(request: Request):
 
 
 @router.get("/feed")
-def get_feed(request: Request):
+def get_feed(request: Request, limit: int = 20):
     """
     Retorna os perfis disponíveis para swipe intercalados com cards de publicidade!
     Exclui o próprio usuário e perfis que já receberam swipe (like ou pass).
     Respeita o filtro de target_gender definido pelo usuário.
+    Entrega em lotes paginados (padrão 20 perfis) para suportar milhões de usuários sem travar.
     """
+    limit = max(1, min(limit, 100))
     current_id = get_current_user_id(request)
     conn = get_db()
     cursor = conn.cursor()
@@ -181,7 +183,8 @@ def get_feed(request: Request):
           )
           {gender_filter_sql}
         ORDER BY id ASC
-    """, (current_id, current_id, current_id, current_id))
+        LIMIT ?
+    """, (current_id, current_id, current_id, current_id, limit))
 
     rows = cursor.fetchall()
     conn.close()
@@ -243,7 +246,11 @@ def get_feed(request: Request):
             feed_cards.append(ad_card)
             ad_index += 1
 
-    return {"cards": feed_cards, "total_profiles": len(profiles)}
+    return {
+        "cards": feed_cards,
+        "total_profiles": len(profiles),
+        "has_more": len(profiles) >= limit
+    }
 
 @router.post("/swipe")
 def post_swipe(swipe: SwipeRequest, request: Request):
