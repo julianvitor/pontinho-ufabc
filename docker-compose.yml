@@ -11,7 +11,6 @@ services:
       # Persistência do banco SQLite e uploads no host
       - ./data:/app/data
       - ./backend:/app/backend
-      - ./frontend:/app/frontend
       - ./scripts:/app/scripts
     env_file:
       - .env
@@ -30,30 +29,14 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: pontinho-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
-      - "35729:35729"
     volumes:
-      - ./frontend:/app/frontend
-      - ./scripts:/app/scripts
-    entrypoint: ["python", "scripts/serve_frontend.py", "--host", "0.0.0.0", "--port", "3000"]
-    depends_on:
-      - backend
-
-  frontend-preact:
-    build:
-      context: ./frontend_preact
-      dockerfile: Dockerfile
-    container_name: pontinho-frontend-preact
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./frontend_preact:/app
+      - ./frontend:/app
       - /app/node_modules
     environment:
       - BACKEND_URL=http://backend:8000

@@ -9,6 +9,6 @@ RUN npm install
 # Copia os fontes da aplicação
 COPY . .
 
-EXPOSE 3001
+EXPOSE 3000
 
 CMD ["npm", "run", "dev"]

@@ -25,9 +25,8 @@ RUN pip install --no-cache-dir poetry && \
 COPY pyproject.toml poetry.lock* ./
 RUN poetry install --no-root --no-interaction --no-ansi
 
-# Copia pastas do backend, frontend e scripts
+# Copia pastas do backend e scripts
 COPY backend/ ./backend/
-COPY frontend/ ./frontend/
 COPY scripts/ ./scripts/
 
 # Cria o diretório para persistência do SQLite via volume e dá permissão ao entrypoint

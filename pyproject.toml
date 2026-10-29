@@ -11,7 +11,6 @@ python = "^3.11"
 fastapi = ">=0.110.0"
 uvicorn = {extras = ["standard"], version = ">=0.28.0"}
 python-multipart = ">=0.0.9"
-livereload = ">=2.7.0"
 pillow = ">=10.0.0"
 nudenet = ">=3.4.0"
 onnxruntime = ">=1.17.0"

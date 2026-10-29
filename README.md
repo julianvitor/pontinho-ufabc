@@ -69,8 +69,7 @@ pontinho-ufabc/
 │   ├── API.md                # Manual completo e detalhado da API REST
 │   └── SECURITY_AUDIT.md     # Relatório completo de auditoria de segurança e pentest
 ├── scripts/                  # 📁 Scripts de automação e inicialização
-│   ├── entrypoint.sh         # Script de inicialização do container
-│   └── serve_frontend.py     # Servidor frontend desacoplado com Live Reload (porta 3000)
+│   └── entrypoint.sh         # Script de inicialização do container backend
 ├── backend/                  # 📁 Aplicação Python / FastAPI modular
 │   ├── __init__.py
 │   ├── auth.py               # Utilitários de sessão HMAC-SHA256 e validação de e-mail UFABC
@@ -214,22 +213,23 @@ Se preferir rodar os serviços individualmente na sua máquina:
    poetry run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
-3. **Frontend (Live Reload)**:
+3. **Frontend (Vite / Preact SPA)**:
    ```bash
-   python3 scripts/serve_frontend.py --port 3000
+   cd frontend
+   npm install
+   npm run dev
    ```
 
 ---
 
 ## 🌐 URLs de Acesso
 
-- **Frontend Preact (SPA + Vite HMR)**: [http://localhost:3001](http://localhost:3001)
-- **Frontend Clássico (Live Reload)**: [http://localhost:3000](http://localhost:3000)
-  - **Feed Principal (Swipes)**: [http://localhost:3000](http://localhost:3000)
-  - **Festas & Eventos**: [http://localhost:3000/events.html](http://localhost:3000/events.html)
-  - **Conversas & Matches**: [http://localhost:3000/matches.html](http://localhost:3000/matches.html)
-  - **Meu Perfil**: [http://localhost:3000/profile.html](http://localhost:3000/profile.html)
-  - **Login & Cadastro**: [http://localhost:3000/login.html](http://localhost:3000/login.html)
-  - **Painel Administrativo**: [http://localhost:3000/admin.html](http://localhost:3000/admin.html)
+- **Frontend Preact (SPA + Vite HMR)**: [http://localhost:3000](http://localhost:3000)
+  - **Feed Principal (Swipes)**: [http://localhost:3000/](http://localhost:3000/)
+  - **Festas & Eventos**: [http://localhost:3000/events](http://localhost:3000/events)
+  - **Conversas & Matches**: [http://localhost:3000/matches](http://localhost:3000/matches)
+  - **Meu Perfil**: [http://localhost:3000/profile](http://localhost:3000/profile)
+  - **Login & Cadastro**: [http://localhost:3000/login](http://localhost:3000/login)
+  - **Painel Administrativo**: [http://localhost:3000/admin](http://localhost:3000/admin)
 - **Backend API & Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
