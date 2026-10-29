@@ -102,7 +102,14 @@ export function FeedPage() {
     if (isFetchingMoreRef.current || !hasMoreRef.current) return;
     isFetchingMoreRef.current = true;
     try {
-      const data = await apiFetch('/api/feed?limit=20');
+      // Coleta os IDs de perfis reais que ainda estão na fila ativa (do índice atual em diante)
+      const currentDeck = cardsRef.current.slice(currentIndex);
+      const activeIds = currentDeck
+        .filter((c) => !c.is_ad && c.id)
+        .map((c) => c.id);
+
+      const excludeParam = activeIds.length > 0 ? `&exclude=${activeIds.join(',')}` : '';
+      const data = await apiFetch(`/api/feed?limit=20${excludeParam}`);
       const newCards = shuffleCards(data.cards || []);
       if (newCards.length === 0) {
         setHasMore(false);

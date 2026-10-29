@@ -184,9 +184,11 @@ describe('FeedPage Component', () => {
     ];
 
     let fetchCount = 0;
+    const calledUrls = [];
     global.fetch = vi.fn().mockImplementation((url) => {
       if (typeof url === 'string' && url.includes('/api/feed?limit=20')) {
         fetchCount++;
+        calledUrls.push(url);
         return Promise.resolve({
           ok: true,
           status: 200,
@@ -215,8 +217,9 @@ describe('FeedPage Component', () => {
     fireEvent.click(likeBtn);
 
     await waitFor(() => {
-      // Como restaram 5 cards, deve ter disparado uma segunda requisição em background para buscar mais cards
+      // Como restaram 5 cards, deve ter disparado uma segunda requisição em background com exclude dos cards ativos
       expect(fetchCount).toBeGreaterThanOrEqual(2);
+      expect(calledUrls.some((u) => u.includes('&exclude='))).toBe(true);
     });
   });
 });

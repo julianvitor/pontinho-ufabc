@@ -135,17 +135,26 @@ def reset_feed_swipes(request: Request):
 
 
 @router.get("/feed")
-def get_feed(request: Request, limit: int = 20):
+def get_feed(request: Request, limit: int = 20, exclude: str = ""):
     """
     Retorna os perfis disponíveis para swipe intercalados com cards de publicidade!
     Exclui o próprio usuário e perfis que já receberam swipe (like ou pass).
+    Exclui também perfis passados em 'exclude' (que já estão carregados na tela do cliente).
     Respeita o filtro de target_gender definido pelo usuário.
     Entrega em lotes paginados (padrão 20 perfis) para suportar milhões de usuários sem travar.
     """
-    limit = max(1, min(limit, 100))
+    limit = max(1, min(limit, 20))
     current_id = get_current_user_id(request)
     conn = get_db()
     cursor = conn.cursor()
+
+    # Processa IDs para exclusão imediata (cards atualmente presentes no deck do cliente)
+    exclude_ids = []
+    if exclude:
+        for part in exclude.split(","):
+            part_clean = part.strip()
+            if part_clean.isdigit():
+                exclude_ids.append(int(part_clean))
 
     # Buscar preferências do usuário atual
     cursor.execute("SELECT target_gender FROM users WHERE id = ?", (current_id,))
@@ -165,6 +174,15 @@ def get_feed(request: Request, limit: int = 20):
     elif target_gender in ("Não-binário", "Nao-binario", "nao binario"):
         gender_filter_sql = " AND LOWER(gender) IN ('não-binário', 'nao-binario', 'não binário', 'nao binario')"
 
+    # Monta parâmetros seguros com placeholders
+    params = [current_id, current_id, current_id, current_id]
+    exclude_sql = ""
+    if exclude_ids:
+        placeholders = ",".join("?" for _ in exclude_ids)
+        exclude_sql = f" AND id NOT IN ({placeholders})"
+        params.extend(exclude_ids)
+    params.append(limit)
+
     # Buscar perfis ainda não avaliados respeitando o filtro de gênero e exclusão de bloqueios mútuos
     # Projeção com Allowlist Estrita: NUNCA seleciona dados sensíveis como 'email', 'password_hash' ou 'is_admin'
     cursor.execute(f"""
@@ -181,10 +199,11 @@ def get_feed(request: Request, limit: int = 20):
               UNION
               SELECT blocker_id FROM blocks WHERE blocked_id = ?
           )
+          {exclude_sql}
           {gender_filter_sql}
         ORDER BY id ASC
         LIMIT ?
-    """, (current_id, current_id, current_id, current_id, limit))
+    """, tuple(params))
 
     rows = cursor.fetchall()
     conn.close()
