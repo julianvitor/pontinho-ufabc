@@ -44,8 +44,14 @@ class ImageContentModerator:
     def _get_age_session(self):
         if self._age_session is None and GENDERAGE_MODEL_PATH.exists():
             import onnxruntime as ort
+            opts = ort.SessionOptions()
+            opts.enable_cpu_mem_arena = False
+            opts.intra_op_num_threads = 1
+            opts.inter_op_num_threads = 1
+            opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
             self._age_session = ort.InferenceSession(
                 str(GENDERAGE_MODEL_PATH),
+                sess_options=opts,
                 providers=["CPUExecutionProvider"]
             )
         return self._age_session

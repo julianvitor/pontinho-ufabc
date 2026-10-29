@@ -1,11 +1,18 @@
-# Imagem base Python slim oficial (leve e segura)
-FROM python:3.11-slim
+# Imagem base Python slim oficial (versão mais recente estável: 3.13)
+FROM python:3.13-slim
 
-# Evita arquivos .pyc e garante logs em tempo real
+# Evita arquivos .pyc, garante logs imediatos e otimiza alocação de RAM
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
-    DATABASE_PATH=/app/data/pontinho.db
+    DATABASE_PATH=/app/data/pontinho.db \
+    MALLOC_TRIM_THRESHOLD_=100000 \
+    PYTHONMALLOC=malloc \
+    OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    VECLIB_MAXIMUM_THREADS=1 \
+    NUMEXPR_NUM_THREADS=1
 
 # Diretório de trabalho dentro do container
 WORKDIR /app

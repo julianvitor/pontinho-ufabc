@@ -28,10 +28,32 @@ from backend.routers import (
     help_router
 )
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Ciclo de vida da aplicação: inicializa recursos e libera memória excedente."""
+    # Inicializa banco de dados SQLite e migrações automáticas
+    init_db()
+    pregenerate_all_teasers()
+
+    # Executa coleta de lixo e força liberação de heap do glibc para o SO
+    import gc
+    gc.collect()
+    try:
+        import ctypes
+        libc = ctypes.CDLL("libc.so.6")
+        libc.malloc_trim(0)
+    except Exception:
+        pass
+
+    yield
+
 app = FastAPI(
     title="Pontinho API",
     description="Backend modularizado e API REST pura do aplicativo Pontinho",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan
 )
 
 # Habilita CORS para permitir que o frontend desacoplado acesse a API
@@ -49,10 +71,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Inicializa banco de dados SQLite e migrações automáticas
-init_db()
-pregenerate_all_teasers()
 
 # Cria e monta o diretório de uploads estáticos
 DATA_DIR = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent

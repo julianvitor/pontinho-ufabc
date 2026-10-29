@@ -14,10 +14,13 @@ else:
     DB_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 def get_db():
-    """Retorna uma conexão com o banco SQLite com suporte a dicionários."""
+    """Retorna uma conexão com o banco SQLite com suporte a dicionários e baixo consumo de memória."""
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA cache_size = -2000")  # Limita cache a ~2MB por conexão
+    conn.execute("PRAGMA temp_store = MEMORY")
+    conn.execute("PRAGMA mmap_size = 0")       # Evita alocação excessiva de mmap virtual
     return conn
 
 import hashlib
@@ -27,7 +30,7 @@ from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHas
 
 _hasher = PasswordHasher(
     time_cost=2,
-    memory_cost=65536,  # 64 MB
+    memory_cost=19456,  # 19 MB (Padrão OWASP otimizado para economia de RAM, vs 64 MB)
     parallelism=1,
     hash_len=32,
     salt_len=16

@@ -18,10 +18,15 @@ services:
     environment:
       - DATABASE_PATH=/app/data/pontinho.db
       - PYTHONUNBUFFERED=1
+      - MALLOC_TRIM_THRESHOLD_=100000
+      - PYTHONMALLOC=malloc
+      - OMP_NUM_THREADS=1
+      - OPENBLAS_NUM_THREADS=1
       - PONTINHO_SECRET_KEY=${PONTINHO_SECRET_KEY:-pontinho_ufabc_secret_key_desenvolvimento_2026_super_forte_32ch}
       - DEV_MODE=${DEV_MODE:-true}
       - SECURE_COOKIES=${SECURE_COOKIES:-false}
-    command: ["--reload"]
+    command: ["--reload", "--reload-dir", "backend", "--reload-include", "*.py"]
+    mem_limit: 512m
 
   frontend:
     build:

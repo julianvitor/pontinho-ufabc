@@ -90,24 +90,22 @@ def get_or_create_server_blurred_teaser(photo_source: str, user_id: int) -> str 
         if not local_file or not local_file.is_file():
             logger.warning(f"[Security Path Traversal or File Missing Blocked] Caminho inválido: {photo_source}")
             return None
-        img = Image.open(local_file)
+        with Image.open(local_file) as img:
+            # Se for animação (GIF animado), extrai apenas o primeiro frame estático
+            if getattr(img, "is_animated", False):
+                img.seek(0)
 
-        # Se for animação (GIF animado), extrai apenas o primeiro frame estático
-        if getattr(img, "is_animated", False):
-            img.seek(0)
+            # Converte para RGB para compatibilidade universal e processamento
+            with img.convert("RGB") as processed:
+                # Redimensiona proporcionalmente para otimizar transferência e render
+                if processed.width > MAX_TEASER_DIMENSION or processed.height > MAX_TEASER_DIMENSION:
+                    processed.thumbnail((MAX_TEASER_DIMENSION, MAX_TEASER_DIMENSION), Image.Resampling.LANCZOS)
 
-        # Converte para RGB para compatibilidade universal e processamento
-        processed = img.convert("RGB")
+                # Aplica desfoque Gaussiano destrutivo no servidor (irreversível)
+                with processed.filter(ImageFilter.GaussianBlur(radius=BLUR_RADIUS)) as blurred:
+                    # Salva em WebP comprimido de alta performance
+                    blurred.save(target_path, format="WEBP", quality=75, optimize=True)
 
-        # Redimensiona proporcionalmente para otimizar transferência e render
-        if processed.width > MAX_TEASER_DIMENSION or processed.height > MAX_TEASER_DIMENSION:
-            processed.thumbnail((MAX_TEASER_DIMENSION, MAX_TEASER_DIMENSION), Image.Resampling.LANCZOS)
-
-        # Aplica desfoque Gaussiano destrutivo no servidor (irreversível)
-        blurred = processed.filter(ImageFilter.GaussianBlur(radius=BLUR_RADIUS))
-
-        # Salva em WebP comprimido de alta performance
-        blurred.save(target_path, format="WEBP", quality=75, optimize=True)
         return f"/uploads/teasers/{safe_filename}"
 
     except Exception as e:
@@ -118,6 +116,7 @@ def pregenerate_all_teasers():
     """Varre todos os usuários com álbum secreto e pré-gera os teasers borrados em cache."""
     import sqlite3
     import json
+    import gc
 
     db_path = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve()
     if not db_path.exists():
@@ -137,5 +136,7 @@ def pregenerate_all_teasers():
                     get_or_create_server_blurred_teaser(photos[0], user_id)
             except Exception:
                 continue
+
+        gc.collect()
     except Exception as e:
         logger.error(f"Erro na pré-geração em lote de teasers: {e}")

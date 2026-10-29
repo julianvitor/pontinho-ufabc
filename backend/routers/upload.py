@@ -196,6 +196,37 @@ async def upload_photo(
             status_code=400,
             detail=f"Falha ao processar e comprimir a imagem: {str(e)}"
         )
+    finally:
+        # Liberação imediata de buffers e memória do processo
+        try:
+            buffer.close()
+        except Exception:
+            pass
+        if "img" in locals() and hasattr(img, "close"):
+            try:
+                img.close()
+            except Exception:
+                pass
+        if "processed_img" in locals() and hasattr(processed_img, "close"):
+            try:
+                processed_img.close()
+            except Exception:
+                pass
+        if "frames" in locals() and isinstance(frames, list):
+            for f in frames:
+                try:
+                    f.close()
+                except Exception:
+                    pass
+            frames.clear()
+        import gc
+        gc.collect()
+        try:
+            import ctypes
+            libc = ctypes.CDLL("libc.so.6")
+            libc.malloc_trim(0)
+        except Exception:
+            pass
 
     url_path = f"/api/media/private/{safe_filename}" if is_private else f"/uploads/{safe_filename}"
     return {
