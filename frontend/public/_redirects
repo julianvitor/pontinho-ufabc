@@ -1,0 +1,6 @@
+# Cloudflare Pages Redirects & Reverse Proxy
+# 1. Encaminha chamadas de API para o backend na VPS com proxy reverso transparente
+/api/*  https://api-pontinho.julianvitor.com.br/api/:splat  200
+
+# 2. Roteamento SPA: Qualquer rota do frontend renderiza o index.html (evita 404 no F5)
+/*      /index.html                                        200
