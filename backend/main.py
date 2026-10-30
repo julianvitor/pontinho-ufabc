@@ -60,12 +60,16 @@ app = FastAPI(
 # (ex: servidor com live reload na porta 3000)
 app.add_middleware(
     CORSMiddleware,
-    # Inclui IPs privados da rede local para permitir acesso via smartphone
+    # Permite localhost, redes locais, Cloudflare Workers (*.workers.dev), Pages (*.pages.dev) e domínios próprios
     allow_origin_regex=(
-        r"http://(localhost|127\.0\.0\.1"
+        r"^https?://(localhost|127\.0\.0\.1"
         r"|192\.168\.\d{1,3}\.\d{1,3}"
         r"|10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
-        r"|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?"
+        r"|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$"
+        r"|^https://.*\.workers\.dev$"
+        r"|^https://.*\.pages\.dev$"
+        r"|^https://.*\.julianvitor\.com\.br$"
+        r"|^https://julianvitor\.com\.br$"
     ),
     allow_credentials=True,
     allow_methods=["*"],
