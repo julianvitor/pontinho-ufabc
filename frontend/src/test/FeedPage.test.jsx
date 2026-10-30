@@ -17,7 +17,7 @@ describe('FeedPage Component', () => {
     });
 
     render(<FeedPage />);
-    expect(screen.getByText(/apenas para membros da UFABC/i)).toBeTruthy();
+    expect(screen.getAllByText((_, element) => element?.textContent?.includes('apenas para membros da UFABC')).length).toBeGreaterThan(0);
     expect(screen.getByText('Criar Conta')).toBeTruthy();
     expect(screen.getByText('Entrar')).toBeTruthy();
   });

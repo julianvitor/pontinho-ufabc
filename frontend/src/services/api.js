@@ -53,9 +53,12 @@ export function getApiBase() {
     if (window.location && (window.location.port === '3000' || window.location.port === '3001' || window.location.port === '5173')) {
       return '';
     }
-    // Fallback para domínios em nuvem sem porta explícita
+    // Fallback dinâmico para domínios em nuvem sem porta explícita (deriva api-pontinho a partir de dev.pontinho ou pontinho)
     if (window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      return 'https://api-pontinho.julianvitor.com.br';
+      const host = window.location.hostname;
+      if (host.includes('pontinho.')) {
+        return `${window.location.protocol}//${host.replace(/^(dev\.)?pontinho\./, 'api-pontinho.')}`;
+      }
     }
     if (window.location && window.location.port && window.location.port !== '8000') {
       return `${window.location.protocol}//${window.location.hostname}:8000`;

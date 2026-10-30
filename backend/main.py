@@ -61,7 +61,7 @@ app = FastAPI(
 import re
 
 # Configuração dinâmica de CORS via variável de ambiente (CORS_ORIGINS)
-# Suporta origens exatas e curingas '*' de nível único ou aninhado (ex: https://*.julianvitor.com.br, https://*.workers.dev)
+# Suporta origens exatas e curingas '*' de nível único ou aninhado (ex: https://*.exemplo.com.br, https://*.workers.dev)
 def build_cors_regex() -> str:
     # Sempre permite localhost e IPs de redes locais para desenvolvimento
     base_patterns = [
@@ -72,7 +72,7 @@ def build_cors_regex() -> str:
         cleaned = origin.strip()
         if not cleaned:
             continue
-        # Suporta múltiplos níveis de subdomínios (ex: dev.pontinho.julianvitor.com.br)
+        # Suporta múltiplos níveis de subdomínios (ex: dev.pontinho.exemplo.com.br)
         if cleaned.startswith("https://*."):
             domain = re.escape(cleaned[10:])
             base_patterns.append(f"^https://([a-zA-Z0-9_\\-]+\\.)*{domain}$")

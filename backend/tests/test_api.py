@@ -263,16 +263,16 @@ def test_upload_corrupted_video_rejected(client):
 
 
 def test_cors_preflight_dev_subdomain():
-    """Verifica se origens de subdomínios aninhados como dev.pontinho.julianvitor.com.br são aceitas no CORS."""
+    """Verifica se origens de subdomínios aninhados são aceitas no CORS."""
     import re
-    os.environ["CORS_ORIGINS"] = "https://*.workers.dev,https://*.pages.dev,https://*.julianvitor.com.br,https://julianvitor.com.br"
+    os.environ["CORS_ORIGINS"] = "https://*.workers.dev,https://*.pages.dev,https://*.exemplo.com.br,https://exemplo.com.br"
     from backend.main import build_cors_regex
 
     regex_pattern = build_cors_regex()
     compiled = re.compile(regex_pattern)
-    assert compiled.match("https://dev.pontinho.julianvitor.com.br") is not None
-    assert compiled.match("https://pontinho.julianvitor.com.br") is not None
-    assert compiled.match("https://pontinho-ufabc.julian-vtr.workers.dev") is not None
+    assert compiled.match("https://dev.pontinho.exemplo.com.br") is not None
+    assert compiled.match("https://pontinho.exemplo.com.br") is not None
+    assert compiled.match("https://pontinho-ufabc.subdomain.workers.dev") is not None
     assert compiled.match("https://attacker-fake.com") is None
 
 
