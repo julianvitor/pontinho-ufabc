@@ -45,10 +45,15 @@ export function getApiBase() {
     if (window.PONTINHO_API_URL) {
       return window.PONTINHO_API_URL;
     }
+    // Variável de ambiente do Vite para produção/build
+    if (import.meta.env && import.meta.env.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL;
+    }
+    // No modo dev do Vite com proxy, usa relativo
     if (window.location && (window.location.port === '3000' || window.location.port === '3001' || window.location.port === '5173')) {
       return '';
     }
-    // Em produção na nuvem (Cloudflare Workers/Pages ou domínio público sem porta 8000)
+    // Fallback para domínios em nuvem sem porta explícita
     if (window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       return 'https://api-pontinho.julianvitor.com.br';
     }

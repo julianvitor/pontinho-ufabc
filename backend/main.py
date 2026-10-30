@@ -56,21 +56,28 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Habilita CORS para permitir que o frontend desacoplado acesse a API
-# (ex: servidor com live reload na porta 3000)
+# Configuração dinâmica de CORS via variável de ambiente (CORS_ORIGINS)
+# Suporta origens exatas e padrões com curinga '*' (ex: https://*.workers.dev)
+def build_cors_regex() -> str:
+    # Sempre permite localhost e IPs de redes locais para desenvolvimento
+    base_patterns = [
+        r"^https?://(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$"
+    ]
+    env_origins = os.getenv("CORS_ORIGINS", "")
+    for origin in env_origins.split(","):
+        cleaned = origin.strip()
+        if not cleaned:
+            continue
+        # Converte curingas como https://*.workers.dev em regex seguro
+        escaped = re.escape(cleaned).replace(r"\*", r"[a-zA-Z0-9_\-]+")
+        base_patterns.append(f"^{escaped}$")
+    return "|".join(base_patterns)
+
+import re
+
 app.add_middleware(
     CORSMiddleware,
-    # Permite localhost, redes locais, Cloudflare Workers (*.workers.dev), Pages (*.pages.dev) e domínios próprios
-    allow_origin_regex=(
-        r"^https?://(localhost|127\.0\.0\.1"
-        r"|192\.168\.\d{1,3}\.\d{1,3}"
-        r"|10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
-        r"|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$"
-        r"|^https://.*\.workers\.dev$"
-        r"|^https://.*\.pages\.dev$"
-        r"|^https://.*\.julianvitor\.com\.br$"
-        r"|^https://julianvitor\.com\.br$"
-    ),
+    allow_origin_regex=build_cors_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
