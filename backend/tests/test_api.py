@@ -182,6 +182,51 @@ def test_successful_user_registration_and_login(client):
     assert login_data["user"]["email"] == unique_email
 
 
+def test_upload_webp_image_accepted(client):
+    """Verifica se o upload de imagem já convertida em WebP é aceito e processado."""
+    import io
+    from PIL import Image
+
+    img = Image.new("RGB", (120, 120), color=(16, 185, 129))
+    webp_buf = io.BytesIO()
+    img.save(webp_buf, format="WEBP", quality=90)
+    webp_bytes = webp_buf.getvalue()
+
+    token = create_session_token(user_id=1)
+    response = client.post(
+        "/api/upload/photo",
+        headers={"Authorization": f"Bearer {token}"},
+        files={"file": ("foto.webp", webp_bytes, "image/webp")}
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["media_type"] == "image"
+    assert data["filename"].endswith(".webp")
+
+
+def test_upload_raw_jpeg_rejected(client):
+    """Verifica se imagens não-WebP (como JPEG cru) são rejeitadas pelo backend."""
+    import io
+    from PIL import Image
+
+    img = Image.new("RGB", (100, 100), color=(255, 0, 0))
+    jpeg_buf = io.BytesIO()
+    img.save(jpeg_buf, format="JPEG")
+    jpeg_bytes = jpeg_buf.getvalue()
+
+    token = create_session_token(user_id=1)
+    response = client.post(
+        "/api/upload/photo",
+        headers={"Authorization": f"Bearer {token}"},
+        files={"file": ("foto.jpg", jpeg_bytes, "image/jpeg")}
+    )
+
+    assert response.status_code == 400
+    assert "WebP (.webp) ou GIFs" in response.json()["detail"]
+
+
 def test_upload_animated_gif_accepted(client):
     """Verifica se o upload de GIF animado é aceito, sanitizado e gravado como .gif."""
     import io

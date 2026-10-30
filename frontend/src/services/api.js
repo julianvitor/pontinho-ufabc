@@ -1,6 +1,7 @@
 // Cliente HTTP e utilitários de comunicação para Pontinho (Preact SPA)
 import { isVideoFile, convertVideoToGif } from './videoToGif.js';
-export { isVideoFile, convertVideoToGif };
+import { isWebpOrGif, convertImageToWebp } from './imageToWebp.js';
+export { isVideoFile, convertVideoToGif, isWebpOrGif, convertImageToWebp };
 
 // Sistema leve de pub/sub para Toasts reativos no Preact
 const toastListeners = new Set();
@@ -96,6 +97,9 @@ export async function uploadPhoto(file, isPrivate = false, onProgress = null) {
   if (isVideoFile(file)) {
     showToast('Convertendo vídeo para GIF no navegador...', 'info');
     fileToUpload = await convertVideoToGif(file, onProgress || (() => {}));
+  } else if (!isWebpOrGif(file)) {
+    showToast('Convertendo imagem para WebP no navegador...', 'info');
+    fileToUpload = await convertImageToWebp(file);
   }
 
   if (fileToUpload.size > 40 * 1024 * 1024) {

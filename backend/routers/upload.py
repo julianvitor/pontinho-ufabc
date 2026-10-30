@@ -35,7 +35,7 @@ MAX_FILE_SIZE = 40 * 1024 * 1024       # 40 MB máximo para stream de imagem/GIF
 CHUNK_SIZE = 64 * 1024                 # Leitura segura de 64 KB por chunk para evitar pico de RAM
 MAX_DIMENSION = 1900                   # Redimensiona fotos mantendo proporção para no máximo 1900x1900
 WEBP_QUALITY = 95                     # Qualidade de compressão WebP
-ALLOWED_IMAGE_FORMATS = {"JPEG", "PNG", "WEBP", "GIF"}
+ALLOWED_IMAGE_FORMATS = {"WEBP", "GIF"}
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".webm", ".avi", ".mkv", ".m4v", ".3gp", ".ogv"}
 
 # Anti-flood em memória: máximo de 15 uploads por minuto por identificador (usuário ou IP)
@@ -85,10 +85,10 @@ async def upload_photo(
     is_private: bool = False
 ):
     """
-    Recebe imagem ou GIF animado.
-    Vídeos devem ser convertidos em GIF no navegador pelo frontend antes do envio.
-    - Valida formato real (JPEG, PNG, WEBP, GIF)
-    - Sanitiza, remove metadados EXIF, redimensiona e comprime para WebP ou GIF otimizado
+    Recebe imagem já comprimida em WebP ou GIF animado.
+    Toda conversão de fotos (JPEG/PNG) ou vídeos (MP4/WebM) é realizada previamente pelo frontend no navegador.
+    - Valida formato estrito (WEBP ou GIF)
+    - Sanitiza, remove metadados EXIF e valida integridade
     - Executa moderação automática de segurança e armazena em diretório isolado.
     """
     user_id = get_current_user_id(request)
@@ -145,7 +145,7 @@ async def upload_photo(
         if raw_format not in ALLOWED_IMAGE_FORMATS:
             raise HTTPException(
                 status_code=400,
-                detail="Formato de imagem não suportado. Por favor envie imagens em formato JPG, PNG, WEBP ou GIF animado."
+                detail="Formato não suportado. O servidor aceita exclusivamente imagens já convertidas em WebP (.webp) ou GIFs animados (.gif)."
             )
 
         is_animated = (raw_format == "GIF" or getattr(img, "is_animated", False)) and getattr(img, "n_frames", 1) > 1

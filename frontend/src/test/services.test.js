@@ -119,4 +119,23 @@ describe('Services Unit Tests', () => {
       expect(isVideoFile(null)).toBe(false);
     });
   });
+
+  describe('Image to WebP Service', () => {
+    it('identifies webp and gif files correctly', async () => {
+      const { isWebpOrGif } = await import('../services/imageToWebp.js');
+      expect(isWebpOrGif({ type: 'image/webp', name: 'foto.webp' })).toBe(true);
+      expect(isWebpOrGif({ type: 'image/gif', name: 'avatar.gif' })).toBe(true);
+      expect(isWebpOrGif({ type: '', name: 'foto.WEBP' })).toBe(true);
+      expect(isWebpOrGif({ type: 'image/jpeg', name: 'foto.jpg' })).toBe(false);
+      expect(isWebpOrGif({ type: 'image/png', name: 'foto.png' })).toBe(false);
+      expect(isWebpOrGif(null)).toBe(false);
+    });
+
+    it('returns webp or gif without converting', async () => {
+      const { convertImageToWebp } = await import('../services/imageToWebp.js');
+      const webpFile = new File(['fake-webp'], 'foto.webp', { type: 'image/webp' });
+      const result = await convertImageToWebp(webpFile);
+      expect(result).toBe(webpFile);
+    });
+  });
 });
