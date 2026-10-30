@@ -68,7 +68,7 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
             data_dir = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent
             uploads_dir = data_dir / "uploads"
             uploads_dir.mkdir(parents=True, exist_ok=True)
-            filename = f"verify_{uuid.uuid4().hex[:16]}.jpg"
+            filename = f"verify_{uuid.uuid4().hex[:16]}.webp"
             file_dest = uploads_dir / filename
             with open(file_dest, "wb") as f:
                 f.write(img_bytes)

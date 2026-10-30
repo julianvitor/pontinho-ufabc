@@ -90,6 +90,11 @@ export function resolveMediaUrl(url) {
   return finalUrl;
 }
 
+/**
+ * Upload seguro de qualquer mídia (fotos de perfil, bio secreta, eventos, propagandas)
+ * com conversão automática no navegador: vídeos para GIF animado e imagens para WebP.
+ * O backend aceita exclusivamente arquivos já convertidos em WebP ou GIFs animados.
+ */
 export async function uploadPhoto(file, isPrivate = false, onProgress = null) {
   if (!file) throw new Error('Selecione uma foto ou vídeo para enviar.');
 
@@ -140,6 +145,8 @@ export async function uploadPhoto(file, isPrivate = false, onProgress = null) {
 
   return await response.json();
 }
+
+export const uploadMedia = uploadPhoto;
 
 export async function apiFetch(url, options = {}) {
   const headers = { ...(options.headers || {}) };

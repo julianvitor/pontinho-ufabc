@@ -137,5 +137,10 @@ describe('Services Unit Tests', () => {
       const result = await convertImageToWebp(webpFile);
       expect(result).toBe(webpFile);
     });
+
+    it('exports uploadMedia as universal upload service alias', async () => {
+      const { uploadPhoto, uploadMedia } = await import('../services/api.js');
+      expect(uploadMedia).toBe(uploadPhoto);
+    });
   });
 });

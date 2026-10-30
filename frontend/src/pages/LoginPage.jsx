@@ -424,7 +424,7 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
                 ctx.translate(hiddenCanvas.width, 0);
                 ctx.scale(-1, 1);
                 ctx.drawImage(video, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
-                const snapshotBase64 = hiddenCanvas.toDataURL('image/jpeg', 0.85);
+                const snapshotBase64 = hiddenCanvas.toDataURL('image/webp', 0.90);
                 const faceDescriptor =
                   detection && detection.descriptor ? Array.from(detection.descriptor) : null;
 

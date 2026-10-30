@@ -82,4 +82,40 @@ describe('EventsPage Component', () => {
       expect(screen.getByText('Lista privada')).toBeTruthy();
     });
   });
+
+  it('renders Cadastrar Festa button for admin users and opens modal', async () => {
+    localStorage.setItem('pontinho_user_id', '999');
+
+    global.fetch = vi.fn().mockImplementation((url) => {
+      if (url.includes('/api/users/me')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ id: 999, is_admin: 1 })
+        });
+      }
+      if (url.includes('/api/events')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => []
+        });
+      }
+      return Promise.reject(new Error('not found'));
+    });
+
+    render(<EventsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Cadastrar Festa/i)).toBeTruthy();
+    });
+
+    screen.getByText(/Cadastrar Festa/i).click();
+
+    await waitFor(() => {
+      expect(screen.getByText('Cadastrar Nova Festa')).toBeTruthy();
+      expect(screen.getByPlaceholderText(/Cervejada Geral BC&T/i)).toBeTruthy();
+      expect(screen.getByText(/Flyer da Festa/i)).toBeTruthy();
+    });
+  });
 });

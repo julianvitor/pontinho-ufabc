@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
-import { apiFetch, getCurrentUserId, resolveMediaUrl, showToast } from '../services/api.js';
+import { apiFetch, getCurrentUserId, uploadMedia, resolveMediaUrl, showToast } from '../services/api.js';
 
 export function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -19,8 +19,26 @@ export function EventsPage() {
   // Modal de preview de usuário
   const [userPreview, setUserPreview] = useState(null);
 
+  // Admin & Cadastro de Eventos com processamento no front
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [eventTitle, setEventTitle] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventLocation, setEventLocation] = useState('Campus Santo André');
+  const [eventDescription, setEventDescription] = useState('');
+  const [eventTicketUrl, setEventTicketUrl] = useState('');
+  const [eventImageUrl, setEventImageUrl] = useState('');
+  const [uploadingFlyer, setUploadingFlyer] = useState(false);
+  const [savingEvent, setSavingEvent] = useState(false);
+
   useEffect(() => {
-    setUserId(getCurrentUserId());
+    const uid = getCurrentUserId();
+    setUserId(uid);
+    if (uid) {
+      apiFetch('/api/users/me')
+        .then((u) => setIsAdmin(!!u.is_admin))
+        .catch(() => {});
+    }
     loadEvents();
   }, []);
 
@@ -63,6 +81,70 @@ export function EventsPage() {
       );
     } catch (err) {
       showToast(err.message || 'Erro ao marcar presença.', 'error');
+    }
+  }
+
+  // --- UPLOAD DO FLYER COM CONVERSÃO NO FRONTEND (WEBP/GIF) ---
+  async function handleFlyerUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    setUploadingFlyer(true);
+    try {
+      const res = await uploadMedia(file, false);
+      if (res && res.url) {
+        setEventImageUrl(res.url);
+        showToast('Flyer da festa processado para WebP/GIF e enviado! 🎉', 'success');
+      }
+    } catch (err) {
+      showToast(err.message || 'Erro ao enviar flyer da festa', 'error');
+    } finally {
+      setUploadingFlyer(false);
+      e.target.value = '';
+    }
+  }
+
+  async function handleCreateEvent(e) {
+    e.preventDefault();
+    const title = eventTitle.trim();
+    if (!title || title.length < 2) {
+      showToast('O título da festa deve ter pelo menos 2 caracteres.', 'error');
+      return;
+    }
+    if (title.length > 25) {
+      showToast('O título da festa deve ter no máximo 25 caracteres.', 'error');
+      return;
+    }
+    if (!eventDate.trim() || !eventLocation.trim()) {
+      showToast('Data e local da festa são obrigatórios.', 'error');
+      return;
+    }
+
+    setSavingEvent(true);
+    try {
+      await apiFetch('/api/events', {
+        method: 'POST',
+        body: JSON.stringify({
+          title,
+          description: eventDescription.trim(),
+          event_date: eventDate.trim(),
+          location: eventLocation.trim(),
+          image_url: eventImageUrl.trim(),
+          ticket_url: eventTicketUrl.trim()
+        })
+      });
+      showToast('Festa cadastrada com sucesso! 🎉', 'success');
+      setEventTitle('');
+      setEventDate('');
+      setEventDescription('');
+      setEventTicketUrl('');
+      setEventImageUrl('');
+      setCreateModalOpen(false);
+      loadEvents();
+    } catch (err) {
+      showToast(err.message || 'Erro ao cadastrar evento', 'error');
+    } finally {
+      setSavingEvent(false);
     }
   }
 
@@ -141,6 +223,17 @@ export function EventsPage() {
             >
               Vou Colar ✅
             </button>
+
+            {isAdmin && (
+              <button
+                type="button"
+                id="btn-open-create-event"
+                onClick={() => setCreateModalOpen(true)}
+                class="px-3 py-1.5 rounded-xl text-xs bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black transition flex items-center gap-1.5 shadow-sm"
+              >
+                <span>➕</span> <span>Cadastrar Festa</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -475,6 +568,170 @@ export function EventsPage() {
                     </a>
                   </div>
                 </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null)}
+
+    {/* MODAL DE CADASTRO DE FESTA PARA ADMIN COM UPLOAD WEBP/GIF */}
+    {createModalOpen &&
+      (typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in"
+              onClick={(e) => {
+                if (e.target === e.currentTarget && !savingEvent) setCreateModalOpen(false);
+              }}
+            >
+              <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 relative shadow-2xl text-slate-100 space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div class="flex items-center gap-2">
+                    <span class="text-2xl">🎉</span>
+                    <h3 class="text-base font-black text-white">Cadastrar Nova Festa</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCreateModalOpen(false)}
+                    class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center font-bold text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form onSubmit={handleCreateEvent} class="space-y-3">
+                  <div>
+                    <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Nome da Festa (Máx 25 letras) *
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={25}
+                      value={eventTitle}
+                      onInput={(e) => setEventTitle(e.target.value)}
+                      placeholder="Ex: Cervejada Geral BC&T"
+                      class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Data e Horário *
+                      </label>
+                      <input
+                        type="text"
+                        value={eventDate}
+                        onInput={(e) => setEventDate(e.target.value)}
+                        placeholder="Ex: 14 Nov • 22h00"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Local / Campus *
+                      </label>
+                      <input
+                        type="text"
+                        value={eventLocation}
+                        onInput={(e) => setEventLocation(e.target.value)}
+                        placeholder="Ex: Santo André"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Link de Ingressos (Opcional)
+                    </label>
+                    <input
+                      type="url"
+                      value={eventTicketUrl}
+                      onInput={(e) => setEventTicketUrl(e.target.value)}
+                      placeholder="https://blacktag.com.br/..."
+                      class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Descrição da Festa
+                    </label>
+                    <textarea
+                      value={eventDescription}
+                      onInput={(e) => setEventDescription(e.target.value)}
+                      placeholder="Atrações, open bar e detalhes..."
+                      rows={2}
+                      class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 outline-none resize-none"
+                    />
+                  </div>
+
+                  {/* UPLOAD DE FLYER */}
+                  <div>
+                    <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Flyer da Festa (Convertido para WebP/GIF no Front)
+                    </label>
+                    <div class="flex items-center gap-3">
+                      <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 flex items-center gap-2 transition">
+                        <span>🖼️</span>
+                        <span>{uploadingFlyer ? 'Convertendo...' : 'Selecionar Flyer ou GIF'}</span>
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          onChange={handleFlyerUpload}
+                          disabled={uploadingFlyer}
+                          class="hidden"
+                        />
+                      </label>
+                      {eventImageUrl && (
+                        <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                          <span>✓ Flyer anexado</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {eventImageUrl && (
+                      <div class="mt-2.5 relative w-full h-32 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+                        <img
+                          src={resolveMediaUrl(eventImageUrl)}
+                          alt="Flyer Preview"
+                          class="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setEventImageUrl('')}
+                          class="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center text-xs font-bold"
+                          title="Remover"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div class="pt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCreateModalOpen(false)}
+                      disabled={savingEvent}
+                      class="flex-1 py-2.5 rounded-xl border border-slate-800 text-slate-400 text-xs font-bold hover:bg-slate-800"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={savingEvent || uploadingFlyer}
+                      class="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-md transition disabled:opacity-50"
+                    >
+                      {savingEvent ? 'Salvando...' : 'Publicar Festa'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>,
             document.body
