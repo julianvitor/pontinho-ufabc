@@ -1,4 +1,6 @@
 // Cliente HTTP e utilitários de comunicação para Pontinho (Preact SPA)
+import { isVideoFile, convertVideoToGif } from './videoToGif.js';
+export { isVideoFile, convertVideoToGif };
 
 // Sistema leve de pub/sub para Toasts reativos no Preact
 const toastListeners = new Set();
@@ -87,14 +89,21 @@ export function resolveMediaUrl(url) {
   return finalUrl;
 }
 
-export async function uploadPhoto(file, isPrivate = false) {
+export async function uploadPhoto(file, isPrivate = false, onProgress = null) {
   if (!file) throw new Error('Selecione uma foto ou vídeo para enviar.');
-  if (file.size > 40 * 1024 * 1024) {
+
+  let fileToUpload = file;
+  if (isVideoFile(file)) {
+    showToast('Convertendo vídeo para GIF no navegador...', 'info');
+    fileToUpload = await convertVideoToGif(file, onProgress || (() => {}));
+  }
+
+  if (fileToUpload.size > 40 * 1024 * 1024) {
     throw new Error('O arquivo selecionado ultrapassa o limite de 40 MB.');
   }
 
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', fileToUpload);
 
   const headers = {};
   const userId = getCurrentUserId();

@@ -106,4 +106,17 @@ describe('Services Unit Tests', () => {
       unsub();
     });
   });
+
+  describe('Video to GIF Service', () => {
+    it('detects video files by mime type and extension', async () => {
+      const { isVideoFile } = await import('../services/videoToGif.js');
+      expect(isVideoFile({ type: 'video/mp4', name: 'teste.mp4' })).toBe(true);
+      expect(isVideoFile({ type: 'video/webm', name: 'clip.webm' })).toBe(true);
+      expect(isVideoFile({ type: 'video/quicktime', name: 'gravação.mov' })).toBe(true);
+      expect(isVideoFile({ type: '', name: 'video.mkv' })).toBe(true);
+      expect(isVideoFile({ type: 'image/jpeg', name: 'foto.jpg' })).toBe(false);
+      expect(isVideoFile({ type: 'image/gif', name: 'animado.gif' })).toBe(false);
+      expect(isVideoFile(null)).toBe(false);
+    });
+  });
 });

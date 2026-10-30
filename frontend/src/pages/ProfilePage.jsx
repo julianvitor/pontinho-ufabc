@@ -415,15 +415,24 @@ export function ProfilePage() {
     else setUploadingPublic(true);
 
     try {
-      showToast('Otimizando e enviando imagem...', 'info');
-      const res = await uploadPhoto(file, isPrivate);
+      const isVid = file.type?.startsWith('video/') || /\.(mp4|mov|webm|avi|mkv|m4v|3gp|ogv)$/i.test(file.name || '');
+      if (isVid) {
+        showToast('Convertendo vídeo para GIF no navegador... (até 10s)', 'info');
+      } else {
+        showToast('Otimizando e enviando imagem...', 'info');
+      }
+      const res = await uploadPhoto(file, isPrivate, (pct) => {
+        if (pct % 25 === 0 || pct === 100) {
+          showToast(`Convertendo vídeo para GIF: ${pct}%`, 'info');
+        }
+      });
       if (res && res.url) {
         if (isPrivate) {
           setPrivatePhotos((prev) => [...prev, res.url]);
         } else {
           setPhotos((prev) => [...prev, res.url]);
         }
-        showToast('Foto adicionada com sucesso! 📸', 'success');
+        showToast('Mídia adicionada com sucesso! 📸', 'success');
       }
     } catch (err) {
       showToast(err.message || 'Erro ao enviar foto', 'error');
