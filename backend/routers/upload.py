@@ -6,7 +6,7 @@ Inclui:
 - Proteção contra Image Bomb / Decompression Bomb
 - Remoção total de metadados EXIF para privacidade
 - Correção de rotação (exif_transpose) para fotos de smartphones
-- Redimensionamento proporcional (max 1200x1200px)
+- Redimensionamento proporcional (max 1900x1900px)
 - Compressão de alta eficiência em WebP
 - Anti-flood / Rate limiting em memória por usuário/IP
 """
@@ -32,8 +32,8 @@ PRIVATE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_FILE_SIZE = 10 * 1024 * 1024     # 10 MB máximo de stream na requisição
 CHUNK_SIZE = 64 * 1024               # Leitura segura de 64 KB por chunk para evitar pico de RAM
-MAX_DIMENSION = 1200                 # Redimensiona mantendo proporção para no máximo 1200x1200px
-WEBP_QUALITY = 82                    # Qualidade de compressão WebP (redução típica de 80% a 90% do tamanho)
+MAX_DIMENSION = 1900                 # Redimensiona mantendo proporção para no máximo 1900x1900
+WEBP_QUALITY = 95                   # Qualidade de compressão WebP (redução típica de 80% a 90% do tamanho)
 ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP", "GIF"}
 
 # Anti-flood em memória: máximo de 15 uploads por minuto por identificador (usuário ou IP)
