@@ -35,7 +35,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 PRIVATE_UPLOAD_DIR = DATA_DIR / "private_uploads"
 PRIVATE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-MAX_FILE_SIZE = 25 * 1024 * 1024       # 25 MB máximo para stream (permite vídeos curtos de até 10s e fotos em alta resolução)
+MAX_FILE_SIZE = 40 * 1024 * 1024       # 40 MB máximo para stream (permite vídeos curtos de até 10s e fotos em alta resolução)
 MAX_VIDEO_DURATION = 10.05             # Limite estrito de 10 segundos para vídeos (tolerância de 0.05s de muxer)
 CHUNK_SIZE = 64 * 1024                 # Leitura segura de 64 KB por chunk para evitar pico de RAM
 MAX_DIMENSION = 1900                   # Redimensiona fotos mantendo proporção para no máximo 1900x1900
@@ -210,9 +210,9 @@ def _validate_and_convert_video_to_gif(temp_video_path: Path, destination_path: 
         destination_path.unlink(missing_ok=True)
         raise HTTPException(status_code=400, detail="O GIF resultante do vídeo gerou um arquivo vazio.")
 
-    if final_size > 15 * 1024 * 1024:
+    if final_size > 25 * 1024 * 1024:
         destination_path.unlink(missing_ok=True)
-        raise HTTPException(status_code=400, detail="O GIF animado resultante excedeu o limite máximo seguro de 15 MB.")
+        raise HTTPException(status_code=400, detail="O GIF animado resultante excedeu o limite máximo seguro de 25 MB.")
 
     # 4. Moderação Automática de Conteúdo
     safety_check = check_image_safety(str(destination_path))

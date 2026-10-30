@@ -88,9 +88,9 @@ export function resolveMediaUrl(url) {
 }
 
 export async function uploadPhoto(file, isPrivate = false) {
-  if (!file) throw new Error('Selecione uma imagem para enviar.');
-  if (file.size > 10 * 1024 * 1024) {
-    throw new Error('A imagem selecionada ultrapassa o limite de 10 MB.');
+  if (!file) throw new Error('Selecione uma foto ou vídeo para enviar.');
+  if (file.size > 40 * 1024 * 1024) {
+    throw new Error('O arquivo selecionado ultrapassa o limite de 40 MB.');
   }
 
   const formData = new FormData();
