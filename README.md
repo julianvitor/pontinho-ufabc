@@ -13,6 +13,7 @@
 - **Moderação Inteligente**: **NudeNet** integrado para detecção e bloqueio de conteúdo inadequado.
 - **Validação de Dados**: **Pydantic** para integridade de tipos e validação de regras de negócio.
 - **Containers**: **Docker** e **Docker Compose** para orquestração e deploy simplificado.
+- **CI/CD & Deploy**: Pipeline automatizado no **GitHub Actions** com testes unitários em **Vitest**, deploy na VPS Oracle Linux e hospedagem estática no **Cloudflare Workers**.
 
 ---
 
