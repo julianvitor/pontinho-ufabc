@@ -35,6 +35,9 @@ jobs:
           python-version: "3.13"
           cache: "pip"
 
+      - name: Instalar ffmpeg para testes de processamento de vídeo
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Instalar dependências de Teste do Backend
         run: |
           python -m pip install --upgrade pip

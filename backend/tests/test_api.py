@@ -246,6 +246,10 @@ def test_upload_long_video_rejected(client):
 
 def test_upload_corrupted_video_rejected(client):
     """Verifica se arquivos forjados ou corrompidos com extensão de vídeo são rejeitados."""
+    import shutil
+    if not shutil.which("ffmpeg"):
+        pytest.skip("ffmpeg não disponível no ambiente para teste de vídeo")
+
     token = create_session_token(user_id=1)
     fake_bytes = b"Este nao e um arquivo de video real, mas sim bytes forjados."
 
