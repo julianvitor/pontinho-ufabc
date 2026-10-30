@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir poetry && \
 
 # Instala dependências Python via Poetry
 COPY pyproject.toml poetry.lock* ./
-RUN poetry install --only main --no-root --no-interaction --no-ansi
+RUN poetry install --no-root --no-interaction --no-ansi
 
 # Copia pastas do backend e scripts
 COPY backend/ ./backend/
