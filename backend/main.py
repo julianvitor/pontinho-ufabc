@@ -58,8 +58,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+import re
+
 # Configuração dinâmica de CORS via variável de ambiente (CORS_ORIGINS)
-# Suporta origens exatas e padrões com curinga '*' (ex: https://*.workers.dev)
+# Suporta origens exatas e curingas '*' de nível único ou aninhado (ex: https://*.julianvitor.com.br, https://*.workers.dev)
 def build_cors_regex() -> str:
     # Sempre permite localhost e IPs de redes locais para desenvolvimento
     base_patterns = [
@@ -70,12 +72,17 @@ def build_cors_regex() -> str:
         cleaned = origin.strip()
         if not cleaned:
             continue
-        # Converte curingas como https://*.workers.dev em regex seguro
-        escaped = re.escape(cleaned).replace(r"\*", r"[a-zA-Z0-9_\-]+")
-        base_patterns.append(f"^{escaped}$")
+        # Suporta múltiplos níveis de subdomínios (ex: dev.pontinho.julianvitor.com.br)
+        if cleaned.startswith("https://*."):
+            domain = re.escape(cleaned[10:])
+            base_patterns.append(f"^https://([a-zA-Z0-9_\\-]+\\.)*{domain}$")
+        elif cleaned.startswith("http://*."):
+            domain = re.escape(cleaned[9:])
+            base_patterns.append(f"^http://([a-zA-Z0-9_\\-]+\\.)*{domain}$")
+        else:
+            escaped = re.escape(cleaned).replace(r"\*", r"[a-zA-Z0-9_\-.]+")
+            base_patterns.append(f"^{escaped}$")
     return "|".join(base_patterns)
-
-import re
 
 app.add_middleware(
     CORSMiddleware,
