@@ -142,5 +142,37 @@ describe('Services Unit Tests', () => {
       const { uploadPhoto, uploadMedia } = await import('../services/api.js');
       expect(uploadMedia).toBe(uploadPhoto);
     });
+
+    it('triggers onProgress during convertImageToWebp', async () => {
+      const { convertImageToWebp } = await import('../services/imageToWebp.js');
+      const progressUpdates = [];
+      const fakeFile = new File(['fake-png'], 'teste.png', { type: 'image/png' });
+
+      await convertImageToWebp(fakeFile, 0.92, (pct, stage) => {
+        progressUpdates.push({ pct, stage });
+      });
+
+      expect(progressUpdates.length).toBeGreaterThan(0);
+      expect(progressUpdates[progressUpdates.length - 1].pct).toBe(100);
+    });
+
+    it('triggers onProgress during uploadPhoto', async () => {
+      const { uploadPhoto } = await import('../services/api.js');
+      const progressCalls = [];
+      const testFile = new File(['dummy-content'], 'foto.webp', { type: 'image/webp' });
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ url: '/uploads/foto.webp' })
+      });
+
+      const res = await uploadPhoto(testFile, false, (pct, stage) => {
+        progressCalls.push({ pct, stage });
+      });
+
+      expect(res.url).toBe('/uploads/foto.webp');
+      expect(progressCalls.length).toBeGreaterThan(0);
+      expect(progressCalls[progressCalls.length - 1].pct).toBe(100);
+    });
   });
 });

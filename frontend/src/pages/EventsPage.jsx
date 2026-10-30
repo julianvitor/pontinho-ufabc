@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
 import { apiFetch, getCurrentUserId, uploadMedia, resolveMediaUrl, showToast } from '../services/api.js';
+import { UploadProgressBar } from '../components/UploadProgressBar.jsx';
 
 export function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -29,6 +30,8 @@ export function EventsPage() {
   const [eventTicketUrl, setEventTicketUrl] = useState('');
   const [eventImageUrl, setEventImageUrl] = useState('');
   const [uploadingFlyer, setUploadingFlyer] = useState(false);
+  const [flyerProgress, setFlyerProgress] = useState(0);
+  const [flyerStage, setFlyerStage] = useState('');
   const [savingEvent, setSavingEvent] = useState(false);
 
   useEffect(() => {
@@ -90,8 +93,13 @@ export function EventsPage() {
     if (!file) return;
 
     setUploadingFlyer(true);
+    setFlyerProgress(0);
+    setFlyerStage('Iniciando processamento...');
     try {
-      const res = await uploadMedia(file, false);
+      const res = await uploadMedia(file, false, (pct, stage) => {
+        setFlyerProgress(pct);
+        if (stage) setFlyerStage(stage);
+      });
       if (res && res.url) {
         setEventImageUrl(res.url);
         showToast('Flyer da festa processado para WebP/GIF e enviado! 🎉', 'success');
@@ -694,6 +702,14 @@ export function EventsPage() {
                         </span>
                       )}
                     </div>
+
+                    {uploadingFlyer && (
+                      <UploadProgressBar
+                        progress={flyerProgress}
+                        stage={flyerStage}
+                        className="mt-2.5"
+                      />
+                    )}
 
                     {eventImageUrl && (
                       <div class="mt-2.5 relative w-full h-32 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">

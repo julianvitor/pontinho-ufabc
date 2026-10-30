@@ -112,17 +112,17 @@ export async function convertVideoToGif(file, onProgress = () => {}) {
           });
         }
 
-        onProgress(5);
+        onProgress(5, 'Iniciando captura de frames do vídeo...');
 
         for (let time = 0; time < duration; time += frameInterval) {
           await seekAndCapture(time);
           currentFrame++;
           const pct = Math.min(95, Math.round(5 + (currentFrame / totalFrames) * 90));
-          onProgress(pct);
+          onProgress(pct, `Convertendo frames para GIF: ${pct}%`);
         }
 
         gif.finish();
-        onProgress(100);
+        onProgress(100, 'GIF animado gerado com sucesso!');
 
         const bytes = gif.bytes();
         const safeBaseName = (file.name || 'animacao').replace(/\.[^/.]+$/, '');

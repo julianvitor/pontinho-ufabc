@@ -3,6 +3,7 @@ import { createPortal } from 'preact/compat';
 import { apiFetch, getCurrentUserId, uploadPhoto, resolveMediaUrl, showToast, logout } from '../services/api.js';
 import { applyTheme, getStoredTheme, onThemeChange } from '../services/theme.js';
 import { UnsavedChangesModal } from '../components/UnsavedChangesModal.jsx';
+import { UploadProgressBar } from '../components/UploadProgressBar.jsx';
 
 const VERIFY_CHALLENGES = [
   { id: 'smile', instruction: 'Dê um belo sorriso para a câmera 😊', badge: '2. Dê um Sorriso' },
@@ -32,8 +33,12 @@ export function ProfilePage() {
   const [newInterest, setNewInterest] = useState('');
   const [photos, setPhotos] = useState([]);
   const [uploadingPublic, setUploadingPublic] = useState(false);
+  const [publicUploadProgress, setPublicUploadProgress] = useState(0);
+  const [publicUploadStage, setPublicUploadStage] = useState('');
   const [privatePhotos, setPrivatePhotos] = useState([]);
   const [uploadingPrivate, setUploadingPrivate] = useState(false);
+  const [privateUploadProgress, setPrivateUploadProgress] = useState(0);
+  const [privateUploadStage, setPrivateUploadStage] = useState('');
   const [privateBio, setPrivateBio] = useState('');
 
   // Músicas
@@ -593,19 +598,24 @@ export function ProfilePage() {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
-    if (isPrivate) setUploadingPrivate(true);
-    else setUploadingPublic(true);
+    if (isPrivate) {
+      setUploadingPrivate(true);
+      setPrivateUploadProgress(0);
+      setPrivateUploadStage('Iniciando processamento...');
+    } else {
+      setUploadingPublic(true);
+      setPublicUploadProgress(0);
+      setPublicUploadStage('Iniciando processamento...');
+    }
 
     try {
-      const isVid = file.type?.startsWith('video/') || /\.(mp4|mov|webm|avi|mkv|m4v|3gp|ogv)$/i.test(file.name || '');
-      if (isVid) {
-        showToast('Convertendo vídeo para GIF no navegador... (até 10s)', 'info');
-      } else {
-        showToast('Otimizando e enviando imagem...', 'info');
-      }
-      const res = await uploadPhoto(file, isPrivate, (pct) => {
-        if (pct % 25 === 0 || pct === 100) {
-          showToast(`Convertendo vídeo para GIF: ${pct}%`, 'info');
+      const res = await uploadPhoto(file, isPrivate, (pct, stage) => {
+        if (isPrivate) {
+          setPrivateUploadProgress(pct);
+          if (stage) setPrivateUploadStage(stage);
+        } else {
+          setPublicUploadProgress(pct);
+          if (stage) setPublicUploadStage(stage);
         }
       });
       if (res && res.url) {
@@ -960,6 +970,14 @@ export function ProfilePage() {
               </div>
             )}
 
+            {uploadingPublic && (
+              <UploadProgressBar
+                progress={publicUploadProgress}
+                stage={publicUploadStage}
+                isPrivate={false}
+              />
+            )}
+
             <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
               <label class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 rounded-xl text-xs font-black transition shadow-sm cursor-pointer active:scale-95">
                 <span>📁</span>
@@ -1027,6 +1045,14 @@ export function ProfilePage() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {uploadingPrivate && (
+                <UploadProgressBar
+                  progress={privateUploadProgress}
+                  stage={privateUploadStage}
+                  isPrivate={true}
+                />
               )}
 
               <div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { apiFetch, uploadMedia, resolveMediaUrl, showToast } from '../services/api.js';
+import { UploadProgressBar } from '../components/UploadProgressBar.jsx';
 
 export function AdminPage() {
   const [tab, setTab] = useState('reports'); // 'reports' | 'ads' | 'events'
@@ -18,6 +19,8 @@ export function AdminPage() {
   const [adFrequency, setAdFrequency] = useState(4);
   const [adImageUrl, setAdImageUrl] = useState('');
   const [uploadingAdImage, setUploadingAdImage] = useState(false);
+  const [adUploadProgress, setAdUploadProgress] = useState(0);
+  const [adUploadStage, setAdUploadStage] = useState('');
   const [savingAd, setSavingAd] = useState(false);
 
   // Formulário Nova Festa / Evento
@@ -28,6 +31,8 @@ export function AdminPage() {
   const [eventTicketUrl, setEventTicketUrl] = useState('');
   const [eventImageUrl, setEventImageUrl] = useState('');
   const [uploadingEventImage, setUploadingEventImage] = useState(false);
+  const [eventUploadProgress, setEventUploadProgress] = useState(0);
+  const [eventUploadStage, setEventUploadStage] = useState('');
   const [savingEvent, setSavingEvent] = useState(false);
 
   useEffect(() => {
@@ -79,8 +84,13 @@ export function AdminPage() {
     if (!file) return;
 
     setUploadingAdImage(true);
+    setAdUploadProgress(0);
+    setAdUploadStage('Iniciando processamento...');
     try {
-      const res = await uploadMedia(file, false);
+      const res = await uploadMedia(file, false, (pct, stage) => {
+        setAdUploadProgress(pct);
+        if (stage) setAdUploadStage(stage);
+      });
       if (res && res.url) {
         setAdImageUrl(res.url);
         showToast('Banner da propaganda processado para WebP/GIF e enviado! 📢', 'success');
@@ -144,8 +154,13 @@ export function AdminPage() {
     if (!file) return;
 
     setUploadingEventImage(true);
+    setEventUploadProgress(0);
+    setEventUploadStage('Iniciando processamento...');
     try {
-      const res = await uploadMedia(file, false);
+      const res = await uploadMedia(file, false, (pct, stage) => {
+        setEventUploadProgress(pct);
+        if (stage) setEventUploadStage(stage);
+      });
       if (res && res.url) {
         setEventImageUrl(res.url);
         showToast('Flyer da festa processado para WebP/GIF e enviado! 🎉', 'success');
@@ -429,6 +444,14 @@ export function AdminPage() {
                       )}
                     </div>
 
+                    {uploadingAdImage && (
+                      <UploadProgressBar
+                        progress={adUploadProgress}
+                        stage={adUploadStage}
+                        className="mt-2.5 max-w-xs"
+                      />
+                    )}
+
                     {adImageUrl && (
                       <div class="mt-2.5 relative w-full max-w-xs h-36 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
                         <img
@@ -604,6 +627,14 @@ export function AdminPage() {
                         </span>
                       )}
                     </div>
+
+                    {uploadingEventImage && (
+                      <UploadProgressBar
+                        progress={eventUploadProgress}
+                        stage={eventUploadStage}
+                        className="mt-2.5 max-w-xs"
+                      />
+                    )}
 
                     {eventImageUrl && (
                       <div class="mt-2.5 relative w-full max-w-xs h-36 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">

@@ -98,18 +98,44 @@ export function resolveMediaUrl(url) {
 export async function uploadPhoto(file, isPrivate = false, onProgress = null) {
   if (!file) throw new Error('Selecione uma foto ou vídeo para enviar.');
 
+  const report = (pct, stage) => {
+    if (typeof onProgress === 'function') {
+      try { onProgress(pct, stage); } catch (_) {}
+    }
+  };
+
   let fileToUpload = file;
-  if (isVideoFile(file)) {
+  const isVid = isVideoFile(file);
+  const isAlreadyOptimized = isWebpOrGif(file);
+
+  let startUploadPct = 40;
+
+  if (isVid) {
+    report(5, 'Convertendo vídeo para GIF no navegador...');
     showToast('Convertendo vídeo para GIF no navegador...', 'info');
-    fileToUpload = await convertVideoToGif(file, onProgress || (() => {}));
-  } else if (!isWebpOrGif(file)) {
+    fileToUpload = await convertVideoToGif(file, (p, text) => {
+      const overall = Math.min(50, Math.round((p / 100) * 50));
+      report(overall, text || `Processando vídeo: ${p}%`);
+    });
+    startUploadPct = 50;
+  } else if (!isAlreadyOptimized) {
+    report(10, 'Otimizando imagem para WebP...');
     showToast('Convertendo imagem para WebP no navegador...', 'info');
-    fileToUpload = await convertImageToWebp(file);
+    fileToUpload = await convertImageToWebp(file, 0.92, (p, text) => {
+      const overall = Math.min(45, Math.round((p / 100) * 45));
+      report(overall, text || `Otimizando imagem: ${p}%`);
+    });
+    startUploadPct = 45;
+  } else {
+    report(20, 'Preparando arquivo para upload...');
+    startUploadPct = 20;
   }
 
   if (fileToUpload.size > 40 * 1024 * 1024) {
     throw new Error('O arquivo selecionado ultrapassa o limite de 40 MB.');
   }
+
+  report(startUploadPct, 'Iniciando envio para o servidor...');
 
   const formData = new FormData();
   formData.append('file', fileToUpload);
@@ -127,6 +153,57 @@ export async function uploadPhoto(file, isPrivate = false, onProgress = null) {
 
   const query = isPrivate ? '?is_private=true' : '';
   const targetUrl = `${getApiBase()}/api/upload/photo${query}`;
+
+  // Se o navegador suporta XMLHttpRequest com upload progress (fora de testes JSDOM), usa para rastreio exato de bytes
+  const isJsdom = typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.includes('jsdom');
+  if (!isJsdom && typeof XMLHttpRequest !== 'undefined' && typeof window !== 'undefined' && window.XMLHttpRequest) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', targetUrl);
+      xhr.withCredentials = true;
+
+      for (const [k, v] of Object.entries(headers)) {
+        xhr.setRequestHeader(k, v);
+      }
+
+      if (xhr.upload) {
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable && e.total > 0) {
+            const fraction = e.loaded / e.total;
+            const currentTotal = Math.min(98, Math.round(startUploadPct + fraction * (98 - startUploadPct)));
+            const uploadOnlyPct = Math.round(fraction * 100);
+            report(currentTotal, `Enviando para o servidor: ${uploadOnlyPct}%`);
+          }
+        };
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            report(100, 'Upload concluído com sucesso!');
+            resolve(res);
+          } catch (_) {
+            report(100, 'Upload concluído com sucesso!');
+            resolve({});
+          }
+        } else {
+          let errorMsg = 'Erro ao enviar imagem.';
+          try {
+            const err = JSON.parse(xhr.responseText);
+            errorMsg = err.detail || errorMsg;
+          } catch (_) {}
+          reject(new Error(errorMsg));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Erro de conexão ao enviar imagem.'));
+      xhr.send(formData);
+    });
+  }
+
+  // Fallback seguro usando fetch (ex: ambiente de testes Vitest/Node)
+  report(Math.min(90, startUploadPct + 30), 'Enviando para o servidor...');
   const response = await fetch(targetUrl, {
     method: 'POST',
     headers,
@@ -143,6 +220,7 @@ export async function uploadPhoto(file, isPrivate = false, onProgress = null) {
     throw new Error(errorMsg);
   }
 
+  report(100, 'Upload concluído com sucesso!');
   return await response.json();
 }
 
