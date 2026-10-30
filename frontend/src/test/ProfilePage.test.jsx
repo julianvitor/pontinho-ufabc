@@ -154,4 +154,63 @@ describe('ProfilePage Component', () => {
 
     expect(screen.getByText('#Cinema')).toBeTruthy();
   });
+
+  it('detects changes in profile and intercepts navigation with unsaved changes modal', async () => {
+    global.fetch = vi.fn().mockImplementation((url) => {
+      if (url.includes('/api/metadata')) {
+        return Promise.resolve({ ok: true, status: 200, json: async () => mockMetadata });
+      }
+      if (url.includes('/api/users/me')) {
+        return Promise.resolve({ ok: true, status: 200, json: async () => mockUser });
+      }
+      return Promise.reject(new Error('not found'));
+    });
+
+    render(<ProfilePage />);
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Ana Júlia')).toBeTruthy();
+    });
+
+    // Inicialmente não deve ter badge de alterações pendentes
+    expect(document.getElementById('unsaved-badge')).toBeNull();
+
+    // Modifica o campo bio
+    const bioInput = screen.getByDisplayValue('Estudante de computação e apaixonada por café.');
+    fireEvent.input(bioInput, { target: { value: 'Nova bio com alterações não salvas!' } });
+
+    // Badge de alterações pendentes deve aparecer
+    await waitFor(() => {
+      expect(document.getElementById('unsaved-badge')).toBeTruthy();
+      expect(screen.getByText(/Alterações pendentes/i)).toBeTruthy();
+    });
+
+    // Simula clique em link para navegar para fora da página
+    const externalLink = document.createElement('a');
+    externalLink.setAttribute('href', '/events');
+    externalLink.textContent = 'Ir para Festas';
+    document.body.appendChild(externalLink);
+
+    fireEvent.click(externalLink);
+
+    // O modal deve ser exibido com opções de Salvar e Descartar
+    await waitFor(() => {
+      expect(screen.getByText('Alterações Não Salvas')).toBeTruthy();
+      expect(screen.getByText(/Se você sair agora, as novas alterações serão perdidas/i)).toBeTruthy();
+      expect(screen.getByText(/Salvar Alterações e Sair/i)).toBeTruthy();
+      expect(screen.getByText(/Descartar Alterações/i)).toBeTruthy();
+      expect(screen.getByText(/Continuar Editando o Perfil/i)).toBeTruthy();
+    });
+
+    // Clica em "Continuar Editando o Perfil"
+    const cancelBtn = screen.getByText(/Continuar Editando o Perfil/i);
+    fireEvent.click(cancelBtn);
+
+    // Modal deve fechar
+    await waitFor(() => {
+      expect(document.getElementById('unsaved-changes-modal')).toBeNull();
+    });
+
+    externalLink.remove();
+  });
 });

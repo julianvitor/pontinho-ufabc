@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
-import { apiFetch, getCurrentUserId, uploadPhoto, resolveMediaUrl, showToast } from '../services/api.js';
+import { apiFetch, getCurrentUserId, uploadPhoto, resolveMediaUrl, showToast, logout } from '../services/api.js';
 import { applyTheme, getStoredTheme, onThemeChange } from '../services/theme.js';
+import { UnsavedChangesModal } from '../components/UnsavedChangesModal.jsx';
 
 const VERIFY_CHALLENGES = [
   { id: 'smile', instruction: 'Dê um belo sorriso para a câmera 😊', badge: '2. Dê um Sorriso' },
@@ -72,6 +73,41 @@ export function ProfilePage() {
   const verifyChallengeRef = useRef(null);
   const photoDescriptorCacheRef = useRef(new Map());
 
+  // Rastreamento e diálogo de alterações não salvas
+  const initialSnapshotRef = useRef(null);
+  const isDirtyRef = useRef(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
+
+  function getCurrentSnapshot() {
+    return JSON.stringify({
+      name: (name || '').trim(),
+      age: parseInt(age, 10) || 20,
+      campus: campus || '',
+      course: course || '',
+      specificCourse: specificCourse || '',
+      entity: entity || '',
+      lookingFor: lookingFor || '',
+      gender: gender || '',
+      targetGender: targetGender || '',
+      bio: (bio || '').trim(),
+      interests: Array.isArray(interests) ? [...interests].sort() : [],
+      photos: Array.isArray(photos) ? photos : [],
+      privatePhotos: Array.isArray(privatePhotos) ? privatePhotos : [],
+      privateBio: (privateBio || '').trim(),
+      song1: (song1 || '').trim(),
+      song2: (song2 || '').trim(),
+      song3: (song3 || '').trim(),
+      prompt1_q: prompt1_q || '',
+      prompt1_a: (prompt1_a || '').trim(),
+      prompt2_q: prompt2_q || '',
+      prompt2_a: (prompt2_a || '').trim(),
+      prompt3_q: prompt3_q || '',
+      prompt3_a: (prompt3_a || '').trim()
+    });
+  }
+
   const currentUserId = getCurrentUserId();
 
   useEffect(() => {
@@ -130,12 +166,158 @@ export function ProfilePage() {
         setPrompt2_a(userData.prompt2_a || "");
         setPrompt3_q(userData.prompt3_q || defaultP3);
         setPrompt3_a(userData.prompt3_a || "");
+
+        // Inicializa snapshot base para rastreamento de alterações
+        const snap = JSON.stringify({
+          name: (userData.name || '').trim(),
+          age: parseInt(userData.age || 20, 10),
+          campus: userData.campus || 'Santo André',
+          course: userData.course || 'BC&T - Bacharelado em Ciência e Tecnologia',
+          specificCourse: userData.specific_course || 'Ciência da Computação',
+          entity: userData.entity || 'Nenhuma / Foco no CR',
+          lookingFor: userData.looking_for || 'Algo casual',
+          gender: userData.gender || 'Mulher',
+          targetGender: userData.target_gender || 'Todos',
+          bio: (userData.bio || '').trim(),
+          interests: Array.isArray(userData.interests) ? [...userData.interests].sort() : [],
+          photos: Array.isArray(userData.photos) ? userData.photos : [],
+          privatePhotos: Array.isArray(userData.private_photos) ? userData.private_photos : [],
+          privateBio: (userData.private_bio || '').trim(),
+          song1: (songsList[0] || '').trim(),
+          song2: (songsList[1] || '').trim(),
+          song3: (songsList[2] || '').trim(),
+          prompt1_q: userData.prompt1_q || defaultP1,
+          prompt1_a: (userData.prompt1_a || '').trim(),
+          prompt2_q: userData.prompt2_q || defaultP2,
+          prompt2_a: (userData.prompt2_a || '').trim(),
+          prompt3_q: userData.prompt3_q || defaultP3,
+          prompt3_a: (userData.prompt3_a || '').trim()
+        });
+        initialSnapshotRef.current = snap;
+        setIsDirty(false);
+        isDirtyRef.current = false;
       }
     } catch (err) {
       showToast(err.message || 'Erro ao carregar perfil', 'error');
     } finally {
       setLoading(false);
     }
+  }
+
+  // Monitora alterações dos dados para ativar estado dirty
+  useEffect(() => {
+    if (!initialSnapshotRef.current) return;
+    const current = getCurrentSnapshot();
+    const dirty = current !== initialSnapshotRef.current;
+    setIsDirty(dirty);
+    isDirtyRef.current = dirty;
+  }, [
+    name, age, campus, course, specificCourse, entity, lookingFor,
+    gender, targetGender, bio, interests, photos, privatePhotos,
+    privateBio, song1, song2, song3,
+    prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a
+  ]);
+
+  // Intercepta navegação externa, cliques no menu, botão sair e fechar página caso haja alterações pendentes
+  useEffect(() => {
+    function handleDocumentClick(e) {
+      if (!isDirtyRef.current) return;
+
+      // Não intercepta se o clique for dentro do próprio modal de confirmação
+      if (e.target.closest('#unsaved-changes-modal-backdrop')) return;
+
+      // Intercepta botão de Logout no Navbar
+      const logoutBtn = e.target.closest('#navbar-user-box button');
+      if (logoutBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        setPendingNavigation('LOGOUT');
+        setShowUnsavedModal(true);
+        return;
+      }
+
+      // Intercepta qualquer link de navegação que saia de /profile
+      const anchor = e.target.closest('a[href]');
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+
+      try {
+        const targetUrl = new URL(anchor.href, window.location.origin);
+        if (targetUrl.pathname !== window.location.pathname) {
+          e.preventDefault();
+          e.stopPropagation();
+          setPendingNavigation(targetUrl.pathname + targetUrl.search + targetUrl.hash);
+          setShowUnsavedModal(true);
+        }
+      } catch (_) {}
+    }
+
+    function handleBeforeUnload(e) {
+      if (isDirtyRef.current) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    }
+
+    function handlePopState() {
+      if (isDirtyRef.current) {
+        window.history.pushState(null, '', window.location.href);
+        setPendingNavigation('BACK');
+        setShowUnsavedModal(true);
+      }
+    }
+
+    document.addEventListener('click', handleDocumentClick, true);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  function executeNavigation(nav) {
+    if (!nav) return;
+    if (nav === 'BACK') {
+      window.history.back();
+    } else if (nav === 'LOGOUT') {
+      logout().then(() => {
+        window.location.href = '/';
+      });
+    } else {
+      window.location.href = nav;
+    }
+  }
+
+  async function handleModalSaveAndExit() {
+    const success = await handleSaveProfile();
+    if (success) {
+      setShowUnsavedModal(false);
+      const dest = pendingNavigation;
+      setPendingNavigation(null);
+      executeNavigation(dest);
+    } else {
+      setShowUnsavedModal(false);
+    }
+  }
+
+  function handleModalDiscardAndExit() {
+    setIsDirty(false);
+    isDirtyRef.current = false;
+    setShowUnsavedModal(false);
+    const dest = pendingNavigation;
+    setPendingNavigation(null);
+    executeNavigation(dest);
+  }
+
+  function handleModalCancel() {
+    setShowUnsavedModal(false);
+    setPendingNavigation(null);
   }
 
   // --- MODELOS FACE-API E DESCRITORES ---
@@ -527,8 +709,14 @@ export function ProfilePage() {
       } else {
         showToast(res.message || 'Perfil salvo com sucesso! 🎉', 'success');
       }
+
+      initialSnapshotRef.current = getCurrentSnapshot();
+      setIsDirty(false);
+      isDirtyRef.current = false;
+      return true;
     } catch (err) {
       showToast(err.message || 'Erro ao salvar perfil', 'error');
+      return false;
     } finally {
       setSaving(false);
     }
@@ -630,14 +818,32 @@ export function ProfilePage() {
     { question: "Se eu pudesse jantar com qualquer pessoa da história:" }
   ];
 
+  const isPride = currentTheme === 'pride';
+  const isHalloween = currentTheme === 'halloween';
+  const saveBtnThemeClass = isHalloween
+    ? 'bg-gradient-to-r from-orange-500 via-purple-600 to-amber-500 hover:opacity-95 text-white border border-orange-400/40 shadow-orange-950/60'
+    : isPride
+    ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:opacity-95 text-white shadow-purple-950/60'
+    : 'bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 shadow-emerald-950/60';
+
   return (
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 pb-20 md:pb-8 relative z-10">
       {/* CABEÇALHO DA PÁGINA COM BOTÃO SALVAR RÁPIDO */}
       <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
         <div>
-          <h1 class="text-2xl font-black text-white flex items-center gap-2">
-            <span>👤</span> <span>Editar Perfil</span>
-          </h1>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-2xl font-black text-white flex items-center gap-2">
+              <span>👤</span> <span>Editar Perfil</span>
+            </h1>
+            {isDirty && (
+              <span
+                id="unsaved-badge"
+                class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse select-none"
+              >
+                ● Alterações pendentes
+              </span>
+            )}
+          </div>
           <p class="text-xs text-slate-400 font-medium mt-0.5">
             Complete suas fotos, dados e preferências
           </p>
@@ -646,7 +852,7 @@ export function ProfilePage() {
           type="button"
           onClick={handleSaveProfile}
           disabled={saving || loading}
-          class="self-start sm:self-auto px-5 py-2.5 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/60 hover:scale-105 active:scale-95 transition disabled:opacity-50"
+          class={`self-start sm:self-auto px-5 py-2.5 ${saveBtnThemeClass} font-black text-xs sm:text-sm rounded-xl shadow-lg hover:scale-105 active:scale-95 transition disabled:opacity-50`}
         >
           {saving ? 'Salvando...' : 'Salvar Alterações'}
         </button>
@@ -1289,7 +1495,7 @@ export function ProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              class="w-full py-4 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-emerald-950/60 transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              class={`w-full py-4 ${saveBtnThemeClass} font-black text-sm rounded-2xl shadow-xl transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50`}
             >
               {saving ? 'Salvando Alterações...' : 'Salvar Alterações'}
             </button>
@@ -1390,6 +1596,16 @@ export function ProfilePage() {
         </div>,
         document.body
       )}
+
+      {/* POPUP DE CONFIRMAÇÃO DE ALTERAÇÕES NÃO SALVAS (DESIGN DO TEMA ATIVO) */}
+      <UnsavedChangesModal
+        isOpen={showUnsavedModal}
+        theme={currentTheme}
+        isSaving={saving}
+        onSave={handleModalSaveAndExit}
+        onDiscard={handleModalDiscardAndExit}
+        onCancel={handleModalCancel}
+      />
     </main>
   );
 }
