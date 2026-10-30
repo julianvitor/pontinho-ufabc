@@ -35,6 +35,17 @@ jobs:
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - name: Verificar integridade dos Secrets
+        run: |
+          echo "### Status dos Secrets do CD" >> $GITHUB_STEP_SUMMARY
+          echo "- **SSH_HOST presente**: $( [ -n "$HOST" ] && echo "Sim (tamanho ${#HOST})" || echo "NÃO CONFIGURADO / VAZIO" )" >> $GITHUB_STEP_SUMMARY
+          echo "- **SSH_USER presente**: $( [ -n "$USER" ] && echo "Sim (valor: $USER)" || echo "NÃO CONFIGURADO / VAZIO" )" >> $GITHUB_STEP_SUMMARY
+          echo "- **SSH_PRIVATE_KEY presente**: $( [ -n "$KEY" ] && echo "Sim (tamanho ${#KEY})" || echo "NÃO CONFIGURADO / VAZIO" )" >> $GITHUB_STEP_SUMMARY
+        env:
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Conectar na VPS e executar atualização
         uses: appleboy/ssh-action@v1.0.3
         with:
