@@ -180,6 +180,9 @@ def test_successful_user_registration_and_login(client):
     login_data = login_response.json()
     assert "token" in login_data
     assert login_data["user"]["email"] == unique_email
+    # Garante que novas contas não tenham fotos mockadas do Unsplash inseridas automaticamente
+    user_photos = login_data["user"].get("photos", [])
+    assert not any("unsplash.com" in p for p in user_photos)
 
 
 def test_upload_webp_image_accepted(client):

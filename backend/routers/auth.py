@@ -88,13 +88,8 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
     internal_id = sanitized_email.split("@")[0]
     pw_hash = hash_password(cleaned_pw)
 
-    # Fotos padrão de avatar iniciais para satisfazer a regra de negócio de no mínimo 2 fotos
-    default_photos = [
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
-    ]
-    if verification_photo_path:
-        default_photos.insert(0, verification_photo_path)
+    # Fotos iniciais para a nova conta: apenas a selfie de verificação (se capturada na prova de vida)
+    default_photos = [verification_photo_path] if verification_photo_path else []
 
     is_verified_val = 1 if (data.face_descriptor and len(data.face_descriptor) > 0) else 0
     face_desc_json = json.dumps(data.face_descriptor) if data.face_descriptor else ""
