@@ -10,9 +10,10 @@ describe('Navbar Component', () => {
     applyTheme('ufabc');
   });
 
-  it('renders Pontinho brand title', () => {
+  it('renders Pontinho brand title and Beta badge', () => {
     render(<Navbar onOpenTheme={() => {}} onOpenHelp={() => {}} />);
     expect(screen.getByText('Pontinho')).toBeTruthy();
+    expect(screen.getByText('Beta')).toBeTruthy();
   });
 
   it('renders Entrar button when user is not authenticated', () => {

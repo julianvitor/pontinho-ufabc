@@ -35,12 +35,15 @@ export function Navbar({ onOpenTheme, onOpenHelp }) {
     <header class="bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-40 shadow-sm">
       <div class="max-w-5xl mx-auto px-4 h-[51px] flex items-center justify-between gap-4">
         {/* Marca */}
-        <a href="/" class="flex items-center group">
+        <a href="/" class="flex items-center gap-1.5 group">
           <span class="font-black text-xl sm:text-2xl tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
             Pontinho
           </span>
+          <span class="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 select-none">
+            Beta
+          </span>
           {isPride && (
-            <span class="theme-pride-badge text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-xs ml-1.5">
+            <span class="theme-pride-badge text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-xs">
               PRIDE 🏳️‍🌈
             </span>
           )}
