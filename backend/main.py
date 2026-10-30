@@ -4,9 +4,11 @@ Pontinho - Ponto de Entrada Principal da Aplicação FastAPI (API REST Pura)
 import os
 import sys
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+import logging
 
 # Configuração de paths
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -82,6 +84,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Erro não tratado na rota {request.url.path}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Ocorreu um erro interno no servidor ao processar a requisição."}
+    )
 
 # Cria e monta o diretório de uploads estáticos
 DATA_DIR = Path(os.getenv("DATABASE_PATH", "/app/data/pontinho.db")).resolve().parent

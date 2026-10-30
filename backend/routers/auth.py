@@ -96,8 +96,8 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
     if verification_photo_path:
         default_photos.insert(0, verification_photo_path)
 
-    is_verified_val = 1 if (req.face_descriptor and len(req.face_descriptor) > 0) else 0
-    face_desc_json = json.dumps(req.face_descriptor) if req.face_descriptor else ""
+    is_verified_val = 1 if (data.face_descriptor and len(data.face_descriptor) > 0) else 0
+    face_desc_json = json.dumps(data.face_descriptor) if data.face_descriptor else ""
 
     cursor.execute("""
         INSERT INTO users (
