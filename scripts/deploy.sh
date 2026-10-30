@@ -13,7 +13,19 @@ echo "[3/4] Limpando imagens antigas..."
 sudo docker image prune -f
 
 echo "[4/4] Verificando saude da API local..."
-sleep 3
-curl -fsS http://127.0.0.1:8000/ > /dev/null
+
+MAX_ATTEMPTS=20
+ATTEMPT=1
+until curl -fsS http://127.0.0.1:8000/ > /dev/null; do
+  if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+    echo "API indisponivel apos ${MAX_ATTEMPTS} tentativas."
+    sudo docker compose -f docker-compose.prod.yml logs --tail=100 backend
+    exit 1
+  fi
+
+  echo "API ainda indisponivel (tentativa ${ATTEMPT}/${MAX_ATTEMPTS}); aguardando..."
+  ATTEMPT=$((ATTEMPT + 1))
+  sleep 3
+done
 
 echo "Deploy concluido com sucesso!"
