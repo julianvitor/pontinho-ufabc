@@ -47,11 +47,12 @@ jobs:
           KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Conectar na VPS e executar atualização
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            /home/ubuntu/pontinho-backend/scripts/deploy.sh
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i ~/.ssh/deploy_key -p 22 "$SSH_USER@$SSH_HOST" "/home/ubuntu/pontinho-backend/scripts/deploy.sh"
