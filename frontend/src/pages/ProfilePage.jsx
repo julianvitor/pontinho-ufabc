@@ -767,7 +767,7 @@ export function ProfilePage() {
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="text-sm font-extrabold text-rose-300 flex items-center gap-2">
-                  <span>🔥</span> <span>Área Secreta & Picante</span>
+                  <span>🔥</span> <span>Área Secreta</span>
                 </h3>
                 <p class="text-[11px] text-rose-200/70 mt-0.5">
                   Fotos e bio exclusivas. Liberadas apenas após seu consentimento mútuo no chat.
@@ -834,7 +834,7 @@ export function ProfilePage() {
             {/* Bio Secreta */}
             <div class="pt-2 border-t border-white/10">
               <label class="block text-xs font-bold text-rose-200 mb-1 flex items-center gap-1">
-                <span>💋</span> Bio Privada (Seu lado picante ou sem filtros)
+                <span>💋</span> Bio Privada (Seu lado ❤️‍🔥 sem filtros)
               </label>
               <textarea
                 rows="2"
@@ -849,7 +849,7 @@ export function ProfilePage() {
           {/* 3. DADOS ACADÊMICOS & PESSOAIS */}
           <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4">
             <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-              <span>🎓</span> <span>Dados Acadêmicos & Pessoais</span>
+              <span>🎓</span> <span>Dados Pessoais</span>
             </h3>
 
             {/* Nome, Idade, E-mail */}
