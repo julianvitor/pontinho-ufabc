@@ -69,7 +69,7 @@ export function FeedPage() {
       if (Array.isArray(events)) {
         setLandingEvents(events.slice(0, 3));
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
   function shuffleCards(cardList) {
@@ -150,9 +150,9 @@ export function FeedPage() {
   // Monta lista de itens do carrossel (fotos normais + secret teaser)
   const carouselItems = activeCard && !activeCard.is_ad
     ? (activeCard.photos && activeCard.photos.length ? activeCard.photos : ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800']).map(p => ({
-        url: p,
-        is_secret: false
-      })).concat(activeCard.secret_teaser_photo ? [{ url: activeCard.secret_teaser_photo, is_secret: true }] : [])
+      url: p,
+      is_secret: false
+    })).concat(activeCard.secret_teaser_photo ? [{ url: activeCard.secret_teaser_photo, is_secret: true }] : [])
     : [];
 
   const currentItem = carouselItems[currentPhotoIndex] || carouselItems[0] || null;
@@ -280,7 +280,7 @@ export function FeedPage() {
       if (!hasMoved) {
         if (dist > 8) {
           hasMoved = true;
-          try { card.setPointerCapture(e.pointerId); } catch (_) {}
+          try { card.setPointerCapture(e.pointerId); } catch (_) { }
         } else {
           return;
         }
@@ -306,7 +306,7 @@ export function FeedPage() {
     function onPointerUp(e) {
       if (!isDragging) return;
       isDragging = false;
-      try { card.releasePointerCapture(e.pointerId); } catch (_) {}
+      try { card.releasePointerCapture(e.pointerId); } catch (_) { }
 
       const dx = currentX - startX;
       const dy = currentY - startY;
@@ -405,7 +405,7 @@ export function FeedPage() {
       if (vid) {
         setModalVideoId(vid);
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
   function selectModalSong(index) {
@@ -423,18 +423,18 @@ export function FeedPage() {
 
   const modalCarouselItems = detailsUser
     ? (detailsUser.photos && detailsUser.photos.length
-        ? detailsUser.photos
-        : ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800']
+      ? detailsUser.photos
+      : ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800']
+    )
+      .map((p) => ({
+        url: p,
+        is_secret: false
+      }))
+      .concat(
+        detailsUser.secret_teaser_photo
+          ? [{ url: detailsUser.secret_teaser_photo, is_secret: true }]
+          : []
       )
-        .map((p) => ({
-          url: p,
-          is_secret: false
-        }))
-        .concat(
-          detailsUser.secret_teaser_photo
-            ? [{ url: detailsUser.secret_teaser_photo, is_secret: true }]
-            : []
-        )
     : [];
 
   const currentModalItem = modalCarouselItems[modalPhotoIndex] || modalCarouselItems[0] || null;
@@ -510,7 +510,7 @@ export function FeedPage() {
             <p class="text-xs sm:text-sm text-slate-300 mt-2 font-medium max-w-sm mx-auto leading-relaxed">
               Conexões, amizades e festas.{' '}
               <span class="font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg inline-block shadow-xs">
-                apenas para membros da UFABC
+                apenas para membros da <span class="text-yellow-400">UFABC</span>
               </span>
             </p>
 
@@ -771,7 +771,7 @@ export function FeedPage() {
                           class="carousel-arrow-btn absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-slate-900 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 sm:opacity-85 hover:sm:opacity-100 shadow-xl border border-white/20 active:scale-95 cursor-pointer backdrop-blur-md"
                           title="Foto anterior (←)"
                         >
-                          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
                         </button>
                         <button
                           type="button"
@@ -779,7 +779,7 @@ export function FeedPage() {
                           class="carousel-arrow-btn absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-slate-950/70 hover:bg-slate-900 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 sm:opacity-85 hover:sm:opacity-100 shadow-xl border border-white/20 active:scale-95 cursor-pointer backdrop-blur-md"
                           title="Próxima foto (→)"
                         >
-                          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
                         </button>
 
                         <div class="absolute top-3 inset-x-3 z-30 flex gap-1.5 pointer-events-auto">
@@ -798,11 +798,10 @@ export function FeedPage() {
                     {/* Contador de fotos */}
                     <div
                       id="photo-count-badge"
-                      class={`absolute top-6 right-3 z-30 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all border pointer-events-none ${
-                        currentItem && currentItem.is_secret
+                      class={`absolute top-6 right-3 z-30 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all border pointer-events-none ${currentItem && currentItem.is_secret
                           ? 'bg-rose-950/80 border-rose-500/50 text-rose-200'
                           : 'bg-black/50 backdrop-blur-md text-white border-white/10'
-                      }`}
+                        }`}
                     >
                       <span id="photo-count-label">
                         {currentItem && currentItem.is_secret
@@ -1130,11 +1129,10 @@ export function FeedPage() {
                               id={`song-chip-${idx}`}
                               type="button"
                               onClick={() => selectModalSong(idx)}
-                              class={`song-chip text-[11px] font-semibold px-2 py-0.5 rounded-lg transition flex items-center gap-1 ${
-                                idx === modalPlayingSongIndex
+                              class={`song-chip text-[11px] font-semibold px-2 py-0.5 rounded-lg transition flex items-center gap-1 ${idx === modalPlayingSongIndex
                                   ? 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-300'
                                   : 'bg-white/10 text-purple-200 hover:bg-white/20'
-                              }`}
+                                }`}
                             >
                               <span>🎧</span> <span class="truncate max-w-[120px]">{s}</span>
                             </button>
