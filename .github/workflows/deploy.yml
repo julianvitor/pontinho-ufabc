@@ -55,4 +55,12 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s\n" "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i ~/.ssh/deploy_key -p 22 "$SSH_USER@$SSH_HOST" "/home/ubuntu/pontinho-backend/scripts/deploy.sh"
+          echo "### Log de Conexão SSH" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ssh -vvv -o StrictHostKeyChecking=no -o ConnectTimeout=15 -i ~/.ssh/deploy_key -p 22 "$SSH_USER@$SSH_HOST" "/home/ubuntu/pontinho-backend/scripts/deploy.sh" 2>&1 | tee -a /tmp/ssh.log || SSH_STATUS=$?
+          cat /tmp/ssh.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ "${SSH_STATUS:-0}" -ne 0 ]; then
+            echo "SSH falhou com código de saída: $SSH_STATUS"
+            exit "$SSH_STATUS"
+          fi
