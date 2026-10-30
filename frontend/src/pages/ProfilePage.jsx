@@ -752,13 +752,13 @@ export function ProfilePage() {
                 <span>{uploadingPublic ? 'Enviando foto...' : 'Adicionar Foto'}</span>
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,video/*"
                   class="hidden"
                   disabled={uploadingPublic}
                   onChange={(e) => handleUploadPhoto(e, false)}
                 />
               </label>
-              <span class="text-xs text-slate-400">Fotos ou GIFs compatíveis</span>
+              <span class="text-xs text-slate-400">Imagens ou vídeos curtos (até 10s)</span>
             </div>
           </div>
 
@@ -821,13 +821,13 @@ export function ProfilePage() {
                   <span>{uploadingPrivate ? 'Enviando foto secreta...' : 'Enviar Foto ou GIF Secreto'}</span>
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,video/*"
                     class="hidden"
                     disabled={uploadingPrivate}
                     onChange={(e) => handleUploadPhoto(e, true)}
                   />
                 </label>
-                <span class="text-xs text-rose-200/70">Privacidade garantida (sem metadados EXIF)</span>
+                <span class="text-xs text-rose-200/70">Imagens ou vídeos curtos (privacidade garantida)</span>
               </div>
             </div>
 

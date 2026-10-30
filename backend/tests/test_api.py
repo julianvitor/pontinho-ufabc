@@ -180,3 +180,80 @@ def test_successful_user_registration_and_login(client):
     login_data = login_response.json()
     assert "token" in login_data
     assert login_data["user"]["email"] == unique_email
+
+
+def test_upload_short_video_converts_to_gif(client):
+    """Verifica se o upload de vídeo de até 10s é aceito, sanitizado e convertido em GIF animado."""
+    import subprocess
+    import shutil
+    
+    if not shutil.which("ffmpeg"):
+        pytest.skip("ffmpeg não disponível no ambiente para teste de vídeo")
+
+    test_video_path = "/tmp/test_ci_short_video.mp4"
+    # Gera um vídeo sintético de 2 segundos (resolução leve 160x120)
+    subprocess.run([
+        "ffmpeg", "-y", "-f", "lavfi",
+        "-i", "testsrc=duration=2:size=160x120:rate=15",
+        "-pix_fmt", "yuv420p", test_video_path
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    token = create_session_token(user_id=1)
+
+    with open(test_video_path, "rb") as f:
+        response = client.post(
+            "/api/upload/photo",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"file": ("curto.mp4", f, "video/mp4")}
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["media_type"] == "video_gif"
+    assert data["filename"].endswith(".gif")
+    assert 1.8 <= data["duration_seconds"] <= 2.2
+
+
+def test_upload_long_video_rejected(client):
+    """Verifica se o upload de vídeo com mais de 10s é estritamente rejeitado com HTTP 400."""
+    import subprocess
+    import shutil
+
+    if not shutil.which("ffmpeg"):
+        pytest.skip("ffmpeg não disponível no ambiente para teste de vídeo")
+
+    test_video_path = "/tmp/test_ci_long_video.mp4"
+    # Gera um vídeo sintético de 12 segundos (excede o limite de 10s)
+    subprocess.run([
+        "ffmpeg", "-y", "-f", "lavfi",
+        "-i", "testsrc=duration=12:size=160x120:rate=15",
+        "-pix_fmt", "yuv420p", test_video_path
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    token = create_session_token(user_id=1)
+
+    with open(test_video_path, "rb") as f:
+        response = client.post(
+            "/api/upload/photo",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"file": ("longo.mp4", f, "video/mp4")}
+        )
+
+    assert response.status_code == 400
+    assert "10 segundos" in response.json()["detail"]
+
+
+def test_upload_corrupted_video_rejected(client):
+    """Verifica se arquivos forjados ou corrompidos com extensão de vídeo são rejeitados."""
+    token = create_session_token(user_id=1)
+    fake_bytes = b"Este nao e um arquivo de video real, mas sim bytes forjados."
+
+    response = client.post(
+        "/api/upload/photo",
+        headers={"Authorization": f"Bearer {token}"},
+        files={"file": ("corrupt.mp4", fake_bytes, "video/mp4")}
+    )
+
+    assert response.status_code == 400
+

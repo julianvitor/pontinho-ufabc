@@ -17,6 +17,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Diretório de trabalho dentro do container
 WORKDIR /app
 
+# Instala ffmpeg para processamento e conversão segura de vídeos curtos em GIF
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
 # Instala o Poetry e configura para não criar virtualenv isolado dentro do container
 RUN pip install --no-cache-dir poetry && \
     poetry config virtualenvs.create false
