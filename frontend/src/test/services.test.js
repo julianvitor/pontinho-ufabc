@@ -83,6 +83,17 @@ describe('Services Unit Tests', () => {
       expect(getStoredTheme()).toBe('ufabc');
       expect(document.documentElement.classList.contains('theme-pride')).toBe(false);
     });
+
+    it('applies halloween theme and updates class list and localStorage', () => {
+      applyTheme('halloween');
+      expect(getStoredTheme()).toBe('halloween');
+      expect(document.documentElement.classList.contains('theme-halloween')).toBe(true);
+      expect(document.documentElement.classList.contains('theme-pride')).toBe(false);
+
+      applyTheme('ufabc');
+      expect(getStoredTheme()).toBe('ufabc');
+      expect(document.documentElement.classList.contains('theme-halloween')).toBe(false);
+    });
   });
 
   describe('Notifications Service', () => {

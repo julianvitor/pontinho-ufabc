@@ -33,6 +33,12 @@ describe('Navbar Component', () => {
     expect(screen.getByText('PRIDE 🏳️‍🌈')).toBeTruthy();
   });
 
+  it('renders HALLOWEEN badge when theme is halloween', () => {
+    applyTheme('halloween');
+    render(<Navbar onOpenTheme={() => {}} onOpenHelp={() => {}} />);
+    expect(screen.getByText('HALLOWEEN 🎃')).toBeTruthy();
+  });
+
   it('renders desktop navigation links', () => {
     render(<Navbar onOpenTheme={() => {}} onOpenHelp={() => {}} />);
     expect(screen.getByText('Swipes')).toBeTruthy();

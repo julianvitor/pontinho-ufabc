@@ -575,6 +575,9 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
             <span class="theme-pride-badge hidden text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-xs">
               PRIDE 🏳️‍🌈
             </span>
+            <span class="theme-halloween-badge hidden text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-orange-500 via-purple-600 to-amber-500 text-white shadow-xs border border-orange-500/40">
+              HALLOWEEN 🎃
+            </span>
           </h1>
         </div>
 

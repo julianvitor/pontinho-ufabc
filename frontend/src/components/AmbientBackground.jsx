@@ -30,9 +30,21 @@ export function AmbientBackground() {
     const count = Math.min(Math.floor((width * height) / 22000), 45);
     const particles = [];
 
-    // Cores conforme o tema atual (UFABC / Pride)
+    // Cores conforme o tema atual (UFABC / Pride / Halloween)
     function getColors() {
       const isPride = document.documentElement.classList.contains('theme-pride');
+      const isHalloween = document.documentElement.classList.contains('theme-halloween');
+      if (isHalloween) {
+        return {
+          points: [
+            'rgba(249, 115, 22, ',  // Pumpkin Orange 500
+            'rgba(168, 85, 247, ',  // Witch Purple 500
+            'rgba(239, 68, 68, ',   // Blood Crimson 500
+            'rgba(251, 191, 36, '   // Jack-o-lantern Amber 400
+          ],
+          line: 'rgba(249, 115, 22, '
+        };
+      }
       if (isPride) {
         return {
           points: [

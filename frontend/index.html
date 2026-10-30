@@ -14,6 +14,8 @@
           const savedTheme = localStorage.getItem('pontinho_theme') || 'ufabc';
           if (savedTheme === 'pride') {
             document.documentElement.classList.add('theme-pride');
+          } else if (savedTheme === 'halloween') {
+            document.documentElement.classList.add('theme-halloween');
           }
         } catch (_) {}
       })();

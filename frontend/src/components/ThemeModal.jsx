@@ -23,7 +23,9 @@ export function ThemeModal({ isOpen, onClose }) {
   function selectTheme(theme) {
     applyTheme(theme);
     setCurrentTheme(theme);
-    if (theme === 'pride') {
+    if (theme === 'halloween') {
+      showToast('Tema Noite de Halloween ativado! 🎃👻🦇', 'success');
+    } else if (theme === 'pride') {
       showToast('Tema Dark Pride ativado! 🏳️‍🌈✨', 'success');
     } else {
       showToast('Tema UFABC Esmeralda ativado! 🌿', 'success');
@@ -32,6 +34,8 @@ export function ThemeModal({ isOpen, onClose }) {
   }
 
   const isPride = currentTheme === 'pride';
+  const isHalloween = currentTheme === 'halloween';
+  const isDefault = currentTheme === 'ufabc';
 
   const modalContent = (
     <div
@@ -56,13 +60,13 @@ export function ThemeModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div class="py-4 space-y-3 relative z-10">
+        <div class="py-4 space-y-3 relative z-10 max-h-[70vh] overflow-y-auto pr-1">
           {/* Opção 1: Tema UFABC */}
           <div
             id="theme-card-default"
             onClick={() => selectTheme('ufabc')}
             class={`theme-option-card flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition ${
-              !isPride ? 'active border-emerald-500 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'
+              isDefault ? 'active border-emerald-500 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'
             }`}
           >
             <div class="flex items-center gap-3">
@@ -85,7 +89,7 @@ export function ThemeModal({ isOpen, onClose }) {
                 </div>
               </div>
             </div>
-            {!isPride && (
+            {isDefault && (
               <div class="text-emerald-400 text-lg font-black ml-2">✓</div>
             )}
           </div>
@@ -122,6 +126,40 @@ export function ThemeModal({ isOpen, onClose }) {
             </div>
             {isPride && (
               <div class="text-purple-400 text-lg font-black ml-2">✓</div>
+            )}
+          </div>
+
+          {/* Opção 3: Tema Noite de Halloween */}
+          <div
+            id="theme-card-halloween"
+            onClick={() => selectTheme('halloween')}
+            class={`theme-option-card flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition ${
+              isHalloween ? 'active active-halloween border-orange-500 bg-orange-950/20' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'
+            }`}
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600/25 via-purple-700/25 to-amber-500/20 border border-orange-500/40 flex items-center justify-center text-xl shadow-xs">
+                🎃
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-white">Noite de Halloween</span>
+                  <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-orange-950 text-orange-400 border border-orange-800/40">
+                    Spooky Dark
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Abóboras em chamas, roxo das bruxas, carmesim e névoa sombria</p>
+                <div class="flex items-center gap-1.5 mt-2">
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#f97316] border border-white/20" title="Abóbora" />
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#9333ea] border border-white/20" title="Bruxa" />
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#dc2626] border border-white/20" title="Sangue" />
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#f59e0b] border border-white/20" title="Ember" />
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#0f0a17] border border-white/20" title="Obsidiana" />
+                </div>
+              </div>
+            </div>
+            {isHalloween && (
+              <div class="text-orange-400 text-lg font-black ml-2">✓</div>
             )}
           </div>
         </div>

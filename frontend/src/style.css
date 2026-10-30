@@ -398,6 +398,205 @@ html.theme-pride .theme-option-card.active-pride {
   background-color: rgba(124, 58, 237, 0.2) !important;
 }
 
+/* ========================================================
+   TEMA DARK HALLOWEEN (NOITE DAS BRUXAS) - OBSIDIANA & CHAMA
+   ======================================================== */
+:root {
+  --halloween-fire-h: linear-gradient(90deg, #ea580c 0%, #f97316 25%, #facc15 50%, #a855f7 75%, #ea580c 100%);
+  --halloween-dark-cta: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #7e22ce 100%);
+  --halloween-dark-cta-hover: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #9333ea 100%);
+}
+
+html[data-theme="halloween"],
+html.theme-halloween,
+body.theme-halloween {
+  --ufabc-emerald: #f97316;
+  --ufabc-dark: #431407;
+  --bg-main: #07050a;
+  --bg-card: #0f0a17;
+}
+
+/* 1. LOGO: Chamas vivas de Jack-o'-Lantern com brilho espectral */
+html.theme-halloween .bg-clip-text,
+html.theme-halloween [class*="bg-clip-text"] {
+  background-image: var(--halloween-fire-h) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  animation: halloweenFlameFlow 5s ease infinite !important;
+}
+
+@keyframes halloweenFlameFlow {
+  0% { background-position: 0% 50%; filter: drop-shadow(0 0 1px rgba(234, 88, 12, 0.6)); }
+  50% { background-position: 100% 50%; filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.8)); }
+  100% { background-position: 0% 50%; filter: drop-shadow(0 0 1px rgba(234, 88, 12, 0.6)); }
+}
+
+/* 2. CABEÇALHO: Linha de brasa alaranjada e névoa noturna */
+html.theme-halloween header {
+  border-bottom: 1.5px solid transparent !important;
+  border-image: linear-gradient(90deg, #ea580c 0%, #f97316 35%, #9333ea 70%, #ea580c 100%) 1 !important;
+  box-shadow: 0 4px 25px -2px rgba(0, 0, 0, 0.9), 0 1px 0 0 rgba(249, 115, 22, 0.25) !important;
+}
+
+/* 3. BOTÕES PRINCIPAIS E AÇÕES */
+html.theme-halloween button[class*="from-emerald-"],
+html.theme-halloween a[class*="from-emerald-"]:not([class*="bg-clip-text"]),
+html.theme-halloween button[class*="from-emerald-600"],
+html.theme-halloween a[class*="from-emerald-600"],
+html.theme-halloween [class*="bg-gradient-to-r"][class*="from-emerald-"]:not([class*="bg-clip-text"]):not(div),
+html.theme-halloween [class*="bg-gradient-to-tr"][class*="from-emerald-"]:not([class*="bg-clip-text"]):not(div) {
+  background-image: var(--halloween-dark-cta) !important;
+  background-size: 140% auto !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(251, 146, 60, 0.3) !important;
+  box-shadow: 0 4px 20px -2px rgba(234, 88, 12, 0.45), 0 2px 8px -2px rgba(126, 34, 206, 0.35) !important;
+  transition: all 0.25s ease !important;
+}
+
+html.theme-halloween button[class*="from-emerald-"]:hover,
+html.theme-halloween a[class*="from-emerald-"]:not([class*="bg-clip-text"]):hover {
+  background-image: var(--halloween-dark-cta-hover) !important;
+  background-position: 100% 50% !important;
+  box-shadow: 0 6px 26px -2px rgba(249, 115, 22, 0.65), 0 3px 14px -2px rgba(147, 51, 234, 0.5) !important;
+  filter: brightness(1.06) !important;
+  transform: translateY(-1px) scale(1.01);
+}
+
+/* 4. BALÕES DE CHAT ENVIADOS */
+html.theme-halloween div[class*="from-emerald-"][class*="to-teal-"] {
+  background-image: linear-gradient(135deg, #7c2d12 0%, #431407 55%, #3b0764 100%) !important;
+  color: #ffedd5 !important;
+  border: 1px solid rgba(251, 146, 60, 0.3) !important;
+}
+
+/* 5. HERO / CARDS DA LANDING */
+html.theme-halloween .to-emerald-950,
+html.theme-halloween [class*="to-emerald-950"] {
+  --tw-gradient-to: #180924 !important;
+  background-image: linear-gradient(135deg, #07050a 0%, #0d0814 45%, #180924 100%) !important;
+  border-color: rgba(249, 115, 22, 0.25) !important;
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.9), 0 0 25px -5px rgba(249, 115, 22, 0.15) !important;
+}
+
+/* 6. NÉVOAS E LUZES AMBIENTES */
+html.theme-halloween [class*="bg-emerald-500\/"],
+html.theme-halloween [class*="bg-teal-500\/"] {
+  background-color: rgba(249, 115, 22, 0.12) !important;
+}
+html.theme-halloween div.fixed:first-of-type {
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.14) 0%, rgba(147, 51, 234, 0.08) 45%, transparent 70%) !important;
+}
+html.theme-halloween div.fixed:nth-of-type(2) {
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.12) 0%, rgba(220, 38, 38, 0.07) 45%, transparent 70%) !important;
+}
+
+/* 7. TEXTOS EM DESTAQUE */
+html.theme-halloween [class*="text-emerald-"],
+html.theme-halloween [class*="text-teal-"],
+html.theme-halloween [class*="text-ufabc-"] {
+  color: #fb923c !important;
+}
+html.theme-halloween .text-emerald-300 {
+  color: #fed7aa !important;
+}
+html.theme-halloween .text-emerald-400 {
+  color: #fb923c !important;
+}
+html.theme-halloween .text-emerald-500 {
+  color: #f97316 !important;
+}
+html.theme-halloween .hover\:text-emerald-400:hover,
+html.theme-halloween .hover\:text-emerald-300:hover {
+  color: #fdba74 !important;
+}
+
+/* 8. BORDAS EM DESTAQUE E FOCO */
+html.theme-halloween [class*="border-emerald-"],
+html.theme-halloween [class*="border-teal-"],
+html.theme-halloween [class*="border-ufabc-"] {
+  border-color: rgba(249, 115, 22, 0.35) !important;
+}
+html.theme-halloween [class*="focus:border-emerald-"]:focus,
+html.theme-halloween [class*="focus:border-emerald-"]:focus-within {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 15px rgba(249, 115, 22, 0.35) !important;
+}
+
+/* 9. BADGES E FUNDOS DE PILL */
+html.theme-halloween [class*="bg-emerald-950"],
+html.theme-halloween [class*="bg-teal-950"],
+html.theme-halloween [class*="bg-ufabc-"] {
+  background-color: rgba(67, 20, 7, 0.6) !important;
+  border-color: rgba(249, 115, 22, 0.4) !important;
+  color: #fed7aa !important;
+}
+
+/* 10. BOTÃO DE CURTIDA NOS CARDS TINDER */
+html.theme-halloween button[onclick*="'like'"] {
+  background: linear-gradient(135deg, #431407 0%, #1e092b 100%) !important;
+  border: 2px solid rgba(249, 115, 22, 0.6) !important;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4), inset 0 0 12px rgba(234, 88, 12, 0.3) !important;
+  color: #ffffff !important;
+}
+html.theme-halloween button[onclick*="'like'"]:hover {
+  transform: scale(1.12) !important;
+  border-color: rgba(251, 146, 60, 0.9) !important;
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.7), inset 0 0 16px rgba(168, 85, 247, 0.35) !important;
+}
+
+/* Carimbo de Like no Swipe */
+html.theme-halloween .swipe-stamp.like {
+  color: #f97316 !important;
+  border-color: #f97316 !important;
+  background-color: rgba(67, 20, 7, 0.6) !important;
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.5) !important;
+}
+
+/* Indicadores de foto ativos */
+html.theme-halloween .photo-indicator.active,
+html.theme-halloween .modal-photo-indicator.active {
+  background: var(--halloween-fire-h) !important;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.8) !important;
+}
+
+/* Seleção e Scrollbar */
+html.theme-halloween ::selection {
+  background-color: rgba(249, 115, 22, 0.4) !important;
+  color: #ffffff !important;
+}
+html.theme-halloween ::-webkit-scrollbar-thumb:hover {
+  background: #ea580c !important;
+}
+
+/* 11. BADGE HALLOWEEN VISÍVEL */
+.theme-halloween-badge {
+  display: none;
+}
+html.theme-halloween .theme-halloween-badge {
+  display: inline-flex !important;
+  background: linear-gradient(90deg, rgba(234, 88, 12, 0.4), rgba(147, 51, 234, 0.4), rgba(220, 38, 38, 0.3)) !important;
+  border: 1px solid rgba(249, 115, 22, 0.5) !important;
+  color: #fff7ed !important;
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.3) !important;
+}
+
+/* 12. BOTÃO NA NAVBAR E MODAL */
+html.theme-halloween .theme-pill-btn {
+  border-color: rgba(249, 115, 22, 0.5) !important;
+  background: rgba(15, 10, 23, 0.85) !important;
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.3) !important;
+  color: #fed7aa !important;
+}
+html.theme-halloween .theme-option-card.active-halloween {
+  border-color: #f97316 !important;
+  background-color: rgba(194, 65, 12, 0.25) !important;
+}
+
 /* ==========================================
    EFEITOS DINÂMICOS DE FUNDO (AURORA & PONTINHOS VIVOS)
    ========================================== */

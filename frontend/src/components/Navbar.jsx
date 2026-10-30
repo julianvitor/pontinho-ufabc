@@ -23,6 +23,7 @@ export function Navbar({ onOpenTheme, onOpenHelp }) {
   }, []);
 
   const isPride = theme === 'pride';
+  const isHalloween = theme === 'halloween';
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
 
   async function handleLogout() {
@@ -45,6 +46,11 @@ export function Navbar({ onOpenTheme, onOpenHelp }) {
           {isPride && (
             <span class="theme-pride-badge text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-xs">
               PRIDE 🏳️‍🌈
+            </span>
+          )}
+          {isHalloween && (
+            <span class="theme-halloween-badge text-[10px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-gradient-to-r from-orange-500 via-purple-600 to-amber-500 text-white shadow-xs border border-orange-500/40">
+              HALLOWEEN 🎃
             </span>
           )}
         </a>
@@ -108,10 +114,14 @@ export function Navbar({ onOpenTheme, onOpenHelp }) {
             type="button"
             onClick={onOpenTheme}
             class="theme-pill-btn px-2 sm:px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 rounded-xl border border-slate-700/70 transition flex items-center gap-1 shadow-xs"
-            title="Escolher Tema Visual (UFABC / Orgulho LGBT+)"
+            title="Escolher Tema Visual (UFABC / Pride / Halloween)"
           >
-            <span class="theme-active-icon">{isPride ? '🏳️‍🌈' : '🌿'}</span>{' '}
-            <span class="hidden sm:inline font-bold theme-active-name">{isPride ? 'Pride' : 'UFABC'}</span>
+            <span class="theme-active-icon">
+              {isHalloween ? '🎃' : isPride ? '🏳️‍🌈' : '🌿'}
+            </span>{' '}
+            <span class="hidden sm:inline font-bold theme-active-name">
+              {isHalloween ? 'Halloween' : isPride ? 'Pride' : 'UFABC'}
+            </span>
           </button>
 
           {/* Central de Ajuda */}

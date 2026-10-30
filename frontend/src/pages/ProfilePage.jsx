@@ -1159,13 +1159,14 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div
                 onClick={() => applyTheme('ufabc')}
-                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${currentTheme !== 'pride'
-                  ? 'border-emerald-500/60 bg-emerald-950/30 ring-2 ring-emerald-500/20'
-                  : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                  }`}
+                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${
+                  currentTheme === 'ufabc'
+                    ? 'border-emerald-500/60 bg-emerald-950/30 ring-2 ring-emerald-500/20'
+                    : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                }`}
               >
                 <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-xl shadow-xs">
                   🌿
@@ -1183,10 +1184,11 @@ export function ProfilePage() {
 
               <div
                 onClick={() => applyTheme('pride')}
-                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${currentTheme === 'pride'
-                  ? 'border-pink-500/60 bg-pink-950/30 ring-2 ring-pink-500/20'
-                  : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                  }`}
+                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${
+                  currentTheme === 'pride'
+                    ? 'border-pink-500/60 bg-pink-950/30 ring-2 ring-pink-500/20'
+                    : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                }`}
               >
                 <div class="w-10 h-10 rounded-xl bg-pink-950/60 border border-pink-500/30 flex items-center justify-center text-xl shadow-xs">
                   🏳️‍🌈
@@ -1199,6 +1201,28 @@ export function ProfilePage() {
                     </span>
                   </div>
                   <p class="text-[11px] text-slate-400 mt-0.5">Cores vibrantes do arco-íris</p>
+                </div>
+              </div>
+
+              <div
+                onClick={() => applyTheme('halloween')}
+                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${
+                  currentTheme === 'halloween'
+                    ? 'border-orange-500/60 bg-orange-950/30 ring-2 ring-orange-500/20'
+                    : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                }`}
+              >
+                <div class="w-10 h-10 rounded-xl bg-orange-950/60 border border-orange-500/30 flex items-center justify-center text-xl shadow-xs">
+                  🎃
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-white">Halloween</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-950 text-orange-300 border border-orange-800/40">
+                      Spooky
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Abóboras & noite das bruxas</p>
                 </div>
               </div>
             </div>
