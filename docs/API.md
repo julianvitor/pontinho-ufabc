@@ -54,9 +54,10 @@ Cadastra um novo estudante na plataforma.
   "age_verified": true,
   "liveness_passed": true,
   "estimated_age": 21,
-  "face_snapshot": "data:image/jpeg;base64,..."
+  "face_snapshot": "data:image/webp;base64,..."
 }
 ```
+*(Nota: O snapshot da webcam é codificado diretamente em WebP no navegador do estudante para verificação e arquivamento seguro em `verify_{uuid}.webp`. Contas recém-criadas não recebem fotos externas de placeholder, iniciando em estado limpo).*
 - **Resposta (200 OK)**:
 ```json
 {
@@ -427,11 +428,28 @@ Denuncia um usuário por violação de conduta.
 ## 7. Upload de Mídia & GIFs Animados (`/api/upload`)
 
 ### `POST /api/upload/photo`
-Processa e sanitiza imagens com proteção contra DoS e Image Bombs.
+Processa e sanitiza mídias enviadas após pré-processamento no frontend, com proteção ativa contra DoS e Image Bombs.
 
-- **Query Param**: `is_private=true` para direcionar a imagem ao armazenamento protegido `private_uploads` (Álbum Secreto).
-- **Formatos Aceitos**: JPEG, PNG, WEBP, GIF animado (preserva frames e timings).
-- **Pipelines**: Remoção total de EXIF, downscale seguro para máximo 1200x1200px, compressão WebP e moderação NudeNet.
+- **Autenticação**: Exigida (`get_current_user_id`).
+- **Tamanho Máximo do Arquivo**: **40 MB** (`MAX_IMAGE_SIZE = 40 * 1024 * 1024`).
+- **Formatos Aceitos no Backend**: Estritamente **`WEBP`** e **`GIF`** animado.
+  - O frontend é responsável por converter imagens estáticas (JPEG, PNG, HEIC) em WebP com sanitização de EXIF/GPS via HTML5 Canvas.
+  - Vídeos curtos (< 10 segundos) são convertidos em GIF animado diretamente no navegador do cliente através da biblioteca `gifenc` (FPS ~10, resolução proporcional até 480px).
+- **Parâmetros**:
+  - `file`: Arquivo binário enviado via `multipart/form-data`.
+  - `is_private`: (Opcional, boolean) Se `true`, a mídia é armazenada de forma segura no diretório `private_uploads` (Álbum Secreto) com rota protegida de acesso (`/api/media/private/{filename}`). Se `false`, é armazenada no diretório público `/uploads/{filename}` (usado para fotos públicas de perfil, banners de festas/eventos e anúncios/propagandas).
+- **Validação e Moderação no Servidor**:
+  - Inspeção via Pillow para verificação de cabeçalhos e prevenção de Image Bombs.
+  - Sanitização de metadados adicionais.
+  - Moderação automatizada de conteúdo inadequado via NudeNet / Pillow.
+- **Resposta (200 OK)**:
+```json
+{
+  "url": "/uploads/a8b9c1d2e3f4.webp",
+  "filename": "a8b9c1d2e3f4.webp",
+  "is_animated": false
+}
+```
 
 ---
 

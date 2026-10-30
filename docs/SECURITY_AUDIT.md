@@ -300,4 +300,39 @@ A auditoria identificou **4 pontos de atenção** na superfície de ataque e arq
 - **Problema:** Endpoint de teste que retorna contas para login automático em ambiente de desenvolvimento.
 - **Status Atual:** 🔒 **Restrito a Ambiente de Desenvolvimento (`DEV_MODE=true`)**. Oculta administradores e não expõe senhas no payload. Em produção (`DEV_MODE=false`), retorna array vazio `[]`.
 
+---
+
+## 🛡️ 5. Atualizações Recentes de Segurança, Mitigação de DoS e Resiliência (Outubro/2026)
+
+Em continuidade às boas práticas de segurança defensiva e estabilidade de infraestrutura, foram implementadas as seguintes melhorias:
+
+### 1. Offloading de Processamento de Mídia & Mitigação de DoS por Transcodificação
+- **Vulnerabilidade Mitigada:** Exaustão de Recursos de CPU/RAM (Denial of Service) por upload de vídeos ou imagens de altíssima resolução para transcodificação no servidor.
+- **Solução Implementada:** 
+  - Toda conversão de imagens estáticas (JPEG, PNG, HEIC) para **WebP** e vídeos curtos (< 10s) para **GIF animado** é realizada 100% no navegador do usuário (via HTML5 Canvas e `gifenc`).
+  - O backend (`backend/routers/upload.py`) agora rejeita imediatamente formatos pesados não processados, aceitando exclusivamente `ALLOWED_IMAGE_FORMATS = {"WEBP", "GIF"}`.
+  - Limite seguro de até **40 MB** com inspeção anti-Image Bomb e sanitização de metadados EXIF/GPS, garantindo que o servidor permaneça leve e rápido em instâncias VPS de qualquer porte.
+
+### 2. Verificação Biométrica Contínua de Perfil
+- **Vulnerabilidade Mitigada:** Account Impersonation pós-verificação (troca de fotos verificadas por fotos fakes de terceiros).
+- **Solução Implementada:**
+  - O endpoint de atualização cadastral (`PUT /api/users/me`) monitora a consistência dos vetores faciais de 128 dimensões. Se um usuário previamente verificado (`is_verified = 1`) remover ou substituir todas as fotos contendo sua biometria facial, o selo oficial é automaticamente revogado no servidor.
+
+### 3. Blind Server-Side Request Forgery (SSRF) Hardening
+- **Vulnerabilidade Mitigada:** Requisições arbitrárias do servidor backend disparadas pelo gerador de teasers borrados (`backend/teaser.py`).
+- **Solução Implementada:**
+  - O backend rejeita terminantemente URLs externas não locais (`[Security SSRF Blocked]`), permitindo processamento de desfoque destrutivo apenas para caminhos locais internos autenticados em `/uploads/` e `/api/media/private/`.
+
+### 4. Blindagem de Privacidade e CORS Dinâmico
+- **Vulnerabilidade Mitigada:** Exposição de endpoints ou domínios de produção em repositórios abertos e falhas de CORS em subdomínios dinâmicos.
+- **Solução Implementada:**
+  - Purga completa de referências hardcoded ao domínio de produção em todo o código-fonte, rotas e testes.
+  - A API deriva endpoints dinamicamente a partir de variáveis de ambiente (`VITE_API_URL`) e `window.location`.
+  - Configuração de CORS no FastAPI com suporte a regex para subdomínios dinâmicos seguros.
+
+### 5. Higienização de Metadados e Contas Limpas no Registro
+- **Vulnerabilidade Mitigada:** Inconsistência de perfis e uso indevido de imagens de terceiros.
+- **Solução Implementada:**
+  - Remoção de URLs automáticas de placeholders externos no cadastro de novos estudantes. Perfis iniciam em estado limpo, e snapshots da prova de vida são capturados e armazenados nativamente no formato seguro `.webp`.
+
 
