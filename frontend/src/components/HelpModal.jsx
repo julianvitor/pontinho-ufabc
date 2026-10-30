@@ -102,11 +102,11 @@ export function HelpModal({ isOpen, onClose }) {
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-[11px] text-slate-400">
             <div class="flex items-start gap-1.5 p-2 bg-slate-900/80 rounded-xl border border-slate-800/80">
               <span class="text-emerald-400 font-bold">🔒</span>
-              <span><strong>Comunidade Fechada:</strong> Perfis e listas de festas são restritos a estudantes conectados.</span>
+              <span><strong>Comunidade Fechada:</strong> Perfis e listas de festas são restritos a perfis conectados.</span>
             </div>
             <div class="flex items-start gap-1.5 p-2 bg-slate-900/80 rounded-xl border border-slate-800/80">
               <span class="text-teal-400 font-bold">🎉</span>
-              <span><strong>Festas Universitárias:</strong> Divulgação pública de eventos e rolês de entidades e repúblicas.</span>
+              <span><strong>Festas Universitárias:</strong> Divulgação pública de eventos e rolês de entidades, repúblicas e grupos da federal.</span>
             </div>
           </div>
         </div>
@@ -123,7 +123,7 @@ export function HelpModal({ isOpen, onClose }) {
           </div>
 
           <p class="text-xs text-slate-300 leading-relaxed">
-            Mesmo que você <strong class="text-white">não possua uma conta no app</strong>, utilize este canal seguro para relatar perfis falsos, perseguição (stalking), assédio ou uso não consentido de fotos. Nossa moderação analisa cada caso com máxima prioridade e sigilo.
+            Mesmo que você <strong class="text-white">não possua uma conta no app</strong>, utilize este canal para relatar perfis falsos, perseguição (stalking), assédio ou uso não consentido de fotos. Nossa moderação analisa cada caso com máxima prioridade e sigilo.
           </p>
 
           <form id="public-complaint-form" onSubmit={handleSubmit} class="space-y-3 pt-1">

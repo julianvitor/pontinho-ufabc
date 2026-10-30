@@ -630,7 +630,7 @@ export function ProfilePage() {
             <span>👤</span> <span>Editar Perfil</span>
           </h1>
           <p class="text-xs text-slate-400 font-medium mt-0.5">
-            Complete suas fotos, dados acadêmicos e preferências
+            Complete suas fotos, dados e preferências
           </p>
         </div>
         <button
@@ -688,7 +688,6 @@ export function ProfilePage() {
                       <h4 class="font-black text-white text-sm sm:text-base">Verifique seu Perfil</h4>
                       <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Pendente</span>
                     </div>
-                    <p class="text-xs text-slate-400 mt-0.5">Tire uma selfie biométrica ao vivo para validar suas fotos.</p>
                   </div>
                 </div>
                 <button
@@ -707,7 +706,7 @@ export function ProfilePage() {
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-                  <span>📸</span> <span>Fotos do Perfil</span>
+                  <span>📸</span> <span>Imagens do Perfil</span>
                 </h3>
                 <p class="text-[11px] text-slate-400">A foto #1 será o destaque principal exibido no feed.</p>
               </div>
@@ -718,7 +717,7 @@ export function ProfilePage() {
 
             {photos.length === 0 ? (
               <div class="p-6 border-2 border-dashed border-rose-500/30 bg-rose-950/10 rounded-2xl text-center text-xs text-rose-300">
-                Adicione pelo menos 2 fotos ao seu perfil para salvar!
+                Adicione pelo menos 2 imagens ao seu perfil para salvar!
               </div>
             ) : (
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -770,7 +769,7 @@ export function ProfilePage() {
                   <span>🔥</span> <span>Área Secreta</span>
                 </h3>
                 <p class="text-[11px] text-rose-200/70 mt-0.5">
-                  Fotos e bio exclusivas. Liberadas apenas após seu consentimento mútuo no chat.
+                  Fotos e bio exclusivas. Liberadas apenas após consentimento mútuo no chat.
                 </p>
               </div>
               <span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1">
@@ -1163,11 +1162,10 @@ export function ProfilePage() {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
                 onClick={() => applyTheme('ufabc')}
-                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${
-                  currentTheme !== 'pride'
-                    ? 'border-emerald-500/60 bg-emerald-950/30 ring-2 ring-emerald-500/20'
-                    : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                }`}
+                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${currentTheme !== 'pride'
+                  ? 'border-emerald-500/60 bg-emerald-950/30 ring-2 ring-emerald-500/20'
+                  : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                  }`}
               >
                 <div class="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center text-xl shadow-xs">
                   🌿
@@ -1185,11 +1183,10 @@ export function ProfilePage() {
 
               <div
                 onClick={() => applyTheme('pride')}
-                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${
-                  currentTheme === 'pride'
-                    ? 'border-pink-500/60 bg-pink-950/30 ring-2 ring-pink-500/20'
-                    : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                }`}
+                class={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center gap-3 ${currentTheme === 'pride'
+                  ? 'border-pink-500/60 bg-pink-950/30 ring-2 ring-pink-500/20'
+                  : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                  }`}
               >
                 <div class="w-10 h-10 rounded-xl bg-pink-950/60 border border-pink-500/30 flex items-center justify-center text-xl shadow-xs">
                   🏳️‍🌈

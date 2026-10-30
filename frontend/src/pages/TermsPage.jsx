@@ -45,9 +45,9 @@ export function TermsPage({ onOpenTheme }) {
             Termos de Uso e Política de Privacidade
           </h1>
           <p class="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Bem-vindo(a) ao <strong>Pontinho</strong>, a plataforma universitária de conexões afetivas e amizades da Universidade Federal do ABC (UFABC). Aqui explicamos claramente como nosso serviço funciona e como protegemos seus dados pessoais em estrita conformidade com a <strong>LGPD (Lei Geral de Proteção de Dados - Lei nº 13.709/2018)</strong>.
+            Bem-vindo(a) ao <strong>Pontinho</strong>, a plataforma de conexões afetivas e amizades na Universidade Federal do ABC (UFABC). Aqui explicamos claramente como funciona e como protegemos seus dados pessoais em estrita conformidade com a <strong>LGPD (Lei Geral de Proteção de Dados - Lei nº 13.709/2018)</strong>.
           </p>
-          <p class="text-[11px] text-slate-500 font-mono">Última atualização: 22 de Outubro de 2026</p>
+          <p class="text-[11px] text-slate-500 font-mono">Última atualização: 30 de Outubro de 2026</p>
         </div>
 
         {/* SUMÁRIO RÁPIDO DE NAVEGAÇÃO */}
@@ -153,7 +153,7 @@ export function TermsPage({ onOpenTheme }) {
             <div>
               <h3 class="font-bold text-white text-base mb-1">2. Dados Coletados e Base Legal</h3>
               <ul class="list-disc pl-5 mt-2 space-y-1 text-slate-400">
-                <li><strong class="text-slate-200">Dados Cadastrais:</strong> Nome, E-mail acadêmico institucional, idade, campus e curso (Base legal: Execução de contrato - Art. 7º, V da LGPD).</li>
+                <li><strong class="text-slate-200">Dados Cadastrais:</strong> Nome, E-mail institucional, idade, campus e curso (Base legal: Execução de contrato - Art. 7º, V da LGPD).</li>
                 <li><strong class="text-slate-200">Dados de Perfil:</strong> Biografia, interesses, entidade estudantil e respostas a perguntas de quebra-gelo (Base legal: Consentimento - Art. 7º, I da LGPD).</li>
                 <li><strong class="text-slate-200">Fotos:</strong> Fotos públicas do perfil e fotos privadas compartilhadas sob autorização (Base legal: Consentimento explícito).</li>
                 <li><strong class="text-slate-200">Interações:</strong> Curtidas, passes, matches e mensagens trocadas no chat interno.</li>
@@ -163,7 +163,7 @@ export function TermsPage({ onOpenTheme }) {
             <div>
               <h3 class="font-bold text-white text-base mb-1">3. Sanitização de Imagens e Proteção EXIF</h3>
               <p>
-                Para proteger sua privacidade física e localização, nosso backend remove automaticamente todos os <strong>metadados EXIF</strong> (incluindo coordenadas geográficas de GPS, modelo da câmera e carimbos de data/hora do arquivo original) de todas as imagens enviadas antes de gravá-las no servidor em formato comprimido seguro WebP.
+                Para proteger sua privacidade física e localização, o sistema remove automaticamente todos os <strong>metadados EXIF</strong> (incluindo coordenadas geográficas de GPS, modelo da câmera e carimbos de data/hora do arquivo original) de todas as imagens enviadas antes de gravá-las no servidor.
               </p>
             </div>
 
@@ -225,7 +225,7 @@ export function TermsPage({ onOpenTheme }) {
             <span>•</span>
             <a href="/profile" class="text-slate-400 hover:text-emerald-400 transition">Meu Perfil</a>
           </div>
-          <p>Pontinho UFABC • Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</p>
+          <p>Pontinho • Conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</p>
         </footer>
       </main>
     </div>

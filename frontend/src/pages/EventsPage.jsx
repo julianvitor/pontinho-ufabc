@@ -79,7 +79,7 @@ export function EventsPage() {
         setAttendeesLocked(true);
         setAttendeesMessage(
           details.attendees_message ||
-            'Apenas estudantes da UFABC conectados podem ver a lista de confirmados nesta festa.'
+            'Apenas membros da UFABC conectados podem ver a lista de confirmados nesta festa.'
         );
       } else {
         setAttendeesList(details.attendees || []);
@@ -111,7 +111,7 @@ export function EventsPage() {
               Festas & Eventos Universitários
             </h1>
             <p class="text-xs sm:text-sm text-slate-400 max-w-xl">
-              Descubra os melhores rolês da UFABC, confirme sua presença e veja quem dos seus matches e crushes vai colar!
+              Descubra os melhores rolês da comunidade UFABC, confirme sua presença e veja quem dos seus matches e crushes vai colar!
             </p>
           </div>
 
@@ -352,7 +352,7 @@ export function EventsPage() {
                       </div>
                       <h4 class="text-base font-black text-white">Lista de Confirmados Privada</h4>
                       <p class="text-xs text-slate-300 max-w-xs mx-auto">
-                        {attendeesMessage || 'Apenas estudantes da UFABC conectados podem ver a lista de confirmados nesta festa.'}
+                        {attendeesMessage || 'Apenas membros da UFABC conectados podem ver a lista de confirmados nesta festa.'}
                       </p>
                       <a
                         href="/login"
