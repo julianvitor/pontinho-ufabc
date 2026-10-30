@@ -799,8 +799,8 @@ export function FeedPage() {
                     <div
                       id="photo-count-badge"
                       class={`absolute top-6 right-3 z-30 text-[10px] font-bold px-2 py-0.5 rounded-full transition-all border pointer-events-none ${currentItem && currentItem.is_secret
-                          ? 'bg-rose-950/80 border-rose-500/50 text-rose-200'
-                          : 'bg-black/50 backdrop-blur-md text-white border-white/10'
+                        ? 'bg-rose-950/80 border-rose-500/50 text-rose-200'
+                        : 'bg-black/50 backdrop-blur-md text-white border-white/10'
                         }`}
                     >
                       <span id="photo-count-label">
@@ -1130,8 +1130,8 @@ export function FeedPage() {
                               type="button"
                               onClick={() => selectModalSong(idx)}
                               class={`song-chip text-[11px] font-semibold px-2 py-0.5 rounded-lg transition flex items-center gap-1 ${idx === modalPlayingSongIndex
-                                  ? 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-300'
-                                  : 'bg-white/10 text-purple-200 hover:bg-white/20'
+                                ? 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-300'
+                                : 'bg-white/10 text-purple-200 hover:bg-white/20'
                                 }`}
                             >
                               <span>🎧</span> <span class="truncate max-w-[120px]">{s}</span>
