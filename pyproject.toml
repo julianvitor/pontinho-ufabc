@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pontinho-ufabc"
-version = "0.3.1b0"
+version = "0.3.2b0"
 description = "Backend FastAPI e API REST pura do aplicativo Pontinho UFABC"
 authors = ["Pontinho UFABC Team"]
 readme = "README.md"
