@@ -498,10 +498,10 @@ export function FeedPage() {
   }
 
   return (
-    <main class="flex-1 w-full max-w-4xl mx-auto px-3 sm:px-4 pt-3 pb-24 md:pb-6 flex flex-col items-center justify-center relative">
+    <main class="flex-1 w-full max-w-4xl mx-auto px-3 sm:px-4 pt-2 sm:pt-4 pb-24 md:pb-6 flex flex-col items-center justify-start relative">
       {/* 1. SEÇÃO DE LANDING (DESCONECTADO) */}
       {!userId && (
-        <div id="landing-section" class="w-full max-w-md mx-auto py-4 flex flex-col items-center text-center space-y-6">
+        <div id="landing-section" class="w-full max-w-md mx-auto py-2 sm:py-3 flex flex-col items-center text-center space-y-6">
           <div class="w-full bg-gradient-to-br from-slate-900 via-slate-900/95 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-800/80 relative overflow-hidden">
             <div class="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
             <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -597,10 +597,10 @@ export function FeedPage() {
                             <span class="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.2 rounded-full">
                               🔥 {ev.attendees_count} {ev.attendees_count === 1 ? 'confirmado' : 'confirmados'}
                             </span>
-                            <span class="text-[10px] text-slate-500">⏰ {time}h</span>
+                            <span class="text-[10px] text-slate-400">⏰ {time}h</span>
                           </div>
                         </div>
-                        <span class="text-slate-500 group-hover:text-emerald-400 text-xs shrink-0">❯</span>
+                        <span class="text-slate-400 group-hover:text-emerald-300 text-xs shrink-0">❯</span>
                       </div>
                     </a>
                   );
@@ -1369,7 +1369,7 @@ export function FeedPage() {
 
       {/* Rodapé LGPD */}
       <div class="text-center pt-2 pb-2">
-        <a href="/terms" class="text-[11px] text-slate-500 hover:text-emerald-400 transition">
+        <a href="/terms" class="text-xs text-slate-400 font-medium hover:text-emerald-300 transition">
           Termos de Uso & Política de Privacidade (LGPD)
         </a>
       </div>

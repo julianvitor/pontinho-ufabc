@@ -921,12 +921,12 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
       </div>
 
       {/* RODAPÉ DE PRIVACIDADE E TERMOS DE USO */}
-      <footer class="mt-6 text-center text-xs text-slate-500 flex items-center justify-center gap-3">
-        <a href="/terms" class="hover:text-emerald-400 transition">
+      <footer class="mt-6 text-center text-xs text-slate-400 flex items-center justify-center gap-3">
+        <a href="/terms" class="hover:text-emerald-300 transition">
           Termos de Uso
         </a>
         <span>•</span>
-        <a href="/terms#lgpd" class="hover:text-emerald-400 transition">
+        <a href="/terms#lgpd" class="hover:text-emerald-300 transition">
           Privacidade & LGPD
         </a>
       </footer>

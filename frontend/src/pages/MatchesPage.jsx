@@ -644,7 +644,7 @@ export function MatchesPage() {
 
       {/* Rodapé LGPD */}
       <div class="shrink-0 hidden md:block text-center pt-1.5 pb-0.5">
-        <a href="/terms" class="text-[11px] text-slate-500 hover:text-emerald-400 transition">
+        <a href="/terms" class="text-xs text-slate-400 font-medium hover:text-emerald-300 transition">
           Termos de Uso & Política de Privacidade (LGPD)
         </a>
       </div>

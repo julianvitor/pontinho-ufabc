@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ards-project/ard-spec/main/spec/schemas/ard-entry.schema.json",
+  "@context": "https://agenticresourcediscovery.org/context/v1",
+  "identifier": "urn:air:pontinho.julianvitor.com.br:api:events-and-discovery",
+  "displayName": "Pontinho UFABC API & Events",
+  "type": "application/json",
+  "description": "Plataforma de eventos universitários, conexões e descoberta da UFABC.",
+  "url": "https://pontinho.julianvitor.com.br/api/events",
+  "tags": [
+    "ufabc",
+    "events",
+    "student-community",
+    "university"
+  ],
+  "capabilities": [
+    "events-feed",
+    "university-networking"
+  ],
+  "representativeQueries": [
+    "Quais festas e eventos estão acontecendo na UFABC?",
+    "Como ver os rolês universitários de Santo André e São Bernardo do Campo?"
+  ],
+  "version": "0.3.3",
+  "updatedAt": "2026-11-02T18:00:00Z"
+}
