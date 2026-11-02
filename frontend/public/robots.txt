@@ -1,10 +1,15 @@
 # Pontinho UFABC - Robots Exclusion Standard
-# É expressamente proibida a indexação, scraping e extração de dados por agentes automatizados.
-
 User-agent: *
-Disallow: /
+Allow: /
+Allow: /events
+Allow: /terms
+Allow: /login
+Disallow: /api/
+Disallow: /admin
+Disallow: /profile
+Disallow: /matches
 
-# Bloqueio explícito de crawlers de IA e Web Scraping
+# Bloqueio de bots de treinamento de IA não autorizados
 User-agent: GPTBot
 Disallow: /
 
@@ -34,3 +39,5 @@ Disallow: /
 
 User-agent: Scrapy
 Disallow: /
+
+Sitemap: https://pontinho.julianvitor.com.br/sitemap.xml

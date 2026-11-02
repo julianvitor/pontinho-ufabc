@@ -319,7 +319,7 @@ export function MatchesPage() {
           }`}
         >
           <div class="shrink-0 p-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/80">
-            <h2 class="font-extrabold text-white text-base">Matches</h2>
+            <h1 class="font-extrabold text-white text-base">Matches</h1>
             <span class="px-2 py-0.5 bg-emerald-950/70 text-emerald-300 border border-emerald-500/30 rounded-full font-bold text-xs">
               {matches.length}
             </span>
@@ -357,14 +357,22 @@ export function MatchesPage() {
                     }`}
                   >
                     <div class="relative shrink-0">
-                      <img src={photo} alt={partner.name} class="w-12 h-12 rounded-full object-cover border border-slate-700 shadow-sm" />
+                      <img
+                        src={photo}
+                        alt={partner.name}
+                        width="48"
+                        height="48"
+                        loading="lazy"
+                        decoding="async"
+                        class="w-12 h-12 rounded-full object-cover border border-slate-700 shadow-sm"
+                      />
                       {m.unread_count > 0 && (
                         <span class="absolute top-0 right-0 w-3 h-3 bg-rose-500 border-2 border-slate-900 rounded-full"></span>
                       )}
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-white text-sm truncate">{partner.name}</h4>
+                        <h2 class="font-bold text-white text-sm truncate">{partner.name}</h2>
                         <div class="flex items-center gap-1.5">
                           {m.unread_count > 0 ? (
                             <span class="bg-rose-500 text-white font-extrabold text-[10px] px-1.5 py-0.2 rounded-full shadow-xs animate-pulse">

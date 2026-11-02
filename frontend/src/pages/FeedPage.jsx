@@ -551,7 +551,7 @@ export function FeedPage() {
                 <div class="flex items-center gap-2">
                   <span class="text-xl">🎉</span>
                   <div>
-                    <h3 class="text-sm font-black text-white">Festas & Rolês</h3>
+                    <h2 class="text-sm font-black text-white">Festas & Rolês</h2>
                     <p class="text-[11px] text-emerald-400 font-medium">Veja o que está rolando na facul</p>
                   </div>
                 </div>
@@ -577,13 +577,21 @@ export function FeedPage() {
                     >
                       <div class="flex items-center gap-3">
                         <div class="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-900 border border-slate-800">
-                          <img src={coverUrl} alt={ev.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                          <img
+                            src={coverUrl}
+                            alt={ev.title}
+                            width="64"
+                            height="64"
+                            loading="lazy"
+                            decoding="async"
+                            class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          />
                           <div class="absolute bottom-0 inset-x-0 bg-black/70 text-[9px] font-black text-center text-emerald-400 py-0.2">
                             {day} {month}
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                          <h4 class="text-xs font-bold text-white group-hover:text-emerald-300 truncate">{ev.title}</h4>
+                          <h3 class="text-xs font-bold text-white group-hover:text-emerald-300 truncate">{ev.title}</h3>
                           <p class="text-[11px] text-slate-400 truncate mt-0.5">📍 {ev.location}</p>
                           <div class="flex items-center gap-2 mt-1">
                             <span class="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.2 rounded-full">
@@ -734,6 +742,7 @@ export function FeedPage() {
                         id="card-photo"
                         src={resolveMediaUrl(currentItem ? currentItem.url : '')}
                         alt={activeCard.name}
+                        fetchpriority="high"
                         class="w-full h-full object-cover pointer-events-none transition-all duration-300"
                         style={currentItem && currentItem.is_secret ? { filter: 'blur(36px)', transform: 'scale(1.2)' } : {}}
                       />

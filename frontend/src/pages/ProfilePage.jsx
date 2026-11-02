@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
 import { apiFetch, getCurrentUserId, uploadPhoto, resolveMediaUrl, showToast, logout } from '../services/api.js';
 import { applyTheme, getStoredTheme, onThemeChange } from '../services/theme.js';
+import { loadFaceApiScript } from '../services/faceApi.js';
 import { UnsavedChangesModal } from '../components/UnsavedChangesModal.jsx';
 import { UploadProgressBar } from '../components/UploadProgressBar.jsx';
 
@@ -327,8 +328,16 @@ export function ProfilePage() {
 
   // --- MODELOS FACE-API E DESCRITORES ---
   async function ensureFaceApiModels() {
-    if (typeof window === 'undefined' || !window.faceapi) return false;
-    const faceapi = window.faceapi;
+    if (typeof window === 'undefined') return false;
+    let faceapi = window.faceapi;
+    if (!faceapi) {
+      try {
+        faceapi = await loadFaceApiScript();
+      } catch (_) {
+        return false;
+      }
+    }
+    if (!faceapi) return false;
     if (faceapi.nets.tinyFaceDetector.params) return true;
 
     try {
@@ -888,7 +897,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div class="flex items-center gap-2">
-                      <h4 class="font-black text-white text-sm sm:text-base">Perfil Verificado</h4>
+                      <span class="font-black text-white text-sm sm:text-base">Perfil Verificado</span>
                       <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">ATIVO</span>
                     </div>
                     <p class="text-xs text-slate-300 mt-0.5">Identidade e fotos confirmadas com sucesso.</p>
@@ -910,7 +919,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div class="flex items-center gap-2">
-                      <h4 class="font-black text-white text-sm sm:text-base">Verifique seu Perfil</h4>
+                      <span class="font-black text-white text-sm sm:text-base">Verifique seu Perfil</span>
                       <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Pendente</span>
                     </div>
                   </div>
@@ -930,9 +939,9 @@ export function ProfilePage() {
           <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+                <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
                   <span>📸</span> <span>Imagens do Perfil</span>
-                </h3>
+                </h2>
                 <p class="text-[11px] text-slate-400">A foto #1 será o destaque principal exibido no feed.</p>
               </div>
               <span class={`text-xs font-bold px-2.5 py-1 rounded-full border ${photos.length >= 2 ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/30' : 'bg-rose-950/60 text-rose-400 border-rose-500/30'}`}>
@@ -998,9 +1007,9 @@ export function ProfilePage() {
           <div class="bg-gradient-to-br from-rose-950/60 via-slate-950/90 to-black border border-rose-500/30 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xl">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-sm font-extrabold text-rose-300 flex items-center gap-2">
+                <h2 class="text-sm font-extrabold text-rose-300 flex items-center gap-2">
                   <span>🔥</span> <span>Área Secreta</span>
-                </h3>
+                </h2>
                 <p class="text-[11px] text-rose-200/70 mt-0.5">
                   Fotos e bio exclusivas. Liberadas apenas após consentimento mútuo no chat.
                 </p>
@@ -1088,9 +1097,9 @@ export function ProfilePage() {
 
           {/* 3. DADOS ACADÊMICOS & PESSOAIS */}
           <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4">
-            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+            <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
               <span>🎓</span> <span>Dados Pessoais</span>
-            </h3>
+            </h2>
 
             {/* Nome, Idade, E-mail */}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1245,9 +1254,9 @@ export function ProfilePage() {
 
           {/* 4. TAGS DE INTERESSES */}
           <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-3">
-            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+            <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
               <span>🏷️</span> <span>Tags de Interesses</span>
-            </h3>
+            </h2>
             <div class="flex flex-wrap gap-2">
               {interests.map((tag) => (
                 <span key={tag} class="px-3 py-1 bg-slate-800 text-emerald-300 text-xs rounded-xl flex items-center gap-1.5 border border-slate-700 shadow-xs">
@@ -1278,9 +1287,9 @@ export function ProfilePage() {
           {/* 5. MÚSICAS DO PERFIL (YOUTUBE) */}
           <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-3">
             <div>
-              <h3 class="text-sm font-bold text-purple-300 flex items-center gap-1.5">
+              <h2 class="text-sm font-bold text-purple-300 flex items-center gap-1.5">
                 <span>🎵</span> <span>Músicas do Perfil (YouTube)</span>
-              </h3>
+              </h2>
               <p class="text-xs text-slate-400 mt-0.5">Tocam em segundo plano ao abrirem seu perfil completo.</p>
             </div>
 
@@ -1322,9 +1331,9 @@ export function ProfilePage() {
 
           {/* 6. PERGUNTAS PESSOAIS (PROMPTS) */}
           <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4">
-            <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+            <h2 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
               <span>💬</span> <span>Perguntas Pessoais</span>
-            </h3>
+            </h2>
 
             {/* Pergunta 1 */}
             <div class="p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800 space-y-2">
@@ -1395,7 +1404,7 @@ export function ProfilePage() {
             <div class="flex items-center gap-2.5">
               <span class="text-xl">🎨</span>
               <div>
-                <h3 class="text-sm font-black text-white">Identidade Visual & Tema</h3>
+                <h2 class="text-sm font-black text-white">Identidade Visual & Tema</h2>
                 <p class="text-[11px] text-slate-400">Personalize o estilo da sua interface</p>
               </div>
             </div>
@@ -1474,7 +1483,7 @@ export function ProfilePage() {
             <div class="flex items-center gap-2.5">
               <span class="text-xl">🛡️</span>
               <div>
-                <h3 class="text-sm font-black text-white">Privacidade & Direitos LGPD</h3>
+                <h2 class="text-sm font-black text-white">Privacidade & Direitos LGPD</h2>
                 <p class="text-[11px] text-slate-400">Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p>
               </div>
             </div>

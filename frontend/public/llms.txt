@@ -1,0 +1,12 @@
+# Pontinho UFABC
+
+> Aplicativo para conexões, matches, conversas e festas da comunidade acadêmica da Universidade Federal do ABC (UFABC).
+
+## Informações Gerais
+O Pontinho é uma plataforma digital desenvolvida para conectar estudantes universitários da UFABC, promovendo amizades, encontros e divulgação de festas e eventos acadêmicos com segurança e privacidade.
+
+## Páginas e Recursos Públicos
+- [Início](https://pontinho.julianvitor.com.br/): Feed e conexões entre estudantes universitários.
+- [Festas e Eventos Universitários](https://pontinho.julianvitor.com.br/events): Calendário e mural público de festas, atléticas e entidades da UFABC.
+- [Termos de Uso e LGPD](https://pontinho.julianvitor.com.br/terms): Termos de uso e diretrizes de conformidade com a LGPD e ECA Digital.
+- [Login e Cadastro](https://pontinho.julianvitor.com.br/login): Portal de autenticação de estudantes da UFABC.

@@ -1,338 +1,217 @@
-# 🛡️ Relatório de Auditoria de Segurança & Pentest - Pontinho UFABC
+# 🛡️ Relatório de Segurança, Auditoria & Proteções Implementadas - Pontinho UFABC
 
-> **Data da Auditoria:** 22 de Outubro de 2026  
-> **Tipo de Avaliação:** Análise Estática de Código-Fonte (White-Box Code Audit) & Modelagem de Ameaças  
-> **Escopo:** Backend FastAPI, Banco SQLite, Roteadores da API REST, Gerenciamento de Sessão e Uploads  
-> **Padrão de Referência:** OWASP Top 10 (2021) & Diretrizes de Privacidade da LGPD (Lei nº 13.709/2018)
+> **Última Revisão:** Novembro de 2026  
+> **Tipo de Avaliação:** Análise Estática de Código-Fonte (White-Box Code Audit), Pentest & Verificação de Remediações  
+> **Escopo:** Backend FastAPI, Banco SQLite, Gerenciamento de Sessão HMAC, Criptografia Argon2id, Uploads e Privacidade  
+> **Padrões de Referência:** OWASP Top 10 (2021), NIST SP 800-63B, LGPD (Lei nº 13.709/2018) e ECA Digital (Lei nº 14.811/2024)  
+> **Status Geral:** ✅ **100% das vulnerabilidades identificadas foram sanadas e verificadas no código-fonte.**
 
 ---
 
-## 📊 1. Resumo Executivo das Descobertas
+## 📊 1. Matriz Geral de Risco e Status das Remediações
 
-Durante o checkup de segurança no backend do **Pontinho**, foram mapeadas **11 vulnerabilidades**, distribuídas nos seguintes níveis de risco:
+Todas as 11 vulnerabilidades apontadas na auditoria inicial foram devidamente corrigidas com implementação de controles defensivos em múltiplas camadas (Defense in Depth):
 
-```text
-   CRÍTICAS:  2  [🔴🔴]
-   ALTAS:     5  [🟠🟠🟠🟠🟠]
-   MÉDIAS:    3  [🟡🟡🟡]
-   BAIXAS:    1  [🔵]
+| ID | Vulnerabilidade Original | Severidade | Categoria OWASP | Arquivo Principal | Status Atual |
+|:---|:---|:---:|:---|:---|:---:|
+| **VULN-01** | Bypass de Autenticação / Account Takeover via Headers & Cookies Legados | 🔴 **CRÍTICA** | A07:2021 – Identification and Auth Failures | `backend/auth.py` | ✅ **Sanada** |
+| **VULN-02** | Chave Secreta de Assinatura de Sessão (HMAC) Hardcoded ou Fraca | 🔴 **CRÍTICA** | A02:2021 – Cryptographic Failures | `backend/auth.py` | ✅ **Sanada** |
+| **VULN-03** | Algoritmo Criptográfico de Hash de Senhas Rápido (SHA-256 com Salt Estático) | 🟠 **ALTA** | A02:2021 – Cryptographic Failures | `backend/database.py` | ✅ **Sanada** |
+| **VULN-04** | Exposição Pública de Contas, Privilégios e Senhas em `/demo-accounts` | 🟠 **ALTA** | A01:2021 – Broken Access Control | `backend/routers/auth.py` | ✅ **Sanada** |
+| **VULN-05** | Vazamento de Dados Pessoais (E-mail Institucional) no Feed de Swipes | 🟠 **ALTA** | A01:2021 – Security Misconfiguration / LGPD | `backend/routers/feed.py` | ✅ **Sanada** |
+| **VULN-06** | Blind Server-Side Request Forgery (SSRF) no Gerador de Teasers Borrados | 🟠 **ALTA** | A10:2021 – Server-Side Request Forgery | `backend/teaser.py` | ✅ **Sanada** |
+| **VULN-07** | Endpoint Não Autenticado de Injeção de Contas Arbitrárias (`POST /api/users`) | 🟠 **ALTA** | A04:2021 – Insecure Design | `backend/routers/users.py` | ✅ **Sanada** |
+| **VULN-08** | Ausência de Rate Limiting no Login & Enumeração de E-mails Cadastrados | 🟡 **MÉDIA** | A07:2021 – Identification and Auth Failures | `backend/routers/auth.py` | ✅ **Sanada** |
+| **VULN-09** | Armazenamento Estático de Imagens Privadas Sem Controle de Acesso | 🟡 **MÉDIA** | A01:2021 – Broken Access Control (BOLA) | `backend/routers/media.py` | ✅ **Sanada** |
+| **VULN-10** | Cookies de Sessão Autenticada sem Flags de Proteção `HttpOnly` e `Secure` | 🟡 **MÉDIA** | A05:2021 – Security Misconfiguration | `backend/auth.py` | ✅ **Sanada** |
+| **VULN-11** | Política de Senhas com Comprimento Mínimo Inseguro (4 caracteres) | 🔵 **BAIXA** | A07:2021 – Identification and Auth Failures | `backend/models.py` | ✅ **Sanada** |
+
+---
+
+## 🔍 2. Detalhamento Técnico das Proteções Implementadas
+
+---
+
+### [VULN-01] Autenticação Obrigatória e Blindagem de Sessão HMAC-SHA256
+- **Problema Original:** O backend aceitava identificadores numéricos puros via header `X-User-Id` ou cookie `pontinho_user_id` sem assinatura digital, permitindo personificação de qualquer usuário.
+- **Proteção Implementada:**
+  - Removido qualquer parser de IDs numéricos simples.
+  - Toda requisição autenticada passa obrigatoriamente por `get_current_user_id()`, que exige token assinado no formato `{user_id}.{timestamp}.{hmac_sha256}`.
+  - Validação em tempo constante contra *timing attacks* via `hmac.compare_digest()`.
+  - Expiração forçada de sessão após 30 dias (`SESSION_MAX_AGE`).
+- **Arquivos:** [`backend/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/auth.py#L45-L81) e [`backend/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/auth.py#L137-L173)
+
+---
+
+### [VULN-02] Obrigatoriedade Estrita de Segredo Criptográfico (`PONTINHO_SECRET_KEY`)
+- **Problema Original:** Existência de chave estática padrão hardcoded caso a variável de ambiente não estivesse definida, abrindo brecha para forjamento de tokens offline.
+- **Proteção Implementada:**
+  - O backend valida a presença e a entropia da variável `PONTINHO_SECRET_KEY` no bootstrap do aplicativo.
+  - Se a chave for inexistente, menor que 16 caracteres ou corresponder ao valor de exemplo inseguro, um `RuntimeError` bloqueia a inicialização do container/servidor.
+- **Arquivo:** [`backend/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/auth.py#L32-L40)
+
+---
+
+### [VULN-03] Hashing Robusto de Senhas com Argon2id & Migração Transparente
+- **Problema Original:** Uso de SHA-256 com salt estático global, suscetível a ataques massivos de força bruta com GPU e Rainbow Tables.
+- **Proteção Implementada:**
+  - Adoção de **Argon2id** (padrão ouro OWASP) com salt individual aleatório de 16 bytes via `argon2-cffi`.
+  - Parâmetros configurados para balancear segurança e consumo de RAM: `time_cost=2`, `memory_cost=19456 KB` (19 MB), `parallelism=1`, `hash_len=32`.
+  - Rotina de verificação retrocompatível com auto-migração (`needs_rehash`): quando um usuário com hash legado efetua login com sucesso, sua senha é automaticamente re-hasheada para Argon2id no banco de dados.
+- **Arquivos:** [`backend/database.py`](file:///home/julian/dev/pontinho-ufabc/backend/database.py#L28-L72) e [`backend/routers/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/auth.py#L192-L203)
+
+---
+
+### [VULN-04] Isolamento de Ambiente e Proteção de Dados em `/demo-accounts`
+- **Problema Original:** Rota exposta em produção revelando lista completa de usuários, flags de privilégio de administrador e senhas padrão.
+- **Proteção Implementada:**
+  - O endpoint `/api/auth/demo-accounts` é restrito a ambientes com `DEV_MODE=true` ou `DEBUG=true`. Em produção, retorna array vazio (`[]`).
+  - Filtragem estrita `WHERE is_admin = 0` (administradores nunca são listados).
+  - Projeção seletiva de campos: o atributo `password` foi totalmente excluído da serialização JSON.
+- **Arquivo:** [`backend/routers/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/auth.py#L250-L277)
+
+---
+
+### [VULN-05] Princípio da Minimização de Dados (LGPD) no Feed de Descoberta
+- **Problema Original:** Consulta `SELECT * FROM users` expunha os e-mails acadêmicos de todos os usuários do feed na resposta de rede do navegador.
+- **Proteção Implementada:**
+  - Substituição por projeção SQL explícita em *Allowlist*: apenas campos públicos necessários para o card de swipe são selecionados (`id, name, age, campus, course, specific_course, entity, looking_for, bio, interests, photos, songs, prompts, gender, is_verified`).
+  - O campo `email` e identificadores sensíveis não são requisitados nem transmitidos, em plena conformidade com o Art. 6º, III da LGPD.
+- **Arquivo:** [`backend/routers/feed.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/feed.py#L188-L240)
+
+---
+
+### [VULN-06] Blindagem contra SSRF e Path Traversal no Módulo de Teasers
+- **Problema Original:** Carregamento de imagens via `urllib.request.urlopen` a partir de links arbitrários permitia varredura interna de rede e requisições a serviços locais (SSRF).
+- **Proteção Implementada:**
+  - Bloqueio imediato de esquemas de rede (`http://`, `https://`, `ftp://`, `//`). Teasers são gerados exclusivamente a partir de uploads locais do próprio app.
+  - Confinamento rígido de diretório: resolução de caminhos com `Path.resolve()` e verificação `.is_relative_to(UPLOAD_DIR)` e `.is_relative_to(PRIVATE_UPLOAD_DIR)` para barrar ataques de *Path Traversal* (`../`).
+  - Aplicação de desfoque Gaussiano destrutivo permanente (`radius=35`) e redimensionamento no servidor, garantindo que a foto privada original não possa ser recuperada.
+- **Arquivo:** [`backend/teaser.py`](file:///home/julian/dev/pontinho-ufabc/backend/teaser.py#L45-L109)
+
+---
+
+### [VULN-07] Eliminação de Rota Não Autenticada de Injeção de Contas
+- **Problema Original:** Existência de um endpoint `POST /api/users` sem autenticação permitia a injeção arbitrária de contas falsas no banco de dados.
+- **Proteção Implementada:**
+  - O endpoint inseguro `POST /api/users` foi **completamente eliminado**.
+  - O registro de usuários agora é centralizado exclusivamente em `POST /api/auth/register`, que aplica:
+    - Validação de domínio acadêmico institucional obrigatório (`@aluno.ufabc.edu.br` ou `@ufabc.edu.br`).
+    - Verificação de maioridade ($\ge 18$ anos) e prova de vida facial (ECA Digital).
+    - Aceite formal dos Termos de Uso e LGPD.
+- **Arquivos:** [`backend/routers/users.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/users.py) e [`backend/routers/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/auth.py#L20-L130)
+
+---
+
+### [VULN-08] Rate Limiting no Login & Resposta Genérica Anti-Enumeração
+- **Problema Original:** Ausência de limitação de tentativas de autenticação e mensagens distintas para e-mail incorreto versus senha incorreta, permitindo ataques de força bruta e enumeração de estudantes.
+- **Proteção Implementada:**
+  - Limitador de taxa em memória por endereço IP (`LOGIN_RATE_LIMIT_WINDOW = 60s`, `MAX_LOGIN_ATTEMPTS = 5`). Requisições excedentes recebem HTTP 429 (*Too Many Requests*).
+  - Resposta unificada em caso de falha: `"E-mail institucional ou senha incorretos."` (HTTP 401), impossibilitando a inferência sobre a existência do e-mail na base.
+- **Arquivo:** [`backend/routers/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/auth.py#L132-L188)
+
+---
+
+### [VULN-09] Segregação Física e Autorização Estrita para Fotos Privadas (Álbum Secreto)
+- **Problema Original:** Arquivos privados do Álbum Secreto eram armazenados no mesmo diretório estático público `/uploads`, acessíveis por URL direta.
+- **Proteção Implementada:**
+  - **Segregação física**: Fotos marcadas como privadas são salvas no diretório isolado `private_uploads`, que **não** possui rota estática pública montada no Starlette/FastAPI.
+  - **Endpoint autenticado de entrega**: O acesso ocorre exclusivamente via `GET /api/media/private/{filename}`.
+  - **Regra de autorização**: O servidor consulta o banco e autoriza o acesso somente se:
+    1. O solicitante for o proprietário do arquivo;
+    2. O solicitante for Administrador do sistema;
+    3. Houver registro na tabela `private_access_requests` com `status = 'approved'` concedido pelo proprietário.
+  - **Cabeçalhos de proteção**: Respostas entregam cabeçalhos `Cache-Control: private, no-cache, no-store, must-revalidate` e `X-Content-Type-Options: nosniff` para impedir cache em CDNs públicas ou proxies intermediários.
+- **Arquivos:** [`backend/routers/upload.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/upload.py#L114-L115) e [`backend/routers/media.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/media.py#L25-L104)
+
+---
+
+### [VULN-10] Cookies com Flags `HttpOnly`, `SameSite=Lax` e `Secure` Dinâmico
+- **Problema Original:** O cookie de sessão autenticada era emitido com `httponly=False`, facilitando o roubo de tokens em cenários de Cross-Site Scripting (XSS).
+- **Proteção Implementada:**
+  - O cookie sensível `pontinho_session` é gravado com `httponly=True`, impedindo leitura via JavaScript (`document.cookie`).
+  - Atributo `SameSite="lax"` configurado para mitigar ataques de Cross-Site Request Forgery (CSRF).
+  - Flag `secure` ativada dinamicamente: habilitada via `SECURE_COOKIES=true` no `.env` ou automaticamente quando a requisição for HTTPS (`x-forwarded-proto` / `scheme`).
+- **Arquivo:** [`backend/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/auth.py#L82-L136)
+
+---
+
+### [VULN-11] Política de Senhas com Mínimo de 8 Caracteres
+- **Problema Original:** Limite mínimo de 4 caracteres no formulário de cadastro, permitindo senhas fracas.
+- **Proteção Implementada:**
+  - Validação estrita em nível de esquema Pydantic: `password: str = Field(..., min_length=8)`.
+  - Validação redundante na lógica da rota `register_user`: rejeição com HTTP 400 se `len(cleaned_pw) < 8`.
+- **Arquivos:** [`backend/models.py`](file:///home/julian/dev/pontinho-ufabc/backend/models.py#L10) e [`backend/routers/auth.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/auth.py#L38-L42)
+
+---
+
+## 🛡️ 3. Camadas Adicionais de Segurança & Resiliência
+
+### 1. Offloading de Mídia e Mitigação de DoS por Transcodificação
+- **Problema:** Envio de vídeos pesados ou imagens gigantes para processamento em servidor VPS consome CPU/RAM excessivos, levando a indisponibilidade (DoS).
+- **Controles Implementados:**
+  - **Conversão no Cliente**: A conversão de fotos para WebP e de vídeos curtos para GIF animado é realizada diretamente no navegador (HTML5 Canvas e biblioteca `gifenc`).
+  - **Formatos Estritos no Servidor**: O backend aceita exclusivamente `ALLOWED_IMAGE_FORMATS = {"WEBP", "GIF"}`. Arquivos de vídeo direto são rejeitados com HTTP 400.
+  - **Anti-Image Bomb**: Configurado `Image.MAX_IMAGE_PIXELS = 25_000_000` no Pillow para bloquear descompressão desproporcional.
+  - **Remoção de Metadados**: Limpeza automática de dados sensíveis de localização GPS e EXIF no salvamento.
+  - **Moderação Inteligente**: Integração com **NudeNet** (`check_image_safety`) para bloqueio prévio de conteúdo impróprio.
+- **Arquivo:** [`backend/routers/upload.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/upload.py#L38-L224)
+
+### 2. Verificação Biométrica Facial Contínua & Integridade de Selo
+- **Problema:** Usuário aprovado na verificação facial poderia trocar suas fotos por imagens de terceiros ou celebridades mantendo o selo de verificado.
+- **Controles Implementados:**
+  - Ao atualizar o perfil (`PUT /api/users/me`), se o usuário já possui o selo `is_verified = 1`, o backend calcula a distância euclidiana entre o descritor facial armazenado da verificação ao vivo e os descritores faciais das novas fotos.
+  - Se a menor distância exceder o limiar de similaridade (`FACE_SIMILARITY_THRESHOLD = 0.50`), o selo oficial é automaticamente revogado no banco de dados.
+- **Arquivo:** [`backend/routers/users.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/users.py#L65-L94)
+
+### 3. Proteção contra Open Proxy no YouTube Search
+- **Problema:** Endpoint aberto de busca no YouTube poderia ser explorado como proxy anônimo para scraping abusivo.
+- **Controles Implementados:**
+  - A rota `GET /api/youtube/search` exige autenticação obrigatória de sessão (`get_current_user_id`).
+  - Aplicação de limitador de 15 requisições por minuto por usuário autenticado e cache local em memória de termos frequentes.
+- **Arquivo:** [`backend/routers/feed.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/feed.py#L73-L97)
+
+### 4. CORS Dinâmico com Regex para Ambientes Pré-Produção
+- **Problema:** Falhas de CORS em domínios dinâmicos ou wildcard excessivamente permissivo (`*`) com `allow_credentials=True`.
+- **Controles Implementados:**
+  - Implementado construtor de regex dinâmico (`build_cors_regex()`) que suporta curingas seguros de subdomínios (ex: `https://*.workers.dev`, `https://*.pages.dev`, domínios institucionais) permitindo cookies com integridade.
+- **Arquivo:** [`backend/main.py`](file:///home/julian/dev/pontinho-ufabc/backend/main.py#L65-L93)
+
+### 5. Conformidade com Direitos dos Titulares (LGPD)
+- **Art. 18 (Direito de Acesso e Exportação):** Rota `GET /api/users/me/export` gera um dump estruturado em JSON com todos os dados pessoais, fotos, mensagens e interações vinculadas ao estudante.
+- **Art. 16 (Direito à Eliminação):** Rota `DELETE /api/users/me` executa a exclusão definitiva e irreversível da conta e de todos os registros associados em cascata (swipes, matches, mensagens, fotos físicas e registros de auditoria).
+- **Arquivo:** [`backend/routers/users.py`](file:///home/julian/dev/pontinho-ufabc/backend/routers/users.py#L170-L290)
+
+---
+
+## 🧪 4. Cobertura de Testes Automatizados de Segurança
+
+A suíte de testes em [`backend/tests/test_api.py`](file:///home/julian/dev/pontinho-ufabc/backend/tests/test_api.py) valida de forma contínua as regras de segurança implementadas:
+
+```bash
+# Executar a suíte de testes automatizados
+poetry run pytest backend/tests/test_api.py -v
 ```
 
-### Matriz Geral de Risco
-
-| ID | Vulnerabilidade | Severidade | Categoria OWASP | Arquivo Afetado | Status |
-|:---|:---|:---:|:---|:---|:---:|
-| **VULN-01** | Bypass de Autenticação / Account Takeover via Headers & Cookies Legados | 🔴 **CRÍTICA** | A07:2021 – Identification and Auth Failures | `backend/auth.py` | ✅ **Corrigido** (`530a0d1`) |
-| **VULN-02** | Chave Secreta de Assinatura de Sessão (HMAC) Hardcoded no Código | 🔴 **CRÍTICA** | A02:2021 – Cryptographic Failures | `backend/auth.py` | ✅ **Corrigido** (`9e06712`) |
-| **VULN-03** | Algoritmo Criptográfico de Hash de Senhas Rápido (SHA-256 com Salt Estático) | 🟠 **ALTA** | A02:2021 – Cryptographic Failures | `backend/database.py` | ✅ **Corrigido** (`ce7e312`) |
-| **VULN-04** | Exposição Pública de Contas, Privilégios e Senhas Padrão em `/demo-accounts` | 🟠 **ALTA** | A01:2021 – Broken Access Control | `backend/routers/auth.py` | ✅ **Corrigido** (`4369f5d`) |
-| **VULN-05** | Vazamento de Dados Pessoais (E-mail Institucional) no Feed de Swipes | 🟠 **ALTA** | A01:2021 – Security Misconfiguration / LGPD | `backend/routers/feed.py` | ✅ **Corrigido** (`16e8149`) |
-| **VULN-06** | Blind Server-Side Request Forgery (SSRF) no Gerador de Teasers Borrados | 🟠 **ALTA** | A10:2021 – Server-Side Request Forgery | `backend/teaser.py` | ✅ **Corrigido** (`5849ddd`) |
-| **VULN-07** | Endpoint Não Autenticado de Injeção de Contas Arbitrárias (`POST /api/users`) | 🟠 **ALTA** | A04:2021 – Insecure Design | `backend/routers/users.py` | ✅ **Corrigido** (`e1098ec`) |
-| **VULN-08** | Ausência de Rate Limiting no Login & Enumeração de E-mails Cadastrados | 🟡 **MÉDIA** | A07:2021 – Identification and Auth Failures | `backend/routers/auth.py` | ✅ **Corrigido** (`2c2b583`) |
-| **VULN-09** | Armazenamento Estático de Imagens Privadas Sem Controle de Acesso (`/uploads`) | 🟡 **MÉDIA** | A01:2021 – Broken Access Control (BOLA) | `backend/main.py` | ✅ **Corrigido** (`96c290f`) |
-| **VULN-10** | Cookies de Sessão Autenticada sem Flags de Proteção `HttpOnly` e `Secure` | 🟡 **MÉDIA** | A05:2021 – Security Misconfiguration | `backend/auth.py` | ✅ **Corrigido** (`e6c3626`) |
-| **VULN-11** | Política de Senhas com Comprimento Mínimo Muito Curto (4 caracteres) | 🔵 **BAIXA** | A07:2021 – Identification and Auth Failures | `backend/models.py` | ✅ **Corrigido** (`7998bd2`) |
+### Casos de Teste Chave Implementados:
+- `test_session_token_security`: Validação de tokens HMAC, rejeição de tokens adulterados ou com payload corrompido.
+- `test_register_validation_short_password`: Rejeição com HTTP 400 de senhas menores que 8 caracteres.
+- `test_register_validation_non_ufabc_email`: Rejeição de e-mails de provedores externos genéricos (@gmail, etc.).
+- `test_register_validation_underage_blocked`: Bloqueio automático de cadastros com idade estimada $< 18$ anos.
+- `test_protected_routes_require_authentication`: Confirmação de HTTP 401 para rotas privadas sem credenciais válidas.
+- `test_upload_webp_image_accepted` & `test_upload_raw_jpeg_rejected`: Aceite estrito de WebP e rejeição de formatos não otimizados no servidor.
+- `test_upload_direct_video_rejected`: Bloqueio de upload direto de streams de vídeo para o backend.
+- `test_cors_preflight_dev_subdomain`: Validação do casamento de padrões de CORS para subdomínios confiáveis.
 
 ---
 
-## 🔍 2. Detalhamento Técnico das Vulnerabilidades
+## 📋 5. Checklist de Verificação Periódica
 
----
+Para novos endpoints ou módulos que venham a ser adicionados:
 
-### [VULN-01] Bypass de Autenticação / Account Takeover via Headers & Cookies Legados
-- **Severidade:** 🔴 **CRÍTICA** (CVSS: 9.8)
-- **Localização:** `backend/auth.py:L106-123`
-- **Descrição & Mecanismo:**
-  No método `get_current_user_id()`, existe um fallback herdado de desenvolvimento local que aceita identificadores numéricos puros vindos do cabeçalho HTTP `X-User-Id` ou do cookie `pontinho_user_id`:
-  ```python
-  legacy_header = request.headers.get("x-user-id")
-  if legacy_header and legacy_header.isdigit():
-      return int(legacy_header)
-
-  legacy_cookie = request.cookies.get("pontinho_user_id")
-  if legacy_cookie and legacy_cookie.isdigit():
-      return int(legacy_cookie)
-  ```
-- **Cenário de Ataque:**
-  Um atacante pode interceptar ou emitir qualquer requisição HTTP contendo o header `X-User-Id: 1` ou cookie `pontinho_user_id=1`. O backend imediatamente assumirá a sessão do Usuário ID 1 (inclusive com privilégios de Administrador) sem exigir credencial, assinatura criptográfica ou token válido.
-- **Impacto:** Comprometimento total da aplicação, sequestro de qualquer conta de estudante e acesso irrestrito ao painel de administração.
-- **Remediação Recomendada:**
-  Remover a checagem `.isdigit()` de strings puras. Apenas aceitar tokens que passem pela validação `verify_session_token(token)`.
-
----
-
-### [VULN-02] Chave Secreta de Assinatura de Sessão (HMAC) Hardcoded
-- **Severidade:** 🔴 **CRÍTICA** (CVSS: 9.1)
-- **Localização:** `backend/auth.py:L11`
-- **Descrição & Mecanismo:**
-  A chave utilizada para assinar os tokens criptográficos de sessão possui um valor padrão fixo caso a variável de ambiente não esteja declarada:
-  ```python
-  SECRET_KEY = os.getenv("PONTINHO_SECRET_KEY", "ufabc_pontinho_super_secret_session_key_2026")
-  ```
-- **Cenário de Ataque:**
-  Como o código-fonte está versionado no repositório, qualquer pessoa que inspecione o arquivo pode gerar assinaturas HMAC-SHA256 offline válidas no formato `{user_id}.{timestamp}.{signature}` e autenticar-se como qualquer estudante ou administrador.
-- **Impacto:** Forjamento arbitrário de identidades em qualquer ambiente onde `PONTINHO_SECRET_KEY` não for customizada no `.env`.
-- **Remediação Recomendada:**
-  Obrigar a definição da variável de ambiente `PONTINHO_SECRET_KEY` em produção (gerando erro fatal de inicialização caso ausente), ou gerar um segredo randômico seguro via `secrets.token_hex(32)`.
-
----
-
-### [VULN-03] Algoritmo Criptográfico Fraco para Senhas (SHA-256 com Salt Estático)
-- **Severidade:** 🟠 **ALTA** (CVSS: 7.5)
-- **Localização:** `backend/database.py:L25-L32`
-- **Descrição & Mecanismo:**
-  O armazenamento de senhas utiliza SHA-256 simples com salt fixo universal:
-  ```python
-  def hash_password(password: str) -> str:
-      salt = "ufabc_pontinho_2026"
-      return hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
-  ```
-- **Cenário de Ataque:**
-  O SHA-256 foi projetado para alta velocidade de throughput e não para armazenamento de senhas. Se o banco SQLite for extraído, placas de vídeo modernas conseguem computar bilhões de tentativas por segundo (ataque por dicionário / rainbow table) e reverter as senhas dos estudantes.
-- **Impacto:** Quebra rápida de senhas em caso de vazamento da base de dados.
-- **Remediação Recomendada:**
-  Migrar para algoritmos com fator de trabalho configurável (Work Factor / Cost) projetados para senhas, como **Argon2id** (recomendado pela OWASP) ou **bcrypt**, utilizando salt aleatório individual por usuário.
-
----
-
-### [VULN-04] Exposição Pública de Credenciais em `/api/auth/demo-accounts`
-- **Severidade:** 🟠 **ALTA** (CVSS: 7.5)
-- **Localização:** `backend/routers/auth.py:L170-L191`
-- **Descrição & Mecanismo:**
-  O endpoint `/api/auth/demo-accounts` é público e responde com todos os dados cadastrais dos estudantes, sinalizando se são administradores e expondo senhas padrão:
-  ```python
-  d["password"] = "admin123" if d["is_admin"] else "123456"
-  ```
-- **Cenário de Ataque:**
-  Qualquer visitante não logado consegue listar a base inteira de estudantes da plataforma, descobrir os IDs e e-mails de administradores e tentar login com as credenciais expostas.
-- **Impacto:** Enumeração massiva de usuários e invasão de contas com senhas fracas ou inalteradas.
-- **Remediação Recomendada:**
-  Condicionar a rota para retornar dados apenas se uma flag de debug estiver explicitamente ativa (`DEBUG=true`), e em hipótese alguma expor o campo `password` na resposta da API.
-
----
-
-### [VULN-05] Vazamento de Dados Pessoais (E-mail Institucional) no Feed
-- **Severidade:** 🟠 **ALTA** (CVSS: 7.2)
-- **Localização:** `backend/routers/feed.py:L130-L168`
-- **Descrição & Mecanismo:**
-  O feed executa `SELECT * FROM users`. Apesar de remover `password_hash` e fotos privadas antes do retorno, ele mantinha no payload o campo `email`:
-  ```python
-  d.pop("private_photos", None)
-  d.pop("private_bio", None)
-  d.pop("password_hash", None)
-  # 'email' continuava dentro de 'd'
-  ```
-- **Cenário de Ataque:**
-  Ao usar a interface de swipes, o usuário poderia inspecionar a aba Network e baixar a lista completa de e-mails institucionais de todos os outros estudantes cadastrados.
-- **Impacto:** Violação grave das normas da LGPD (Lei Geral de Proteção de Dados - Lei 13.709/2018) por desrespeito ao Princípio da Minimização de Dados (Art. 6º, III), viabilizando engenharia social e perseguição (doxxing).
-- **Remediação Recomendada:**
-  Definir projeção estrita no banco, buscando e serializando apenas dados públicos: `id, name, age, campus, course, specific_course, entity, looking_for, bio, interests, photos, songs, prompts`.
-
----
-
-### [VULN-06] Blind Server-Side Request Forgery (SSRF) no Processador de Teasers
-- **Severidade:** 🟠 **ALTA** (CVSS: 7.4)
-- **Localização:** `backend/teaser.py:L47-L54`
-- **Descrição & Mecanismo:**
-  Ao gerar teasers borrados para o Álbum Secreto, o servidor efetua requisições HTTP para qualquer URL contida em `photo_source`:
-  ```python
-  if source_clean.startswith("http://") or source_clean.startswith("https://"):
-      req = urllib.request.Request(source_clean, ...)
-      with urllib.request.urlopen(req, timeout=6) as response:
-          img_bytes = response.read()
-  ```
-- **Cenário de Ataque:**
-  Um usuário autenticado pode atualizar seu perfil inserindo em `private_photos` um link para a rede interna (ex: `http://169.254.169.254/latest/meta-data/` na AWS, ou `http://localhost:8000/api/admin/...`). O servidor FastAPI fará a requisição a partir de sua própria interface de rede.
-- **Impacto:** Varredura de portas da rede interna corporativa, acesso a metadados de instâncias em nuvem e disparo de requisições internas autenticadas.
-- **Remediação Recomendada:**
-  Permitir apenas referências a arquivos locais gerenciados pelo Pontinho (`/uploads/...`) ou validar a URL com lista branca rigorosa de domínios públicos externos, bloqueando estritamente endereços de loopback (`127.0.0.1`, `localhost`) e faixas RFC 1918 / link-local (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`).
-
----
-
-### [VULN-07] Criação Não Autenticada de Usuários Arbitrários (`POST /api/users`)
-- **Severidade:** 🟠 **ALTA** (CVSS: 7.3)
-- **Localização:** `backend/routers/users.py:L92-L125`
-- **Descrição & Mecanismo:**
-  O endpoint `POST /api/users` permite criar novos registros na tabela `users` sem exigir autenticação de administrador, sem validar e-mail acadêmico UFABC, sem exigir senha e sem confirmação de aceite dos termos LGPD.
-- **Cenário de Ataque:**
-  Um atacante pode programar um script em lote para injetar centenas de perfis fraudulentos com links ou textos maliciosos diretamente no banco de dados, corrompendo a integridade da plataforma.
-- **Impacto:** Poluição da base de dados, perda de integridade do feed e bypass do fluxo formal de cadastro.
-- **Remediação Recomendada:**
-  Restringir `POST /api/users` exclusivamente para administradores (`require_admin(request)`), canalizando cadastros normais unicamente através de `POST /api/auth/register`.
-
----
-
-### [VULN-08] Ausência de Rate Limiting no Login & Enumeração de Usuários
-- **Severidade:** 🟡 **MÉDIA** (CVSS: 5.3)
-- **Localização:** `backend/routers/auth.py:L94-L127`
-- **Descrição & Mecanismo:**
-  O endpoint `/api/auth/login` não possui limitação de taxa de requisições (rate limiting) nem proteção contra força bruta (bloqueio temporário). Além disso, retorna mensagens de erro diferenciadas:
-  - `"E-mail acadêmico não encontrado no sistema."`
-  - `"Senha incorreta."`
-- **Cenário de Ataque:**
-  Um atacante pode testar listas de e-mails de estudantes da UFABC para descobrir quem possui conta ativa no app e, em seguida, disparar ataques automatizados de adivinhação de senhas com ferramentas como Hydra ou scripts Python.
-- **Impacto:** Descoberta de usuários cadastrados e quebra de contas com senhas comuns.
-- **Remediação Recomendada:**
-  1. Padronizar a mensagem de erro para uma resposta genérica: `"E-mail ou senha inválidos."`
-  2. Implementar rate limiting por IP e por conta (ex: máximo de 5 tentativas por minuto).
-
----
-
-### [VULN-09] Armazenamento de Arquivos Privados Sem Controle de Acesso
-- **Severidade:** 🟡 **MÉDIA** (CVSS: 5.3)
-- **Localização:** `backend/main.py:L54`
-- **Descrição & Mecanismo:**
-  O diretório de uploads é servido de forma pública e direta pelo Starlette:
-  ```python
-  app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
-  ```
-- **Cenário de Ataque:**
-  Se fotos privadas de usuários forem salvas na mesma pasta `/uploads`, qualquer pessoa que consiga o nome do arquivo (ex: interceptando tráfego, por log ou adivinhação de UUID) terá acesso direto ao arquivo original em alta resolução, sem precisar de autorização de match.
-- **Impacto:** Quebra do modelo de isolamento do Álbum Secreto.
-- **Remediação Recomendada:**
-  Separar os diretórios:
-  - `/uploads/public/` para capas de festas e avatares públicos.
-  - `/uploads/private/` protegido, servido unicamente por um endpoint que valida a aprovação da tabela `private_access_requests`.
-
----
-
-### [VULN-10] Cookies de Sessão Sem Atributos `HttpOnly` e `Secure`
-- **Severidade:** 🟡 **MÉDIA** (CVSS: 4.8)
-- **Localização:** `backend/auth.py:L60-L71`
-- **Descrição & Mecanismo:**
-  Ao definir os cookies de sessão (`pontinho_session` e `pontinho_user_id`), o parâmetro `httponly` é explicitamente configurado como `False`:
-  ```python
-  response.set_cookie(
-      key=SESSION_COOKIE_NAME,
-      value=token,
-      httponly=False,
-      samesite="lax"
-  )
-  ```
-- **Cenário de Ataque:**
-  Caso ocorra qualquer injeção de script (XSS) no frontend, o invasor pode executar `document.cookie` e roubar o token assinado de sessão para sequestrar a conta remotamente.
-- **Impacto:** Facilidade de sequestro de sessão em caso de vulnerabilidades XSS.
-- **Remediação Recomendada:**
-  Configurar `httponly=True` em `pontinho_session`. Para ambientes HTTPS de produção, adicionar também `secure=True`.
-
----
-
-### [VULN-11] Política de Senhas com Comprimento Mínimo Muito Curto
-- **Severidade:** 🔵 **BAIXA** (CVSS: 3.1)
-- **Localização:** `backend/models.py:L10`
-- **Descrição & Mecanismo:**
-  O modelo `RegisterRequest` exige apenas 4 caracteres para a senha:
-  ```python
-  password: str = Field(..., min_length=4, description="Senha de acesso")
-  ```
-- **Cenário de Ataque:**
-  Senhas de 4 caracteres possuem um espaço de busca minúsculo e são facilmente descobertas por dicionários básicos (ex: "1234", "ufab").
-- **Impacto:** Criação de contas com senhas extremamente vulneráveis.
-- **Remediação Recomendada:**
-  Aumentar o requisito mínimo para pelo menos 8 caracteres (conforme diretrizes NIST SP 800-63B).
-
----
-
-## 📋 3. Plano de Ação & Roadmap de Hardening (Concluído)
-
-### Fase 1: Correções Críticas Imediatas
-1. ✅ **[VULN-01] Fechado o bypass de autenticação** em `backend/auth.py` removendo a aceitação de IDs numéricos simples sem validação de assinatura (`530a0d1`).
-2. ✅ **[VULN-02] Eliminada a chave de sessão hardcoded**, exigindo variável de ambiente estrita `PONTINHO_SECRET_KEY` no `.env` com aborto em tempo de inicialização (`9e06712`).
-3. ✅ **[VULN-05] Bloqueado vazamento de dados no feed** em `backend/routers/feed.py` retirando `email` via projeção em Allowlist estrita (`16e8149`).
-
-### Fase 2: Fortalecimento de Acesso e Controles
-4. ✅ **[VULN-04] Restrito `/api/auth/demo-accounts`** a `DEV_MODE=true`, ocultando administradores e removendo o campo `password` (`4369f5d`).
-5. ✅ **[VULN-07] Eliminado endpoint não autenticado `POST /api/users`** em `backend/routers/users.py` (`e1098ec`).
-6. ✅ **[VULN-06] Bloqueado SSRF em `backend/teaser.py`** rejeitando URLs externas para fotos privadas e aplicando confinamento de Path Traversal (`5849ddd`).
-7. ✅ **[VULN-10] Marcados cookies de sessão com `HttpOnly=True`** e atributo `Secure` dinâmico para HTTPS em `backend/auth.py` (`e6c3626`).
-
-### Fase 3: Modernização Criptográfica & Resiliência
-8. ✅ **[VULN-03] Substituído o hash SHA-256 por Argon2id** (OWASP) com salt individual e migração transparente em `backend/database.py` e `backend/routers/auth.py` (`ce7e312`).
-9. ✅ **[VULN-08] Implementado Rate Limiting (5 req/min)** e mensagem de erro genérica unificada no login (`2c2b583`).
-10. ✅ **[VULN-09] Segregadas fotos privadas do Álbum Secreto** em `private_uploads` servidas unicamente pelo endpoint autenticado `GET /api/media/private/{filename}` com checagem de autorização/match (`96c290f`).
-11. ✅ **[VULN-11] Aumentado requisito mínimo de senha para 8 caracteres** em `backend/models.py`, `backend/routers/auth.py` e `frontend/login.html` conforme NIST SP 800-63B (`7998bd2`).
-
----
-
-## 🔎 4. Auditoria Exaustiva de Endpoints & Análise de Superfície de Ataque
-
-Após a eliminação das vulnerabilidades críticas e dos backdoors prévios (`GET /api/users/list` e `POST /api/auth/switch-user/{target_user_id}`), foi realizada uma varredura completa em todos os **58 endpoints ativos** registrados na aplicação FastAPI.
-
-### Mapeamento do Inventário de Rotas
-
-| Módulo / Roteador | Qtd. Rotas | Nível de Acesso Principal | Políticas de Proteção |
-|---|:---:|---|---|
-| **Auth** (`/api/auth`) | 5 | Público / Sessão | Rate Limit (Login), Hashes Argon2id, Cookies HttpOnly |
-| **Feed & Swipes** (`/api/feed`, `/api/swipe`, `/api/youtube`) | 3 | Sessão Autenticada / Público | Projeção em Allowlist LGPD, Teasers no Servidor |
-| **Matches & Chat** (`/api/matches`, `/api/messages`) | 9 | Participantes do Match | Validação estrita de autorização de conversa |
-| **Mídia Privada** (`/api/media`) | 1 | Proprietário / Match Aprovado | Prevenção de Path Traversal, No-Cache |
-| **Usuários & Perfil** (`/api/users`) | 7 | Próprio Usuário | Direito LGPD (Art. 18), Sanitização de URLs |
-| **Festas & Eventos** (`/api/events`) | 6 | Autenticado / Admin | Anonimização de participantes para deslogados |
-| **Upload de Arquivos** (`/api/upload`) | 1 | Autenticado | Buffer 10MB, Anti-Image Bomb, Limpeza EXIF |
-| **Ouvidoria & Denúncias** (`/api/help`) | 1 | Público Aberto | Rate limit de conexões, canal confidencial |
-| **Painel Administrativo** (`/api/admin`) | 24 | Exclusivo Administrador (`is_admin=1`) | Verificação estrita via `require_admin()` |
-| **Metadados & Raiz** (`/`, `/api/metadata`) | 2 | Público | Apenas leitura de catálogos estáticos |
-
----
-
-### 🚨 Endpoints Auditados & Remediações Aplicadas
-
-A auditoria identificou **4 pontos de atenção** na superfície de ataque e arquitetura da API, tendo sido aplicadas as seguintes correções:
-
-#### 1. `GET /api/youtube/search` (`backend/routers/feed.py`)
-- **Classificação:** 🟠 **Vulnerabilidade de Médio/Alto Risco** (Open Scraping Proxy / DoS)
-- **Problema:** Endpoint aberto e sem autenticação que recebe query livre (`q: str`) e efetua requisições HTTP para o YouTube realizando scraping com regex.
-- **Ação Executada:** ✅ **Protegido com Autenticação e Rate Limiting**. A rota agora exige sessão válida do estudante (`get_current_user_id`) e aplica rate limit rigoroso em memória de no máximo 15 buscas por minuto por usuário autenticado, bloqueando abuso como proxy aberto.
-
-#### 2. `POST /api/feed/reset` (Antigo `POST /api/admin/reset-swipes`)
-- **Classificação:** 🟡 **Inconsistência de Segurança & Controle de Acesso**
-- **Problema:** A rota de reset de swipes do próprio usuário estava alocada sob o prefixo `/api/admin/reset-swipes` no roteador administrativo sem checagem de `require_admin`.
-- **Ação Executada:** ✅ **Migrado para Rota Canônica de Feed**. A funcionalidade foi transferida para `POST /api/feed/reset` dentro de `backend/routers/feed.py`, validando a identidade do estudante logado e mantendo compatibilidade de rota.
-
-#### 3. Aliases Duplicados de Chat: `GET /api/messages/{match_id}` e `POST /api/messages/{match_id}`
-- **Classificação:** 🔵 **Redundância Arquitetural & Superfície Desnecessária**
-- **Problema:** Rotas duplicadas que decoravam os mesmos handlers das rotas canônicas de chat sob `/api/matches/`.
-- **Ação Executada:** ✅ **Apagados**. As rotas legadas duplicadas foram removidas de `backend/routers/matches.py`, consolidando a API no padrão RESTful `/api/matches/{match_id}/messages`.
-
-#### 4. `GET /api/auth/demo-accounts` (`backend/routers/auth.py`)
-- **Classificação:** 🟡 **Resíduo de Teste / Superfície de Ataque Residual**
-- **Problema:** Endpoint de teste que retorna contas para login automático em ambiente de desenvolvimento.
-- **Status Atual:** 🔒 **Restrito a Ambiente de Desenvolvimento (`DEV_MODE=true`)**. Oculta administradores e não expõe senhas no payload. Em produção (`DEV_MODE=false`), retorna array vazio `[]`.
-
----
-
-## 🛡️ 5. Atualizações Recentes de Segurança, Mitigação de DoS e Resiliência (Outubro/2026)
-
-Em continuidade às boas práticas de segurança defensiva e estabilidade de infraestrutura, foram implementadas as seguintes melhorias:
-
-### 1. Offloading de Processamento de Mídia & Mitigação de DoS por Transcodificação
-- **Vulnerabilidade Mitigada:** Exaustão de Recursos de CPU/RAM (Denial of Service) por upload de vídeos ou imagens de altíssima resolução para transcodificação no servidor.
-- **Solução Implementada:** 
-  - Toda conversão de imagens estáticas (JPEG, PNG, HEIC) para **WebP** e vídeos curtos (< 10s) para **GIF animado** é realizada 100% no navegador do usuário (via HTML5 Canvas e `gifenc`).
-  - O backend (`backend/routers/upload.py`) agora rejeita imediatamente formatos pesados não processados, aceitando exclusivamente `ALLOWED_IMAGE_FORMATS = {"WEBP", "GIF"}`.
-  - Limite seguro de até **40 MB** com inspeção anti-Image Bomb e sanitização de metadados EXIF/GPS, garantindo que o servidor permaneça leve e rápido em instâncias VPS de qualquer porte.
-
-### 2. Verificação Biométrica Contínua de Perfil
-- **Vulnerabilidade Mitigada:** Account Impersonation pós-verificação (troca de fotos verificadas por fotos fakes de terceiros).
-- **Solução Implementada:**
-  - O endpoint de atualização cadastral (`PUT /api/users/me`) monitora a consistência dos vetores faciais de 128 dimensões. Se um usuário previamente verificado (`is_verified = 1`) remover ou substituir todas as fotos contendo sua biometria facial, o selo oficial é automaticamente revogado no servidor.
-
-### 3. Blind Server-Side Request Forgery (SSRF) Hardening
-- **Vulnerabilidade Mitigada:** Requisições arbitrárias do servidor backend disparadas pelo gerador de teasers borrados (`backend/teaser.py`).
-- **Solução Implementada:**
-  - O backend rejeita terminantemente URLs externas não locais (`[Security SSRF Blocked]`), permitindo processamento de desfoque destrutivo apenas para caminhos locais internos autenticados em `/uploads/` e `/api/media/private/`.
-
-### 4. Blindagem de Privacidade e CORS Dinâmico
-- **Vulnerabilidade Mitigada:** Exposição de endpoints ou domínios de produção em repositórios abertos e falhas de CORS em subdomínios dinâmicos.
-- **Solução Implementada:**
-  - Purga completa de referências hardcoded ao domínio de produção em todo o código-fonte, rotas e testes.
-  - A API deriva endpoints dinamicamente a partir de variáveis de ambiente (`VITE_API_URL`) e `window.location`.
-  - Configuração de CORS no FastAPI com suporte a regex para subdomínios dinâmicos seguros.
-
-### 5. Higienização de Metadados e Contas Limpas no Registro
-- **Vulnerabilidade Mitigada:** Inconsistência de perfis e uso indevido de imagens de terceiros.
-- **Solução Implementada:**
-  - Remoção de URLs automáticas de placeholders externos no cadastro de novos estudantes. Perfis iniciam em estado limpo, e snapshots da prova de vida são capturados e armazenados nativamente no formato seguro `.webp`.
-
-
+1. [ ] **Autenticação:** Toda rota não explicitamente pública utiliza `get_current_user_id(request)` ou `require_admin(request)`.
+2. [ ] **Minimização (LGPD):** Consultas ao banco utilizam projeção explícita de colunas (evitar `SELECT *`).
+3. [ ] **Validação de Entrada:** Schemas Pydantic tipados com restrições mínimas/máximas em todos os campos.
+4. [ ] **Mídias Privadas:** Fotos confidenciais salvas unicamente em `private_uploads` e acessadas via rota controlada.
+5. [ ] **Rate Limiting:** Endpoints de autenticação, upload e consumo de APIs externas protegidos contra *flooding*.
+6. [ ] **Segurança de Segredos:** Nenhuma chave criptográfica ou credencial versionada em código (`.env` obrigatório).

@@ -285,6 +285,8 @@ export function EventsPage() {
                   <img
                     src={coverUrl}
                     alt={ev.title}
+                    loading="lazy"
+                    decoding="async"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
@@ -316,9 +318,9 @@ export function EventsPage() {
                 {/* DETALHES DA FESTA */}
                 <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
                   <div>
-                    <h3 class="text-lg font-extrabold text-white tracking-tight leading-snug hover:text-emerald-300 transition">
+                    <h2 class="text-lg font-extrabold text-white tracking-tight leading-snug hover:text-emerald-300 transition">
                       {ev.title}
-                    </h3>
+                    </h2>
                     <p class="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed">
                       {ev.description || 'Integração universitária aberta para a comunidade UFABC.'}
                     </p>

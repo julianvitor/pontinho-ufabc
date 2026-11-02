@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { apiFetch, setCurrentUserId, showToast } from '../services/api.js';
+import { loadFaceApiScript } from '../services/faceApi.js';
 
 const LIVENESS_CHALLENGES = [
   {
@@ -124,7 +125,7 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
   // ==========================================
   async function loadBiometricModels() {
     if (modelsLoadedRef.current) return true;
-    const faceapi = window.faceapi;
+    const faceapi = await loadFaceApiScript();
     if (!faceapi) {
       throw new Error('Biblioteca biométrica indisponível. Verifique sua conexão.');
     }
