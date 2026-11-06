@@ -784,6 +784,43 @@ def seed_database():
         }
     ]
 
+    # 5. Garantir Usuário Administrador Padrão
+    admin_user = mock_users[0]
+    cursor.execute("SELECT id FROM users WHERE is_admin = 1 LIMIT 1")
+    existing_admin = cursor.fetchone()
+    if not existing_admin:
+        cursor.execute("SELECT id FROM users WHERE email = ? OR ra = ?", (admin_user["email"], admin_user["ra"]))
+        existing_admin_by_email = cursor.fetchone()
+        if existing_admin_by_email:
+            cursor.execute("UPDATE users SET is_admin = 1 WHERE id = ?", (existing_admin_by_email["id"],))
+        else:
+            cursor.execute("""
+                INSERT INTO users (
+                    ra, password_hash, email, name, age, campus, course, specific_course, entity,
+                    looking_for, bio, interests, photos,
+                    prompt1_q, prompt1_a, prompt2_q, prompt2_a, prompt3_q, prompt3_a,
+                    gender, target_gender, songs, private_photos, private_bio, is_admin
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+            """, (
+                admin_user["ra"], admin_user["password_hash"], admin_user["email"], admin_user["name"],
+                admin_user["age"], admin_user["campus"], admin_user["course"], admin_user["specific_course"],
+                admin_user["entity"], admin_user["looking_for"], admin_user["bio"], admin_user["interests"],
+                admin_user["photos"], admin_user["prompt1_q"], admin_user["prompt1_a"], admin_user["prompt2_q"],
+                admin_user["prompt2_a"], admin_user["prompt3_q"], admin_user["prompt3_a"],
+                admin_user["gender"], admin_user["target_gender"], admin_user["songs"],
+                admin_user.get("private_photos", "[]"), admin_user.get("private_bio", ""), 1
+            ))
+
+    # Em modo de produção (DEV_MODE=false), encerra a semente sem inserir perfis, eventos ou matches fakes
+    dev_mode_active = os.getenv("DEV_MODE", "false").strip().lower() in ("true", "1", "yes") or \
+                      os.getenv("DEBUG", "false").strip().lower() in ("true", "1", "yes")
+    if not dev_mode_active:
+        conn.commit()
+        conn.close()
+        print("Base inicializada em modo de produção (cursos, entidades, perguntas e admin garantidos; perfis e festas fakes omitidos).")
+        return
+
+    # A partir daqui, povoamento exclusivo para Desenvolvimento/Testes (DEV_MODE=true)
     for u in mock_users:
         cursor.execute("SELECT id FROM users WHERE email = ? OR (ra = ? AND ra != '')", (u["email"], u["ra"]))
         existing = cursor.fetchone()
