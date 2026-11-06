@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pontinho-backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      # Persistência do banco SQLite e diretório de uploads/fotos privadas no host
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - DATABASE_PATH=/app/data/pontinho.db
+      - PYTHONUNBUFFERED=1
+      - MALLOC_TRIM_THRESHOLD_=100000
+      - PYTHONMALLOC=malloc
+      - OMP_NUM_THREADS=1
+      - OPENBLAS_NUM_THREADS=1
+      - DEV_MODE=false
+      - SECURE_COOKIES=true
+    mem_limit: 512m
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+

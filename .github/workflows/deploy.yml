@@ -50,9 +50,9 @@ jobs:
         run: pytest backend/tests/test_api.py -v
 
   deploy:
-    name: 2. Deploy na VPS (CD)
+    name: 2. Deploy na VPS de Produção (CD)
     needs: test
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Verificar integridade dos Secrets
@@ -66,7 +66,7 @@ jobs:
           USER: ${{ secrets.SSH_USER }}
           KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Conectar na VPS e executar atualização
+      - name: Conectar na VPS e executar atualização de produção
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
@@ -75,4 +75,4 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s\n" "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=60 -i ~/.ssh/deploy_key -p 22 "$SSH_USER@$SSH_HOST" "/home/ubuntu/pontinho-backend/scripts/deploy.sh"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=60 -i ~/.ssh/deploy_key -p 22 "$SSH_USER@$SSH_HOST" "/home/ubuntu/pontinho-backend/scripts/deploy.sh main"
