@@ -108,43 +108,7 @@ def seed_database():
     for p in prompts:
         cursor.execute("INSERT OR IGNORE INTO prompts (question) VALUES (?)", (p,))
 
-    # 4. Publicidades (Ads intercalados no feed)
-    ads = [
-        (
-            "🍻 Festa Integração 2026",
-            "A maior integração universitária! Open bar, 3 palcos e atrações imperdíveis. Lote 2 esgotando!",
-            "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80",
-            "Garantir Ingresso",
-            "https://pontinho.app",
-            1,
-            3
-        ),
-        (
-            "🖨️ Gráfica & Coworking Universitário",
-            "Imprima suas apostilas, projetos e relatórios com desconto especial para membros do Pontinho.",
-            "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80",
-            "Pegar Cupom",
-            "https://pontinho.app",
-            1,
-            4
-        ),
-        (
-            "🦊 Kit Exclusivo & Caneca Oficial",
-            "Caneca de tirante de alumínio 850ml, abadá e bandana exclusiva. Seja sócio-torcedor com valor promocional.",
-            "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&auto=format&fit=crop&q=80",
-            "Pedir Kit",
-            "https://pontinho.app",
-            1,
-            4
-        )
-    ]
-    for title, desc, img, btn, link, active, freq in ads:
-        cursor.execute("""
-            INSERT OR IGNORE INTO ads (title, description, image_url, button_text, link_url, is_active, frequency)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (title, desc, img, btn, link, active, freq))
-
-    # 5. 8 Perfis de Exemplo (+ 1 Administrador)
+    # 4. 8 Perfis de Exemplo (+ 1 Administrador)
     mock_users = [
         {
             "ra": "admin",
@@ -958,6 +922,44 @@ def seed_database():
                 INSERT INTO events (title, description, event_date, location, image_url, ticket_url, created_by)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (ev["title"], ev["description"], ev["event_date"], ev["location"], ev["image_url"], ev["ticket_url"], ev["created_by"]))
+
+    # Publicidades de Exemplo (exclusivas do modo de Desenvolvimento/Testes)
+    sample_ads = [
+        (
+            "🍻 Festa Integração 2026",
+            "A maior integração universitária! Open bar, 3 palcos e atrações imperdíveis. Lote 2 esgotando!",
+            "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80",
+            "Garantir Ingresso",
+            "https://pontinho.app",
+            1,
+            3
+        ),
+        (
+            "🖨️ Gráfica & Coworking Universitário",
+            "Imprima suas apostilas, projetos e relatórios com desconto especial para membros do Pontinho.",
+            "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80",
+            "Pegar Cupom",
+            "https://pontinho.app",
+            1,
+            4
+        ),
+        (
+            "🦊 Kit Exclusivo & Caneca Oficial",
+            "Caneca de tirante de alumínio 850ml, abadá e bandana exclusiva. Seja sócio-torcedor com valor promocional.",
+            "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&auto=format&fit=crop&q=80",
+            "Pedir Kit",
+            "https://pontinho.app",
+            1,
+            4
+        )
+    ]
+    for title, desc, img, btn, link, active, freq in sample_ads:
+        cursor.execute("SELECT id FROM ads WHERE title = ?", (title,))
+        if not cursor.fetchone():
+            cursor.execute("""
+                INSERT INTO ads (title, description, image_url, button_text, link_url, is_active, frequency)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (title, desc, img, btn, link, active, freq))
 
     # Presenças confirmadas de exemplo com usuários reais da base
     cursor.execute("SELECT id FROM users WHERE is_admin = 0 LIMIT 10")

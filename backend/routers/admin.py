@@ -368,6 +368,18 @@ def update_admin_ad(ad_id: int, ad: AdCreateOrUpdate, request: Request):
     conn.close()
     return {"success": True}
 
+@router.delete("/api/admin/ads")
+def delete_all_admin_ads(request: Request):
+    """Remove todas as propagandas cadastradas (ação exclusiva de administrador)."""
+    require_admin(request)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM ads")
+    cursor.execute("DELETE FROM sqlite_sequence WHERE name = 'ads'")
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Todas as propagandas foram removidas com sucesso."}
+
 @router.delete("/api/admin/ads/{ad_id}")
 def delete_admin_ad(ad_id: int, request: Request):
     require_admin(request)

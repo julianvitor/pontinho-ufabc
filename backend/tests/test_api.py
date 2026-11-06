@@ -398,4 +398,53 @@ def test_forgot_password_and_reset_flow(client):
     assert res_login.json()["success"] is True
 
 
+def test_delete_all_admin_ads(client):
+    """Testa remoção em lote de todas as propagandas pela API de administrador."""
+    from backend.database import get_db, hash_password
+    from backend.auth import create_session_token
+
+    # Garante que um usuário admin existe no banco de teste
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT OR REPLACE INTO users (id, name, email, password_hash, is_admin) VALUES (999, 'Admin Teste', 'admin.teste@aluno.ufabc.edu.br', ?, 1)", (hash_password("admin123"),))
+    conn.commit()
+    conn.close()
+
+    token = create_session_token(999)
+    headers = {"Authorization": f"Bearer {token}"}
+    client.cookies.set("pontinho_session", token)
+
+    # Insere um anúncio
+    res_add = client.post("/api/admin/ads", json={
+        "title": "Anúncio Teste",
+        "description": "Desc Teste",
+        "image_url": "/uploads/teste.webp",
+        "button_text": "Ver",
+        "link_url": "https://ufabc.edu.br",
+        "is_active": 1,
+        "frequency": 4
+    }, headers=headers)
+    assert res_add.status_code == 200
+
+    # Verifica que existe
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM ads")
+    assert c.fetchone()[0] > 0
+    conn.close()
+
+    # Deleta todas as propagandas
+    del_res = client.delete("/api/admin/ads", headers=headers)
+    assert del_res.status_code == 200
+    assert del_res.json()["success"] is True
+
+    # Verifica que a tabela está vazia
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM ads")
+    assert c.fetchone()[0] == 0
+    conn.close()
+
+
+
 
