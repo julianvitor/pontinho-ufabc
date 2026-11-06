@@ -10,7 +10,7 @@ git checkout -B "${BRANCH}" "origin/${BRANCH}"
 git reset --hard "origin/${BRANCH}"
 
 echo "[2/4] Atualizando container Docker..."
-sudo docker compose -f docker-compose.prod.yml up -d --build
+sudo docker compose --ansi never -f docker-compose.prod.yml up -d --build
 
 echo "[3/4] Limpando imagens antigas..."
 sudo docker image prune -f

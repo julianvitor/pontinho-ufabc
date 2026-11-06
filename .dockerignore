@@ -12,3 +12,11 @@ __pycache__/
 data/
 pontinho.db
 scratch/
+frontend/
+node_modules/
+.pytest_cache/
+uploads/
+private_uploads/
+tmp/
+*.key
+*.bak*
