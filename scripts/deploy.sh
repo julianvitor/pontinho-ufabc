@@ -6,7 +6,7 @@ BRANCH="${1:-main}"
 echo "[1/4] Atualizando repositorio na branch ${BRANCH}..."
 cd /home/ubuntu/pontinho-backend
 git fetch origin
-git checkout -B "${BRANCH}" "origin/${BRANCH}"
+git checkout -f "${BRANCH}" 2>/dev/null || git checkout -B "${BRANCH}" "origin/${BRANCH}"
 git reset --hard "origin/${BRANCH}"
 
 echo "[2/4] Atualizando container Docker..."
