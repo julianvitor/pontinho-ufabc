@@ -332,6 +332,34 @@ def init_db():
     );
     """)
 
+    # Tabela de Códigos de Verificação de E-mail de 4 Dígitos (Cadastro)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS email_verification_codes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        code TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NOT NULL,
+        used_at TIMESTAMP DEFAULT NULL
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_email_codes_lookup ON email_verification_codes(email, code)")
+
+    # Tabela de Tokens de Recuperação de Senha ("Esqueceu a senha")
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS password_resets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        email TEXT NOT NULL,
+        token TEXT NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NOT NULL,
+        used_at TIMESTAMP DEFAULT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets(token)")
+
     conn.commit()
     conn.close()
 

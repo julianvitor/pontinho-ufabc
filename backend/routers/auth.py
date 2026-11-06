@@ -4,16 +4,28 @@ Rotas de autenticação (Login, Cadastro e Sessão) do Pontinho
 import os
 import json
 import time
+import secrets
+import logging
 from collections import defaultdict
 from fastapi import APIRouter, HTTPException, Request, Response
 from backend.database import get_db, hash_password, verify_password, needs_rehash
-from backend.models import RegisterRequest, LoginRequest
+from backend.models import (
+    RegisterRequest,
+    LoginRequest,
+    SendVerificationCodeRequest,
+    VerifyCodeRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest
+)
 from backend.auth import (
     get_current_user_id,
     sanitize_and_validate_ufabc_email,
     set_auth_session,
     clear_auth_session
 )
+from backend.email_service import send_verification_email, send_password_reset_email
+
+logger = logging.getLogger("pontinho.auth")
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -84,6 +96,48 @@ def register_user(data: RegisterRequest, response: Response, request: Request = 
     if cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado no Pontinho.")
+
+    # Validação do código de 4 dígitos enviado ao e-mail institucional
+    code_input = (data.verification_code or "").strip()
+    is_dev = _is_dev_mode()
+
+    if is_dev and (not code_input or code_input in ("0000", "TEST")):
+        # Permite bypass em modo de desenvolvimento ou testes unitários
+        pass
+    else:
+        if not code_input:
+            conn.close()
+            raise HTTPException(
+                status_code=400,
+                detail="O código de verificação de 4 dígitos enviado ao seu e-mail acadêmico é obrigatório para concluir o cadastro."
+            )
+
+        cursor.execute("""
+            SELECT id, expires_at, used_at
+            FROM email_verification_codes
+            WHERE LOWER(email) = ? AND code = ?
+            ORDER BY id DESC LIMIT 1
+        """, (sanitized_email, code_input))
+        code_row = cursor.fetchone()
+
+        if not code_row or code_row["used_at"] is not None:
+            conn.close()
+            raise HTTPException(
+                status_code=400,
+                detail="Código de verificação de 4 dígitos inválido ou já utilizado. Solicite um novo código."
+            )
+
+        cursor.execute("SELECT CASE WHEN datetime('now') > ? THEN 1 ELSE 0 END AS is_expired", (code_row["expires_at"],))
+        exp_check = cursor.fetchone()
+        if exp_check and exp_check["is_expired"] == 1:
+            conn.close()
+            raise HTTPException(
+                status_code=400,
+                detail="Código de verificação expirado. Por favor, solicite um novo código de 4 dígitos."
+            )
+
+        # Invalida o código marcando-o como utilizado
+        cursor.execute("UPDATE email_verification_codes SET used_at = datetime('now') WHERE id = ?", (code_row["id"],))
 
     internal_id = sanitized_email.split("@")[0]
     pw_hash = hash_password(cleaned_pw)
@@ -274,4 +328,238 @@ def get_demo_accounts():
         d["is_admin"] = 0
         result.append(d)
     return result
+
+
+# Rate limiting para envio de código de 4 dígitos (1 envio a cada 60s por email e IP)
+VERIFY_CODE_RATE_LIMIT_WINDOW = 60
+_CODE_RATE_TRACKER = defaultdict(float)
+
+@router.post("/send-verification-code")
+def send_verification_code(data: SendVerificationCodeRequest, request: Request = None):
+    """
+    Gera e envia um código de segurança de 4 dígitos para o e-mail institucional do estudante.
+    """
+    sanitized_email = sanitize_and_validate_ufabc_email(data.email)
+    client_ip = request.client.host if request and request.client else "unknown"
+    rate_key = f"{sanitized_email}_{client_ip}"
+    now = time.time()
+
+    last_sent = _CODE_RATE_TRACKER.get(rate_key, 0)
+    if now - last_sent < VERIFY_CODE_RATE_LIMIT_WINDOW:
+        remaining = int(VERIFY_CODE_RATE_LIMIT_WINDOW - (now - last_sent))
+        raise HTTPException(
+            status_code=429,
+            detail=f"Aguarde {remaining} segundos antes de solicitar um novo código."
+        )
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Verifica se já existe conta cadastrada com este e-mail
+    cursor.execute("SELECT id FROM users WHERE LOWER(email) = ?", (sanitized_email,))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(
+            status_code=400,
+            detail="Este e-mail institucional já possui uma conta no Pontinho. Tente fazer login ou recuperar sua senha."
+        )
+
+    # Gera código aleatório criptograficamente seguro de 4 dígitos (1000 a 9999)
+    code = f"{secrets.randbelow(9000) + 1000}"
+
+    cursor.execute("""
+        INSERT INTO email_verification_codes (email, code, expires_at)
+        VALUES (?, ?, datetime('now', '+15 minutes'))
+    """, (sanitized_email, code))
+    conn.commit()
+    conn.close()
+
+    _CODE_RATE_TRACKER[rate_key] = now
+
+    # Envia o e-mail transacional via Resend
+    try:
+        send_verification_email(sanitized_email, code, data.name)
+    except Exception as e:
+        logger.error(f"Erro ao disparar e-mail de verificação para {sanitized_email}: {e}")
+        if not _is_dev_mode():
+            raise HTTPException(
+                status_code=500,
+                detail="Não foi possível enviar o e-mail de confirmação no momento. Tente novamente mais tarde."
+            )
+
+    return {
+        "success": True,
+        "message": "Código de verificação de 4 dígitos enviado com sucesso para o seu e-mail institucional!"
+    }
+
+
+@router.post("/verify-code")
+def verify_code(data: VerifyCodeRequest):
+    """
+    Verifica se o código de 4 dígitos informado é válido e ainda não expirou.
+    """
+    sanitized_email = sanitize_and_validate_ufabc_email(data.email)
+    code_input = data.code.strip()
+
+    if _is_dev_mode() and code_input in ("0000", "TEST"):
+        return {"success": True, "valid": True, "message": "Código validado com sucesso (modo de testes)."}
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, expires_at, used_at
+        FROM email_verification_codes
+        WHERE LOWER(email) = ? AND code = ?
+        ORDER BY id DESC LIMIT 1
+    """, (sanitized_email, code_input))
+    row = cursor.fetchone()
+
+    if not row or row["used_at"] is not None:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Código de verificação inválido ou já utilizado.")
+
+    cursor.execute("SELECT CASE WHEN datetime('now') > ? THEN 1 ELSE 0 END AS is_expired", (row["expires_at"],))
+    exp_check = cursor.fetchone()
+    conn.close()
+
+    if exp_check and exp_check["is_expired"] == 1:
+        raise HTTPException(status_code=400, detail="Código de verificação expirado. Solicite um novo código de 4 dígitos.")
+
+    return {"success": True, "valid": True, "message": "Código validado com sucesso!"}
+
+
+# Rate limiting para solicitação de recuperação de senha (anti-spam)
+_FORGOT_PW_TRACKER = defaultdict(float)
+
+@router.post("/forgot-password")
+def forgot_password(data: ForgotPasswordRequest, request: Request = None):
+    """
+    Inicia o fluxo de recuperação de senha gerando um link seguro e enviando por e-mail.
+    Retorna resposta genérica anti-enumeração de usuários conforme as boas práticas OWASP.
+    """
+    raw_email = data.email.strip().lower()
+    if "@" not in raw_email:
+        raw_email += "@aluno.ufabc.edu.br"
+
+    GENERIC_SUCCESS_MSG = "Se este e-mail estiver cadastrado no Pontinho, enviamos um link de recuperação com validade de 1 hora."
+
+    try:
+        sanitized_email = sanitize_and_validate_ufabc_email(raw_email)
+    except HTTPException:
+        return {"success": True, "message": GENERIC_SUCCESS_MSG}
+
+    client_ip = request.client.host if request and request.client else "unknown"
+    rate_key = f"{sanitized_email}_{client_ip}"
+    now = time.time()
+
+    last_sent = _FORGOT_PW_TRACKER.get(rate_key, 0)
+    if now - last_sent < 60:
+        return {"success": True, "message": GENERIC_SUCCESS_MSG}
+    _FORGOT_PW_TRACKER[rate_key] = now
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, email FROM users WHERE LOWER(email) = ?", (sanitized_email,))
+    user = cursor.fetchone()
+
+    if user:
+        token = secrets.token_urlsafe(32)
+        cursor.execute("""
+            INSERT INTO password_resets (user_id, email, token, expires_at)
+            VALUES (?, ?, ?, datetime('now', '+1 hour'))
+        """, (user["id"], sanitized_email, token))
+        conn.commit()
+
+        # Determina a URL base do frontend dinamicamente
+        base_url = ""
+        if request:
+            origin = request.headers.get("origin") or request.headers.get("referer")
+            if origin:
+                from urllib.parse import urlparse
+                parsed = urlparse(origin)
+                base_url = f"{parsed.scheme}://{parsed.netloc}"
+        if not base_url:
+            base_url = os.getenv("FRONTEND_URL", "https://pontinho.julianvitor.com.br").rstrip("/")
+
+        reset_link = f"{base_url}/login?tab=reset&token={token}"
+
+        try:
+            send_password_reset_email(sanitized_email, reset_link, user["name"])
+        except Exception as e:
+            logger.error(f"Erro ao enviar e-mail de recuperação para {sanitized_email}: {e}")
+
+    conn.close()
+    return {"success": True, "message": GENERIC_SUCCESS_MSG}
+
+
+@router.get("/verify-reset-token")
+def verify_reset_token(token: str):
+    """
+    Verifica se um token de recuperação de senha é válido e ainda não expirou.
+    """
+    clean_token = token.strip()
+    if not clean_token:
+        return {"valid": False, "message": "Token não fornecido."}
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, user_id, email, expires_at, used_at,
+               CASE WHEN datetime('now') > expires_at THEN 1 ELSE 0 END AS is_expired
+        FROM password_resets
+        WHERE token = ?
+        ORDER BY id DESC LIMIT 1
+    """, (clean_token,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row or row["used_at"] is not None:
+        return {"valid": False, "message": "Link de recuperação inválido ou já utilizado."}
+
+    if row["is_expired"] == 1:
+        return {"valid": False, "message": "Link de recuperação expirado (validade de 1 hora). Solicite um novo link."}
+
+    return {"valid": True, "email": row["email"], "message": "Token válido."}
+
+
+@router.post("/reset-password")
+def reset_password(data: ResetPasswordRequest):
+    """
+    Redefine a senha do usuário utilizando o token seguro recebido por e-mail.
+    """
+    clean_token = data.token.strip()
+    clean_pw = data.new_password.strip()
+
+    if len(clean_pw) < 8:
+        raise HTTPException(status_code=400, detail="A nova senha deve ter no mínimo 8 caracteres.")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, user_id, email, expires_at, used_at,
+               CASE WHEN datetime('now') > expires_at THEN 1 ELSE 0 END AS is_expired
+        FROM password_resets
+        WHERE token = ?
+        ORDER BY id DESC LIMIT 1
+    """, (clean_token,))
+    row = cursor.fetchone()
+
+    if not row or row["used_at"] is not None:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Link de recuperação inválido ou já utilizado.")
+
+    if row["is_expired"] == 1:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Link de recuperação expirado. Por favor, solicite um novo link.")
+
+    new_hash = hash_password(clean_pw)
+    cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, row["user_id"]))
+    cursor.execute("UPDATE password_resets SET used_at = datetime('now') WHERE id = ?", (row["id"],))
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": "Senha redefinida com sucesso! Você já pode entrar com sua nova senha."
+    }
 

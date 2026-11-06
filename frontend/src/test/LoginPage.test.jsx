@@ -49,4 +49,27 @@ describe('LoginPage Component', () => {
     const emailInput = screen.getByPlaceholderText('nome@aluno.ufabc.edu.br');
     expect(emailInput.value).toBe('eren.jaeger@pontinho.app');
   });
+
+  it('switches to forgot password tab and back to login', async () => {
+    render(<LoginPage />);
+    const forgotBtn = screen.getByRole('button', { name: 'Esqueceu a senha?' });
+    fireEvent.click(forgotBtn);
+
+    expect(screen.getByText('Esqueceu sua senha?')).toBeTruthy();
+    expect(screen.getByPlaceholderText('nome.sobrenome@aluno.ufabc.edu.br')).toBeTruthy();
+    expect(screen.getByText('Enviar Link de Recuperação')).toBeTruthy();
+
+    const backBtns = screen.getAllByRole('button', { name: /Voltar ao login/i });
+    fireEvent.click(backBtns[0]);
+    expect(screen.getByPlaceholderText('nome@aluno.ufabc.edu.br')).toBeTruthy();
+  });
+
+  it('shows 4-digit code input in register tab', async () => {
+    render(<LoginPage />);
+    const registerTabBtn = screen.getByRole('button', { name: 'Cadastrar-se' });
+    fireEvent.click(registerTabBtn);
+
+    expect(screen.getByPlaceholderText('0000')).toBeTruthy();
+    expect(screen.getByText(/Enviar Código/i)).toBeTruthy();
+  });
 });

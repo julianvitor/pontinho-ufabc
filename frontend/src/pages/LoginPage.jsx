@@ -18,18 +18,33 @@ const LIVENESS_CHALLENGES = [
 ];
 
 export function LoginPage({ onOpenTheme, onOpenHelp }) {
-  const [tab, setTab] = useState('login');
+  const [tab, setTab] = useState('login'); // 'login' | 'register' | 'forgot' | 'reset'
   const [demoAccounts, setDemoAccounts] = useState([]);
 
   // Campos Login
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
-  // Campos Cadastro (Apenas os 3 campos do static: email, nome, senha)
+  // Campos Cadastro (email, código, nome, senha)
   const [regEmail, setRegEmail] = useState('');
+  const [regVerificationCode, setRegVerificationCode] = useState('');
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeCountdown, setCodeCountdown] = useState(0);
   const [regName, setRegName] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // Esqueci a Senha & Redefinição
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [sendingForgot, setSendingForgot] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+  const [isCheckingToken, setIsCheckingToken] = useState(false);
+  const [tokenValid, setTokenValid] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resettingPw, setResettingPw] = useState(false);
 
   // Biometria Facial & Prova de Vida
   const [bioStep, setBioStep] = useState('initial'); // 'initial' | 'scanning' | 'success' | 'blocked'
@@ -71,14 +86,139 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
   useEffect(() => {
     loadDemoAccounts();
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tab') === 'register') {
+    const token = urlParams.get('token') || urlParams.get('reset_token');
+    if (token) {
+      setResetToken(token);
+      setTab('reset');
+      checkResetToken(token);
+    } else if (urlParams.get('tab') === 'register') {
       setTab('register');
+    } else if (urlParams.get('tab') === 'forgot') {
+      setTab('forgot');
     }
 
     return () => {
       cancelBiometricStreamOnly();
     };
   }, []);
+
+  useEffect(() => {
+    if (codeCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setCodeCountdown((c) => (c > 0 ? c - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [codeCountdown]);
+
+  async function checkResetToken(token) {
+    setIsCheckingToken(true);
+    try {
+      const res = await apiFetch(`/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
+      if (res && res.valid) {
+        setTokenValid(true);
+        setResetEmail(res.email || '');
+      } else {
+        setTokenValid(false);
+      }
+    } catch {
+      setTokenValid(false);
+    } finally {
+      setIsCheckingToken(false);
+    }
+  }
+
+  async function handleSendVerificationCode() {
+    let email = regEmail.trim().toLowerCase();
+    if (!email) {
+      showToast('Digite seu e-mail institucional primeiro.', 'error');
+      return;
+    }
+    if (!email.includes('@')) {
+      email += '@aluno.ufabc.edu.br';
+    }
+    if (!email.endsWith('@aluno.ufabc.edu.br') && !email.endsWith('@ufabc.edu.br')) {
+      showToast('Use um e-mail institucional (@aluno.ufabc.edu.br ou @ufabc.edu.br).', 'error');
+      return;
+    }
+
+    setSendingCode(true);
+    try {
+      const res = await apiFetch('/api/auth/send-verification-code', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      showToast(res.message || 'Código enviado para o e-mail!', 'success');
+      setCodeCountdown(60);
+    } catch (err) {
+      showToast(err.message || 'Erro ao enviar código de verificação.', 'error');
+    } finally {
+      setSendingCode(false);
+    }
+  }
+
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    let email = forgotEmail.trim().toLowerCase();
+    if (!email) {
+      showToast('Informe o e-mail institucional.', 'error');
+      return;
+    }
+    if (!email.includes('@')) {
+      email += '@aluno.ufabc.edu.br';
+    }
+
+    setSendingForgot(true);
+    try {
+      const res = await apiFetch('/api/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      setForgotSuccess(true);
+      showToast(res.message || 'Se o e-mail estiver cadastrado, o link foi enviado.', 'info');
+    } catch (err) {
+      showToast(err.message || 'Erro ao solicitar recuperação de senha.', 'error');
+    } finally {
+      setSendingForgot(false);
+    }
+  }
+
+  async function handleResetPassword(e) {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 8) {
+      showToast('A senha deve ter no mínimo 8 caracteres.', 'error');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast('As senhas não coincidem.', 'error');
+      return;
+    }
+
+    setResettingPw(true);
+    try {
+      const res = await apiFetch('/api/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          token: resetToken,
+          new_password: newPassword
+        })
+      });
+
+      showToast(res.message || 'Senha redefinida com sucesso! Faça login.', 'success');
+      setTab('login');
+      setNewPassword('');
+      setConfirmPassword('');
+      setResetToken('');
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch {
+        // no-op
+      }
+    } catch (err) {
+      showToast(err.message || 'Erro ao redefinir senha.', 'error');
+    } finally {
+      setResettingPw(false);
+    }
+  }
 
   async function loadDemoAccounts() {
     try {
@@ -488,6 +628,12 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
       return;
     }
 
+    const code = regVerificationCode.trim();
+    if (!code || code.length !== 4) {
+      showToast('Digite o código de 4 dígitos enviado ao seu e-mail.', 'error');
+      return;
+    }
+
     if (!password || password.length < 8) {
       showToast('Senha mínima: 8 caracteres.', 'error');
       return;
@@ -518,6 +664,7 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
         method: 'POST',
         body: JSON.stringify({
           email,
+          verification_code: code,
           name,
           password,
           terms_accepted: true,
@@ -582,33 +729,48 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
           </h1>
         </div>
 
-        {/* SELETOR DE ABAS: LOGIN OU CADASTRO */}
-        <div class="flex border-b border-slate-800 bg-slate-950/60">
-          <button
-            id="tab-btn-login"
-            type="button"
-            onClick={() => setTab('login')}
-            class={`flex-1 py-3.5 text-xs sm:text-sm transition ${
-              tab === 'login'
-                ? 'font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80'
-                : 'font-semibold text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Entrar
-          </button>
-          <button
-            id="tab-btn-register"
-            type="button"
-            onClick={() => setTab('register')}
-            class={`flex-1 py-3.5 text-xs sm:text-sm transition ${
-              tab === 'register'
-                ? 'font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80'
-                : 'font-semibold text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Cadastrar-se
-          </button>
-        </div>
+        {/* SELETOR DE ABAS: LOGIN OU CADASTRO OU RECUPERAÇÃO */}
+        {tab === 'login' || tab === 'register' ? (
+          <div class="flex border-b border-slate-800 bg-slate-950/60">
+            <button
+              id="tab-btn-login"
+              type="button"
+              onClick={() => setTab('login')}
+              class={`flex-1 py-3.5 text-xs sm:text-sm transition ${
+                tab === 'login'
+                  ? 'font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80'
+                  : 'font-semibold text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Entrar
+            </button>
+            <button
+              id="tab-btn-register"
+              type="button"
+              onClick={() => setTab('register')}
+              class={`flex-1 py-3.5 text-xs sm:text-sm transition ${
+                tab === 'register'
+                  ? 'font-bold text-emerald-400 border-b-2 border-emerald-500 bg-slate-900/80'
+                  : 'font-semibold text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Cadastrar-se
+            </button>
+          </div>
+        ) : (
+          <div class="flex items-center justify-between border-b border-slate-800 bg-slate-950/60 px-4 py-3">
+            <button
+              type="button"
+              onClick={() => setTab('login')}
+              class="text-xs text-slate-400 hover:text-emerald-400 flex items-center gap-1 font-semibold transition"
+            >
+              <span>❮</span> Voltar ao login
+            </button>
+            <span class="text-xs font-bold text-slate-300">
+              {tab === 'forgot' ? 'Recuperar Senha' : 'Nova Senha'}
+            </span>
+          </div>
+        )}
 
         <div class="p-5 sm:p-6">
           {/* ABA 1: FORMULÁRIO DE LOGIN */}
@@ -628,7 +790,16 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">Senha</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-bold text-slate-300">Senha</label>
+                  <button
+                    type="button"
+                    onClick={() => setTab('forgot')}
+                    class="text-[11px] text-emerald-400 hover:text-emerald-300 hover:underline transition"
+                  >
+                    Esqueceu a senha?
+                  </button>
+                </div>
                 <input
                   id="login-password"
                   type="password"
@@ -664,6 +835,41 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
                   class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                 />
                 <p class="text-[10px] text-slate-500 mt-1">Apenas e-mail institucional @ufabc</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">Código de Confirmação (4 dígitos)</label>
+                <div class="flex gap-2">
+                  <input
+                    id="reg-code"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={4}
+                    required
+                    value={regVerificationCode}
+                    onInput={(e) => setRegVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="0000"
+                    class="w-28 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2.5 text-center tracking-widest text-base font-mono font-bold text-emerald-400 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                  />
+                  <button
+                    type="button"
+                    id="btn-send-code"
+                    onClick={handleSendVerificationCode}
+                    disabled={sendingCode || codeCountdown > 0}
+                    class="flex-1 py-2 px-3 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 disabled:opacity-50 disabled:cursor-not-allowed text-emerald-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                  >
+                    {sendingCode ? (
+                      <span>Enviando...</span>
+                    ) : codeCountdown > 0 ? (
+                      <span>Reenviar em {codeCountdown}s</span>
+                    ) : (
+                      <span>✉️ Enviar Código</span>
+                    )}
+                  </button>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-1">
+                  Enviaremos o código de 4 dígitos para o seu e-mail institucional.
+                </p>
               </div>
 
               <div>
@@ -894,8 +1100,144 @@ export function LoginPage({ onOpenTheme, onOpenHelp }) {
             </form>
           )}
 
+          {/* ABA 3: FORMULÁRIO DE ESQUECI A SENHA */}
+          {tab === 'forgot' && (
+            <form id="form-forgot" onSubmit={handleForgotPassword} class="space-y-4">
+              <div class="text-center pb-1">
+                <div class="w-12 h-12 mx-auto rounded-full bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center text-xl text-emerald-400 mb-2 shadow-inner">
+                  🔑
+                </div>
+                <h3 class="text-sm font-bold text-white">Esqueceu sua senha?</h3>
+                <p class="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                  Digite seu e-mail institucional (@ufabc). Enviaremos um link seguro para você redefinir sua senha.
+                </p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1">E-mail Institucional</label>
+                <input
+                  id="forgot-email"
+                  type="email"
+                  required
+                  value={forgotEmail}
+                  onInput={(e) => setForgotEmail(e.target.value)}
+                  placeholder="nome.sobrenome@aluno.ufabc.edu.br"
+                  class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                />
+              </div>
+
+              {forgotSuccess && (
+                <div class="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs space-y-1">
+                  <p class="font-bold">E-mail enviado! 📬</p>
+                  <p class="text-[11px] text-slate-300 leading-tight">
+                    Se este e-mail estiver cadastrado, você receberá um link de recuperação com validade de 1 hora.
+                  </p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                id="btn-forgot-submit"
+                disabled={sendingForgot}
+                class="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 transition active:scale-[0.99]"
+              >
+                {sendingForgot ? 'Enviando link...' : 'Enviar Link de Recuperação'}
+              </button>
+
+              <div class="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => setTab('login')}
+                  class="text-xs text-slate-400 hover:text-emerald-400 transition underline"
+                >
+                  Lembrou a senha? Voltar ao login
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ABA 4: FORMULÁRIO DE REDEFINIÇÃO DE SENHA */}
+          {tab === 'reset' && (
+            <div class="space-y-4">
+              {isCheckingToken ? (
+                <div class="text-center py-8 text-slate-400 text-xs">
+                  <div class="w-8 h-8 mx-auto border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-3" />
+                  Verificando link de recuperação...
+                </div>
+              ) : !tokenValid ? (
+                <div class="text-center py-6 space-y-3">
+                  <div class="w-12 h-12 mx-auto rounded-full bg-red-950/70 border border-red-500/40 flex items-center justify-center text-xl text-red-400">
+                    ⚠️
+                  </div>
+                  <h3 class="text-sm font-bold text-white">Link Inválido ou Expirado</h3>
+                  <p class="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">
+                    Este link de recuperação é inválido ou já expirou (validade de 1 hora).
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setTab('forgot')}
+                    class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-bold transition"
+                  >
+                    Solicitar Novo Link
+                  </button>
+                </div>
+              ) : (
+                <form id="form-reset" onSubmit={handleResetPassword} class="space-y-3.5">
+                  <div class="text-center pb-1">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center text-xl text-emerald-400 mb-2">
+                      🔒
+                    </div>
+                    <h3 class="text-sm font-bold text-white">Criar Nova Senha</h3>
+                    {resetEmail && (
+                      <p class="text-[11px] text-slate-400 mt-1">
+                        Conta: <span class="font-bold text-emerald-400">{resetEmail}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Nova Senha</label>
+                    <input
+                      id="reset-new-password"
+                      type="password"
+                      required
+                      minlength={8}
+                      value={newPassword}
+                      onInput={(e) => setNewPassword(e.target.value)}
+                      placeholder="Mínimo 8 caracteres"
+                      class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1">Confirme a Nova Senha</label>
+                    <input
+                      id="reset-confirm-password"
+                      type="password"
+                      required
+                      minlength={8}
+                      value={confirmPassword}
+                      onInput={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repita a nova senha"
+                      class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    id="btn-reset-submit"
+                    disabled={resettingPw}
+                    class="w-full py-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-950/50 transition active:scale-[0.99]"
+                  >
+                    {resettingPw ? 'Salvando...' : 'Salvar Nova Senha'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
           {/* ATALHOS RÁPIDOS PARA CONTAS DE TESTE (CARREGADOS DINAMICAMENTE DO BACKEND) */}
-          {demoAccounts.length > 0 && (
+          {(tab === 'login' || tab === 'register') && demoAccounts.length > 0 && (
             <div id="demo-section" class="mt-6 pt-5 border-t border-slate-800 text-center">
               <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2.5">
                 Contas Demo:

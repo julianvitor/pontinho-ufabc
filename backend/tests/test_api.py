@@ -308,3 +308,94 @@ def test_cors_preflight_dev_subdomain():
     assert compiled.match("https://attacker-fake.com") is None
 
 
+def test_send_and_verify_email_code(client):
+    """Verifica geração e validação de código de 4 dígitos via e-mail."""
+    test_email = "novo.estudante@aluno.ufabc.edu.br"
+
+    # 1. Enviar código de 4 dígitos
+    res = client.post("/api/auth/send-verification-code", json={"email": test_email, "name": "Estudante Teste"})
+    assert res.status_code == 200
+    assert res.json()["success"] is True
+
+    # 2. Consultar código gerado no banco de testes
+    from backend.database import get_db
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT code FROM email_verification_codes WHERE email = ? ORDER BY id DESC LIMIT 1", (test_email,))
+    row = cursor.fetchone()
+    conn.close()
+
+    assert row is not None
+    code = row["code"]
+    assert len(code) == 4
+    assert code.isdigit()
+
+    # 3. Validar código incorreto
+    res_err = client.post("/api/auth/verify-code", json={"email": test_email, "code": "0001"})
+    assert res_err.status_code == 400
+
+    # 4. Validar código correto
+    res_ok = client.post("/api/auth/verify-code", json={"email": test_email, "code": code})
+    assert res_ok.status_code == 200
+    assert res_ok.json()["valid"] is True
+
+
+def test_forgot_password_and_reset_flow(client):
+    """Verifica fluxo completo de recuperação de senha com token único."""
+    from backend.database import get_db
+    from backend.auth import sanitize_and_validate_ufabc_email
+
+    email = "recuperar.senha@aluno.ufabc.edu.br"
+
+    # Cria o usuário para teste
+    client.post("/api/auth/register", json={
+        "email": email,
+        "name": "Aluno Recuperacao",
+        "password": "senhaAntiga123",
+        "terms_accepted": True,
+        "age_verified": True,
+        "liveness_passed": True,
+        "estimated_age": 22,
+        "verification_code": "0000"
+    })
+
+    # 1. Solicitar recuperação de senha
+    res_forgot = client.post("/api/auth/forgot-password", json={"email": email})
+    assert res_forgot.status_code == 200
+    assert res_forgot.json()["success"] is True
+
+    # 2. Obter token gerado no banco de testes
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT token FROM password_resets WHERE email = ? ORDER BY id DESC LIMIT 1", (email,))
+    row = cursor.fetchone()
+    conn.close()
+
+    assert row is not None
+    token = row["token"]
+
+    # 3. Checar validade do token
+    res_check = client.get(f"/api/auth/verify-reset-token?token={token}")
+    assert res_check.status_code == 200
+    assert res_check.json()["valid"] is True
+
+    # 4. Redefinir com senha curta deve falhar
+    res_short = client.post("/api/auth/reset-password", json={"token": token, "new_password": "123"})
+    assert res_short.status_code in (400, 422)
+
+    # 5. Redefinir com senha válida
+    res_reset = client.post("/api/auth/reset-password", json={"token": token, "new_password": "NovaSenhaSegura2026!"})
+    assert res_reset.status_code == 200
+    assert res_reset.json()["success"] is True
+
+    # 6. Reutilizar o mesmo token deve ser rejeitado
+    res_reuse = client.post("/api/auth/reset-password", json={"token": token, "new_password": "OutraSenha123"})
+    assert res_reuse.status_code == 400
+
+    # 7. Login com a nova senha deve ter sucesso
+    res_login = client.post("/api/auth/login", json={"email": email, "password": "NovaSenhaSegura2026!"})
+    assert res_login.status_code == 200
+    assert res_login.json()["success"] is True
+
+
+

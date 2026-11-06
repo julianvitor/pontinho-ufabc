@@ -14,6 +14,22 @@ class RegisterRequest(BaseModel):
     estimated_age: Optional[int] = Field(default=None, description="Idade estimada pela biometria")
     face_snapshot: Optional[str] = Field(default=None, description="Foto da selfie de verificação em base64")
     face_descriptor: Optional[List[float]] = Field(default=None, description="Vetor de 128 floats do descritor facial extraído na câmera ao vivo")
+    verification_code: Optional[str] = Field(default=None, description="Código de 4 dígitos enviado para o e-mail institucional")
+
+class SendVerificationCodeRequest(BaseModel):
+    email: str = Field(..., description="E-mail institucional da UFABC")
+    name: Optional[str] = Field(default="", description="Nome do estudante (opcional para saudação)")
+
+class VerifyCodeRequest(BaseModel):
+    email: str = Field(..., description="E-mail institucional da UFABC")
+    code: str = Field(..., min_length=4, max_length=4, description="Código de 4 dígitos recebido por e-mail")
+
+class ForgotPasswordRequest(BaseModel):
+    email: str = Field(..., description="E-mail institucional cadastrado na conta")
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(..., description="Token de recuperação recebido por e-mail")
+    new_password: str = Field(..., min_length=8, description="Nova senha (mínimo de 8 caracteres)")
 
 class LoginRequest(BaseModel):
     email: str = Field(..., description="E-mail de acesso")
